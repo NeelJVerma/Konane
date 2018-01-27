@@ -16,8 +16,7 @@ public class MainActivity extends AppCompatActivity {
       setContentView(R.layout.activity_main);
 
       Button beginButton;
-
-      beginButton = (Button) findViewById(R.id.beginButton);
+      beginButton = findViewById(R.id.beginButton);
 
       beginButton.setOnClickListener(new View.OnClickListener() {
          public void onClick(View arg0) {

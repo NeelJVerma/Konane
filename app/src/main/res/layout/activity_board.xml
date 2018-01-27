@@ -11,9 +11,20 @@
         android:id="@+id/boardLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="90dp"
+        android:layout_marginTop="75dp"
+        android:layout_marginBottom="60dp"
         android:background="#4b76ad"
         android:orientation="vertical"
-        android:paddingTop="40dp"></LinearLayout>
+        android:paddingTop="40dp"
+        android:clickable="true">
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/removeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="Press to start the game" />
 
 </RelativeLayout>
