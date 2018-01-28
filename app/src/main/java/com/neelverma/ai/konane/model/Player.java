@@ -1,6 +1,13 @@
+/************************************************************
+ * Name: Neel Verma                                         *
+ * Project: Project 1 - Two Player Konane                   *
+ * Class: CMPS331 - Artificial Intelligence                 *
+ * Date: 2/02/2018                                          *
+ ************************************************************/
+
 package com.neelverma.ai.konane.model;
 
-/*
+/**
  * Class to hold a player of the game.
  * Created by Neel on 01/20/2018.
  */
@@ -14,7 +21,7 @@ public class Player {
    public static final int BLACK = 1;
    public static final int WHITE = -1;
 
-   /*
+   /**
     * Description: Constructor. Will initialize the current player with a passed in color, a false
     * turn value, and a score of 0.
     * Parameters: int color to set the current color.
@@ -27,7 +34,7 @@ public class Player {
       this.score = 0;
    }
 
-   /*
+   /**
     * Description: A method to return the color of the current player.
     * Parameters: None.
     * Returns: The current color.
@@ -37,7 +44,7 @@ public class Player {
       return color;
    }
 
-   /*
+   /**
     * Description: A method to return whether or not it is the turn of the current player.
     * Parameters: None.
     * Returns: The turn status of the current player.
@@ -47,7 +54,7 @@ public class Player {
       return isTurn;
    }
 
-   /*
+   /**
     * Description: A method to set the turn status of the current player.
     * Parameters: boolean isTurn to set the turn status.
     * Returns: Nothing.
@@ -57,19 +64,19 @@ public class Player {
       this.isTurn = isTurn;
    }
 
-   /*
+   /**
     * Description: A method to add to the current player's score. We don't need to pass in a value
     * because per turn, we will always add 1. Even in multi-jump turns, each jump is handled as one
     * turn, so we can just add 1 to each.
     * Parameters: None.
     * Returns: Nothing.
-    */
+     */
 
    public void addToScore() {
       score += 1;
    }
 
-   /*
+   /**
     * Description: A method to get the score of the current player.
     * Parameters: None.
     * Returns: The current player's score.

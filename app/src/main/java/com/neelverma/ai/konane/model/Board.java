@@ -1,6 +1,13 @@
+/************************************************************
+ * Name: Neel Verma                                         *
+ * Project: Project 1 - Two Player Konane                   *
+ * Class: CMPS331 - Artificial Intelligence                 *
+ * Date: 2/02/2018                                          *
+ ************************************************************/
+
 package com.neelverma.ai.konane.model;
 
-/*
+/**
  * Class to hold the Konane game board.
  * Created by Neel on 01/20/2018.
  */
@@ -13,7 +20,7 @@ public class Board {
    public static final int MIN_COLUMN = 0;
    private Slot[][] gameBoard = new Slot[MAX_ROW][MAX_COLUMN]; // A 2D array of slots as the board.
 
-   /*
+   /**
     * Description: Constructor. Will initialize the board with 36 slots, each alternating between
     * black and white spaces.
     * Parameters: None.
@@ -32,7 +39,7 @@ public class Board {
       }
    }
 
-   /*
+   /**
     * Description: Method to set the slot of the current board object. It is private because it is
     * only used in this class.
     * Parameters: int row to set the row.
@@ -45,7 +52,7 @@ public class Board {
       gameBoard[row][column] = slotObject;
    }
 
-   /*
+   /**
     * Description: Method to set the slot color of the current board object.
     * Parameters: Slot slotObject to set the passed in slot with the passed in color.
     *             int color to set the slot with this color.
@@ -56,7 +63,7 @@ public class Board {
       slotObject.setColor(color);
    }
 
-   /*
+   /**
     * Description: Method to get the slot located at the row, column pair passed in.
     * Parameters: int row to specify the row.
     *             int column to specify the column.
@@ -71,27 +78,5 @@ public class Board {
       }
       Slot ret = new Slot(MAX_ROW, MAX_COLUMN, 2);
       return ret;
-   }
-
-   /*
-    * Description: Method to print the board.
-    * Parameters: None.
-    * Returns: Nothing.
-    */
-
-   public void printBoard() {
-      for (int r = 0; r < MAX_ROW; r++) {
-         for (int c = 0; c < MAX_COLUMN; c++) {
-            if (gameBoard[r][c].getColor() == Slot.BLACK) {
-               System.out.print("B ");
-            } else if (gameBoard[r][c].getColor() == Slot.WHITE) {
-               System.out.print("W ");
-            } else if (gameBoard[r][c].getColor() == Slot.EMPTY) {
-               System.out.print("0 ");
-            }
-         }
-         System.out.print('\n');
-      }
-      System.out.print('\n');
    }
 }

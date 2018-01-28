@@ -1,10 +1,17 @@
+/************************************************************
+ * Name: Neel Verma                                         *
+ * Project: Project 1 - Two Player Konane                   *
+ * Class: CMPS331 - Artificial Intelligence                 *
+ * Date: 2/02/2018                                          *
+ ************************************************************/
+
 package com.neelverma.ai.konane.model;
 import android.util.Pair;
 
-import java.util.*;
+import java.util.Random;
 
 
-/*
+/**
  * Class to play the game and execute all the game logic.
  * Created by Neel on 01/20/2018.
  *
@@ -25,14 +32,12 @@ import java.util.*;
  * 6) The player moving can make multiple jumps in one turn, providing that each jump is legal.
  */
 
-import java.util.concurrent.ThreadLocalRandom;
-
 public class Game {
    public Player playerBlack; // The player playing black stones.
    public Player playerWhite; // The player playing white stones.
    public Board boardObject; // The current game's board.
 
-   /*
+   /**
     * Description: Constructor. Will initialize the current game's variables through their
     * constructors. It also sets the current turns so that black always moves first.
     * Parameters: None.
@@ -47,18 +52,11 @@ public class Game {
       boardObject = new Board();
    }
 
-   public Player getPlayerBlack() {
-      return playerBlack;
-   }
-
-   public Player getPlayerWhite() {
-      return playerWhite;
-   }
-
-   /*
+   /**
     * Description: Method to remove two slots at the beginning of the game.
     * Parameters: None.
-    * Returns: Nothing.
+    * Returns: A pair of the two slots so that the BoardActivity class can know which slots to mark
+    * as empty.
     */
 
    public Pair<Slot, Slot> removeTwoSlots() {
@@ -81,7 +79,7 @@ public class Game {
       }
    }
 
-   /*
+   /**
     * Description: Method to verify the validity of a move.
     * Parameters: Slot slotFrom, which is the slot to move from.
     *             Slot slotTo, which is the slot to move to.
@@ -89,7 +87,7 @@ public class Game {
     * Returns: Whether the move is valid or not.
     */
 
-   public boolean isValidMove(Slot slotFrom, Slot slotTo, int color) {
+   private boolean isValidMove(Slot slotFrom, Slot slotTo, int color) {
       // In bounds verification.
       boolean slotFromGood = ((slotFrom.getRow() < Board.MAX_ROW && slotFrom.getRow() >= Board.MIN_ROW) &&
          (slotFrom.getColumn() < Board.MAX_COLUMN && slotFrom.getColumn() >= Board.MIN_COLUMN));
@@ -169,7 +167,7 @@ public class Game {
       return true;
    }
 
-   /*
+   /**
     * Description: Method to make the specified move.
     * Parameters: Slot slotFrom, which is the slot to move from.
     *             Slot slotTo, which is the slot to move to.
@@ -216,7 +214,7 @@ public class Game {
       return false;
    }
 
-   /*
+   /**
     * Description: Method to verify whether a player can make a move.
     * Parameters: Player playerObject, which is the player that can move or not.
     * Returns: Whether or not the player can move.
@@ -252,7 +250,7 @@ public class Game {
       return false;
    }
 
-   /*
+   /**
     * Description: Method to check whether or not a player can move again.
     * Parameters: Slot slotFrom, which is the slot to move from.
     *             Player playerObject, which is the player that can move again or not.
@@ -271,7 +269,7 @@ public class Game {
          (isValidMove(slotFrom, slotDown, playerObject.getColor())));
    }
 
-   /*
+   /**
     * Description: Method to verify the validity of the possible chained jump. In a chained jump,
     * the player must move the same piece that they were already moving.
     * Parameters: Slot potentialSlotFrom, which is the potential slot to move from.
@@ -282,171 +280,5 @@ public class Game {
    public boolean verifySuccessiveMove(Slot potentialSlotFrom, Slot slotFrom) {
       return ((slotFrom.getRow() == potentialSlotFrom.getRow()) &&
          (slotFrom.getColumn() == potentialSlotFrom.getColumn()));
-   }
-
-   /*
-    * Description: Method to display the winner of the game.
-    * Parameters: None.
-    * Returns: Nothing.
-    */
-
-   private void displayWinner() {
-      if (playerBlack.getScore() > playerWhite.getScore()) {
-         System.out.println("BLACK WINS!");
-      } else if (playerWhite.getScore() > playerBlack.getScore()) {
-         System.out.println("WHITE WINS!");
-      } else {
-         System.out.println("IT'S A DRAW.");
-      }
-   }
-
-   /*
-    * Description: Method to play the game and execute all game logic.
-    * Parameters: None.
-    * Returns: Nothing.
-    */
-
-   public void playGame() {
-      boardObject.printBoard();
-      removeTwoSlots();
-      boardObject.printBoard();
-
-      int numTurns = 1;
-      int turnCounter = 0;
-      int rowFrom, rowTo, columnFrom, columnTo;
-      Scanner scnr = new Scanner(System.in);
-
-      // Invalid successive slot to start. This is used because potentialSuccessiveSlot is used to
-      // verify if the player can make a chain jump, which is done before it is initialized, to
-      // retain the previous value (refer to where canMoveAgain and verifySuccessiveMove are
-      // called.
-      Slot potentialSuccessiveSlot = new Slot(Board.MAX_ROW, Board.MAX_COLUMN, 2);
-
-      while (playerCanMove(playerBlack) || playerCanMove(playerWhite)) {
-         System.out.println("TURN " + numTurns);
-         if (playerWhite.isTurn()) {
-            System.out.println("WHITE TURN");
-            if (!playerCanMove(playerWhite)) {
-               System.out.println("WHITE CAN'T MOVE");
-               playerBlack.setIsTurn(true);
-               playerWhite.setIsTurn(false);
-               continue;
-            }
-         } else {
-            System.out.println("BLACK TURN");
-            if (!playerCanMove(playerBlack)) {
-               System.out.println("BLACK CAN'T MOVE");
-               playerWhite.setIsTurn(true);
-               playerBlack.setIsTurn(false);
-               continue;
-            }
-         }
-
-         System.out.print("Row from: ");
-         while (!scnr.hasNextInt()) {
-            scnr.next();
-            System.out.print("Row from: ");
-         }
-         rowFrom = scnr.nextInt();
-
-         System.out.print("Column from: ");
-         while (!scnr.hasNextInt()) {
-            scnr.next();
-            System.out.print("Column from: ");
-         }
-         columnFrom = scnr.nextInt();
-
-         System.out.print("Row to: ");
-         while (!scnr.hasNextInt()) {
-            scnr.next();
-            System.out.print("Row to: ");
-         }
-         rowTo = scnr.nextInt();
-
-         System.out.print("Column to: ");
-         while (!scnr.hasNextInt()) {
-            scnr.next();
-            System.out.print("Column to: ");
-         }
-         columnTo = scnr.nextInt();
-
-         Slot slotFrom = boardObject.getSlot(rowFrom, columnFrom);
-         Slot slotTo = boardObject.getSlot(rowTo, columnTo);
-
-         if (playerWhite.isTurn()) {
-            if ((canMoveAgain(potentialSuccessiveSlot, playerWhite)) &&
-               (!verifySuccessiveMove(slotFrom, potentialSuccessiveSlot))) {
-               System.out.println("MUST START FROM POSITION YOU ENDED ON");
-               continue;
-            }
-         } else if (playerBlack.isTurn()) {
-            if ((canMoveAgain(potentialSuccessiveSlot, playerBlack)) &&
-               (!verifySuccessiveMove(slotFrom, potentialSuccessiveSlot))) {
-               System.out.println("MUST START FROM POSITION YOU ENDED ON");
-               continue;
-            }
-         }
-
-         if ((playerWhite.isTurn()) &&
-            (boardObject.getSlot(rowFrom, columnFrom).getColor() != Slot.WHITE)) {
-            System.out.println("NOT A VALID MOVE");
-            continue;
-         }
-
-         if ((playerBlack.isTurn()) &&
-            (boardObject.getSlot(rowFrom, columnFrom).getColor() != Slot.BLACK)) {
-            System.out.println("NOT A VALID MOVE");
-            continue;
-         }
-
-         if (makeMove(slotFrom, slotTo)) {
-            boardObject.printBoard();
-         } else {
-            System.out.println("NOT A VALID MOVE");
-            continue;
-         }
-
-         if (playerWhite.isTurn()) {
-            playerWhite.addToScore();
-
-            if (canMoveAgain(slotTo, playerWhite)) {
-               String choice;
-               System.out.println("Would you like to make another move? ");
-               choice = scnr.next();
-               if (choice.equals("yes")) {
-                  potentialSuccessiveSlot.setRow(rowTo);
-                  potentialSuccessiveSlot.setColumn(columnTo);
-                  potentialSuccessiveSlot.setColor(Slot.WHITE);
-                  continue;
-               }
-            }
-
-            playerBlack.setIsTurn(true);
-            playerWhite.setIsTurn(false);
-         } else if (playerBlack.isTurn()) {
-            playerBlack.addToScore();
-
-            if (canMoveAgain(slotTo, playerBlack)) {
-               String choice;
-               System.out.println("Would you like to make another move? ");
-               choice = scnr.next();
-               if (choice.equals("yes")) {
-                  potentialSuccessiveSlot.setRow(rowTo);
-                  potentialSuccessiveSlot.setColumn(columnTo);
-                  potentialSuccessiveSlot.setColor(Slot.BLACK);
-                  continue;
-               }
-            }
-
-            playerWhite.setIsTurn(true);
-            playerBlack.setIsTurn(false);
-         }
-
-         System.out.println("Score white: " + playerWhite.getScore());
-         System.out.println("Score black: " + playerBlack.getScore());
-      }
-
-      System.out.println("GAME OVER");
-      displayWinner();
    }
 }

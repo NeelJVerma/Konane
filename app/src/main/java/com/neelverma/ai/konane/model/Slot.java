@@ -1,7 +1,13 @@
+/************************************************************
+ * Name: Neel Verma                                         *
+ * Project: Project 1 - Two Player Konane                   *
+ * Class: CMPS331 - Artificial Intelligence                 *
+ * Date: 2/02/2018                                          *
+ ************************************************************/
+
 package com.neelverma.ai.konane.model;
 
-
-/*
+/**
  * Class to hold a particular slot in the game board.
  * Created by Neel on 01/20/2018.
  */
@@ -16,7 +22,7 @@ public class Slot {
    public static final int WHITE = -1;
    public static final int EMPTY = 0;
 
-   /*
+   /**
     * Description: Constructor. Will initialize the slot with values passed in.
     * Parameters: int row to set the row.
     *             int column to set the column.
@@ -30,7 +36,7 @@ public class Slot {
       this.color = color;
    }
 
-   /*
+   /**
     * Description: Method to set the row of the current slot object.
     * Parameters: int row to set the row.
     * Returns: Nothing.
@@ -40,7 +46,7 @@ public class Slot {
       this.row = row;
    }
 
-   /*
+   /**
     * Description: Method to set the column of the current slot object.
     * Parameters: int column to set the column.
     * Returns: Nothing.
@@ -50,7 +56,7 @@ public class Slot {
       this.column = column;
    }
 
-   /*
+   /**
     * Description: Method to set the color of the current slot object.
     * Parameters: int color to set the color.
     * Returns: Nothing.
@@ -60,7 +66,7 @@ public class Slot {
       this.color = color;
    }
 
-   /*
+   /**
     * Description: Method to get the row of the current slot object.
     * Parameters: None.
     * Returns: The row, if it is a valid row, otherwise -1, an invalid row. We need to return -1
@@ -74,7 +80,7 @@ public class Slot {
       return -1;
    }
 
-   /*
+   /**
     * Description: Method to get the column of the current slot object.
     * Parameters: None.
     * Returns: The column, if it is a valid column, otherwise -1, an invalid column. We need to
@@ -89,7 +95,7 @@ public class Slot {
       return -1;
    }
 
-   /*
+   /**
     * Description: Method to get the color of the current slot object.
     * Parameters: None.
     * Returns: The color of the current slot object.
