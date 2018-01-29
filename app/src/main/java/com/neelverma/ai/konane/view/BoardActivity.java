@@ -11,7 +11,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -299,6 +298,14 @@ public class BoardActivity extends AppCompatActivity {
                            gameObject.playerBlack.addToScore();
                            String text = "BLACK: " + gameObject.playerBlack.getScore();
                            playerBlackScore.setText(text.trim());
+
+                           if (gameObject.canMoveAgain(slotTo, gameObject.playerBlack)) {
+                              potentialSuccessiveSlot.setRow(rowTo);
+                              potentialSuccessiveSlot.setColumn(columnTo);
+                              potentialSuccessiveSlot.setColor(Slot.BLACK);
+                              return false;
+                           }
+
                            if (!gameObject.playerCanMove(gameObject.playerWhite) && gameObject.playerCanMove(gameObject.playerBlack)) {
                               AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
                               builder.setMessage("WHITE CANNOT MOVE")
@@ -315,19 +322,20 @@ public class BoardActivity extends AppCompatActivity {
                               return false;
                            }
 
-                           if (gameObject.canMoveAgain(slotTo, gameObject.playerBlack)) {
-                              potentialSuccessiveSlot.setRow(rowTo);
-                              potentialSuccessiveSlot.setColumn(columnTo);
-                              potentialSuccessiveSlot.setColor(Slot.BLACK);
-                              return false;
-                           }
-
                            gameObject.playerWhite.setIsTurn(true);
                            gameObject.playerBlack.setIsTurn(false);
                         } else {
                            gameObject.playerWhite.addToScore();
                            String text = "WHITE: " + gameObject.playerWhite.getScore();
                            playerWhiteScore.setText(text.trim());
+
+                           if (gameObject.canMoveAgain(slotTo, gameObject.playerWhite)) {
+                              potentialSuccessiveSlot.setRow(rowTo);
+                              potentialSuccessiveSlot.setColumn(columnTo);
+                              potentialSuccessiveSlot.setColor(Slot.WHITE);
+                              return false;
+                           }
+
                            if (!gameObject.playerCanMove(gameObject.playerBlack) && gameObject.playerCanMove(gameObject.playerWhite)) {
                               AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
                               builder.setMessage("BLACK CANNOT MOVE")
@@ -341,13 +349,6 @@ public class BoardActivity extends AppCompatActivity {
                               AlertDialog alert = builder.create();
                               alert.show();
 
-                              return false;
-                           }
-
-                           if (gameObject.canMoveAgain(slotTo, gameObject.playerWhite)) {
-                              potentialSuccessiveSlot.setRow(rowTo);
-                              potentialSuccessiveSlot.setColumn(columnTo);
-                              potentialSuccessiveSlot.setColor(Slot.WHITE);
                               return false;
                            }
 
