@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingBottom="16dp"
+    android:paddingTop="16dp" tools:context=".view.BoardActivity"
+    android:background="#4b76ad"
+    android:id="@+id/endActivityLayout">
+
+    <TextView
+        android:id="@+id/gameOverTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:text="GAME OVER!"
+        android:textColor="#fff"
+        android:textSize="50dp" />
+
+    <TextView
+        android:id="@+id/finalResultsTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/gameOverTextView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="12dp"
+        android:text="FINAL RESULTS"
+        android:textColor="#fff"
+        android:textSize="35dp" />
+
+    <ImageView
+        android:id="@+id/blackPieceImageView"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/finalResultsTextView"
+        android:layout_marginTop="13dp"
+        app:srcCompat="@drawable/circle_black" />
+
+    <ImageView
+        android:id="@+id/whitePieceImageView"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@+id/blackPieceImageView"
+        app:srcCompat="@drawable/circle_white" />
+
+    <TextView
+        android:id="@+id/blackScoreTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/blackPieceImageView"
+        android:text=""
+        android:textColor="#000"
+        android:textSize="32dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/whiteScoreTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/whitePieceImageView"
+        android:text=""
+        android:textColor="#fff"
+        android:textSize="32dp"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/playAgainButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="12dp"
+        android:text="PLAY AGAIN" />
+
+    <TextView
+        android:id="@+id/winnerTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/whiteScoreTextView"
+        android:layout_marginTop="50dp"
+        android:layout_centerHorizontal="true"
+        android:text="TextView"
+        android:textColor="#fff"
+        android:textSize="45dp" />
+
+</RelativeLayout>

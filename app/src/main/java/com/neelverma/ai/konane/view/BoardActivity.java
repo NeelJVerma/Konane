@@ -430,22 +430,17 @@ public class BoardActivity extends AppCompatActivity {
                            playerWhiteTurn.setVisibility(View.INVISIBLE);
 
                            AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
-                           String winner;
-                           if (gameObject.playerWhite.getScore() > gameObject.playerBlack.getScore()) {
-                              winner = "WHITE WINS!";
-                           } else if (gameObject.playerWhite.getScore() < gameObject.playerBlack.getScore()) {
-                              winner = "BLACK WINS!";
-                           } else {
-                              winner = "IT'S A DRAW.";
-                           }
 
-                           builder.setMessage("GAME OVER. " + winner)
+                           builder.setMessage("GAME OVER. PRESS OK TO SEE THE RESULTS.")
                               .setCancelable(false)
                               .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                  public void onClick(DialogInterface dialog, int id) {
-                                    Intent mainIntent = new Intent(BoardActivity.this,
-                                       MainActivity.class);
-                                    startActivity(mainIntent);
+                                    Intent endIntent = new Intent(BoardActivity.this,
+                                       EndActivity.class);
+                                    endIntent.putExtra("playerBlackScore", gameObject.playerBlack.getScore());
+                                    endIntent.putExtra("playerWhiteScore", gameObject.playerWhite.getScore());
+
+                                    startActivity(endIntent);
                                  }
                               });
 

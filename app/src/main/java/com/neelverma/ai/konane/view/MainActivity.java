@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
       beginButton = findViewById(R.id.beginButton);
 
       beginButton.setOnClickListener(new View.OnClickListener() {
+         @Override
          public void onClick(View arg0) {
             Intent boardIntent = new Intent(MainActivity.this,
                BoardActivity.class);
