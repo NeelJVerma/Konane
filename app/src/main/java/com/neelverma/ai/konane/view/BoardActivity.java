@@ -37,7 +37,7 @@ import com.neelverma.ai.konane.model.Slot;
  * Each button represents a different black or white piece, or an empty slot.
  * At first, the user is presented with a button that asks them to press to start the game.
  * After this button is pressed, two pieces will get removed from the board.
- * The game will then alternate between black and white players until the game is over.
+ * The game will then alternate between black and white until the game is over.
  * At each step, the score of the player moving is updated to reflect their most current score.
  * Additionally at every click, the model is verifying whether the move being made is valid or not.
  * Some examples of invalid moves that are caught are a player moving out of turn, a player moving
@@ -172,6 +172,29 @@ public class BoardActivity extends AppCompatActivity {
                               return false;
                            }
 
+                           // Mark off the spots that a player can move if they are making their first
+                           // click.
+                           Slot slotRight = gameObject.boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() + 2);
+                           Slot slotLeft = gameObject.boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() - 2);
+                           Slot slotUp = gameObject.boardObject.getSlot(slotFrom.getRow() + 2, slotFrom.getColumn());
+                           Slot slotDown = gameObject.boardObject.getSlot(slotFrom.getRow() - 2, slotFrom.getColumn());
+
+                           if (gameObject.isValidMove(slotFrom, slotRight, turnColor)) {
+                              gameBoard[slotRight.getRow()][slotRight.getColumn()].setBackground(drawCell[0]);
+                           }
+
+                           if (gameObject.isValidMove(slotFrom, slotLeft, turnColor)) {
+                              gameBoard[slotLeft.getRow()][slotLeft.getColumn()].setBackground(drawCell[0]);
+                           }
+
+                           if (gameObject.isValidMove(slotFrom, slotUp, turnColor)) {
+                              gameBoard[slotUp.getRow()][slotUp.getColumn()].setBackground(drawCell[0]);
+                           }
+
+                           if (gameObject.isValidMove(slotFrom, slotDown, turnColor)) {
+                              gameBoard[slotDown.getRow()][slotDown.getColumn()].setBackground(drawCell[0]);
+                           }
+
                            firstClick = false;
 
                            // We return because the following code only pertains to whether or not
@@ -179,6 +202,30 @@ public class BoardActivity extends AppCompatActivity {
                            return false;
                         }
 
+                        // Un-mark the spots that a player can move if they make their second click.
+                        Slot slotRight = gameObject.boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() + 2);
+                        Slot slotLeft = gameObject.boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() - 2);
+                        Slot slotUp = gameObject.boardObject.getSlot(slotFrom.getRow() + 2, slotFrom.getColumn());
+                        Slot slotDown = gameObject.boardObject.getSlot(slotFrom.getRow() - 2, slotFrom.getColumn());
+
+                        if (gameObject.isValidMove(slotFrom, slotRight, turnColor)) {
+                           gameBoard[slotRight.getRow()][slotRight.getColumn()].setBackground(drawCell[3]);
+                        }
+
+                        if (gameObject.isValidMove(slotFrom, slotLeft, turnColor)) {
+                           gameBoard[slotLeft.getRow()][slotLeft.getColumn()].setBackground(drawCell[3]);
+                        }
+
+                        if (gameObject.isValidMove(slotFrom, slotUp, turnColor)) {
+                           gameBoard[slotUp.getRow()][slotUp.getColumn()].setBackground(drawCell[3]);
+                        }
+
+                        if (gameObject.isValidMove(slotFrom, slotDown, turnColor)) {
+                           gameBoard[slotDown.getRow()][slotDown.getColumn()].setBackground(drawCell[3]);
+                        }
+
+                        // If they make their second click, they are immediately ready to make their
+                        // first click again.
                         firstClick = true;
 
                         rowTo = finalR;
@@ -287,13 +334,13 @@ public class BoardActivity extends AppCompatActivity {
 
                         gameBoard[slotTo.getRow()][slotTo.getColumn()].setBackground(draw);
 
-                        // If it is the black player's turn, add to his/her score. Then check if
+                        // If it is black's turn, add to his/her score. Then check if
                         // the player playing white pieces can move. If not, don't switch the turns.
-                        // Then, check if the black player can move again. If they can, set their
+                        // Then, check if black can move again. If they can, set their
                         // successive slot to be the current slot they just moved to. This way, we can
                         // verify that they are the same when we come back for another click. If none
-                        // of those conditions are hit, switch the turns. Do the same thing for the
-                        // white player.
+                        // of those conditions are hit, switch the turns. Do the same thing for
+                        // white.
                         if (gameObject.playerBlack.isTurn()) {
                            gameObject.playerBlack.addToScore();
                            String text = "BLACK: " + gameObject.playerBlack.getScore();
@@ -385,9 +432,9 @@ public class BoardActivity extends AppCompatActivity {
                            AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
                            String winner;
                            if (gameObject.playerWhite.getScore() > gameObject.playerBlack.getScore()) {
-                              winner = "WHITE PLAYER WINS!";
+                              winner = "WHITE WINS!";
                            } else if (gameObject.playerWhite.getScore() < gameObject.playerBlack.getScore()) {
-                              winner = "BLACK PLAYER WINS!";
+                              winner = "BLACK WINS!";
                            } else {
                               winner = "IT'S A DRAW.";
                            }

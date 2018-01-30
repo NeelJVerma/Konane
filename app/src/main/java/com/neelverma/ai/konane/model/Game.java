@@ -87,7 +87,7 @@ public class Game {
     * Returns: Whether the move is valid or not.
     */
 
-   private boolean isValidMove(Slot slotFrom, Slot slotTo, int color) {
+   public boolean isValidMove(Slot slotFrom, Slot slotTo, int color) {
       // In bounds verification.
       boolean slotFromGood = ((slotFrom.getRow() < Board.MAX_ROW && slotFrom.getRow() >= Board.MIN_ROW) &&
          (slotFrom.getColumn() < Board.MAX_COLUMN && slotFrom.getColumn() >= Board.MIN_COLUMN));
