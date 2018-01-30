@@ -57,7 +57,7 @@ public class EndActivity extends AppCompatActivity {
       // game.
       playAgainButton.setOnClickListener(new View.OnClickListener() {
          @Override
-         public void onClick(View arg0) {
+         public void onClick(View v) {
             Intent boardIntent = new Intent(EndActivity.this,
                BoardActivity.class);
             startActivity(boardIntent);

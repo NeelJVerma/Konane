@@ -23,6 +23,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.neelverma.ai.konane.R;
 import com.neelverma.ai.konane.model.Board;
@@ -172,6 +173,50 @@ public class BoardActivity extends AppCompatActivity {
                               return false;
                            }
 
+                           // Check that if a successive move is able to be made for the player playing
+                           // black pieces, they started moving the same piece and didn't switch pieces
+                           // mid turn.
+                           if (gameObject.playerBlack.isTurn()) {
+                              if ((gameObject.canMoveAgain(potentialSuccessiveSlot, gameObject.playerBlack)) &&
+                                 (!gameObject.verifySuccessiveMove(slotFrom, potentialSuccessiveSlot))) {
+                                 AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
+                                 builder.setMessage("YOU MUST START FROM THE POSITION YOU ENDED ON")
+                                    .setCancelable(false)
+                                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                       public void onClick(DialogInterface dialog, int id) {
+                                          return;
+                                       }
+                                    });
+
+                                 AlertDialog alert = builder.create();
+                                 alert.show();
+
+                                 return false;
+                              }
+                           }
+
+                           // Check that if a successive move is able to be made for the player playing
+                           // white pieces, they started moving the same piece and didn't switch pieces
+                           // mid turn.
+                           if (gameObject.playerWhite.isTurn()) {
+                              if ((gameObject.canMoveAgain(potentialSuccessiveSlot, gameObject.playerWhite)) &&
+                                 (!gameObject.verifySuccessiveMove(slotFrom, potentialSuccessiveSlot))) {
+                                 AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
+                                 builder.setMessage("YOU MUST START FROM THE POSITION YOU ENDED ON")
+                                    .setCancelable(false)
+                                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                       public void onClick(DialogInterface dialog, int id) {
+                                          return;
+                                       }
+                                    });
+
+                                 AlertDialog alert = builder.create();
+                                 alert.show();
+
+                                 return false;
+                              }
+                           }
+
                            // Mark off the spots that a player can move if they are making their first
                            // click.
                            Slot slotRight = gameObject.boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() + 2);
@@ -223,6 +268,10 @@ public class BoardActivity extends AppCompatActivity {
                            return false;
                         }
 
+                        // If they make their second click, they are immediately ready to make their
+                        // first click again.
+                        firstClick = true;
+
                         // Un-mark the spots that a player can move if they make their second click.
                         Slot slotRight = gameObject.boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() + 2);
                         Slot slotLeft = gameObject.boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() - 2);
@@ -245,57 +294,9 @@ public class BoardActivity extends AppCompatActivity {
                            gameBoard[slotDown.getRow()][slotDown.getColumn()].setBackground(drawCell[3]);
                         }
 
-                        // If they make their second click, they are immediately ready to make their
-                        // first click again.
-                        firstClick = true;
-
                         rowTo = finalR;
                         columnTo = finalC;
                         slotTo = gameObject.boardObject.getSlot(rowTo, columnTo);
-
-                        // Check that if a successive move is able to be made for the player playing
-                        // black pieces, they started moving the same piece and didn't switch pieces
-                        // mid turn.
-                        if (gameObject.playerBlack.isTurn()) {
-                           if ((gameObject.canMoveAgain(potentialSuccessiveSlot, gameObject.playerBlack)) &&
-                              (!gameObject.verifySuccessiveMove(slotFrom, potentialSuccessiveSlot))) {
-                              AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
-                              builder.setMessage("YOU MUST START FROM THE POSITION YOU ENDED ON")
-                                 .setCancelable(false)
-                                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                       return;
-                                    }
-                                 });
-
-                              AlertDialog alert = builder.create();
-                              alert.show();
-
-                              return false;
-                           }
-                        }
-
-                        // Check that if a successive move is able to be made for the player playing
-                        // white pieces, they started moving the same piece and didn't switch pieces
-                        // mid turn.
-                        if (gameObject.playerWhite.isTurn()) {
-                           if ((gameObject.canMoveAgain(potentialSuccessiveSlot, gameObject.playerWhite)) &&
-                              (!gameObject.verifySuccessiveMove(slotFrom, potentialSuccessiveSlot))) {
-                              AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
-                              builder.setMessage("YOU MUST START FROM THE POSITION YOU ENDED ON")
-                                 .setCancelable(false)
-                                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                       return;
-                                    }
-                                 });
-
-                              AlertDialog alert = builder.create();
-                              alert.show();
-
-                              return false;
-                           }
-                        }
 
                         // Verify whether or not the move made was valid according to in bounds
                         // verification, four direction verification, and color verification (see the
