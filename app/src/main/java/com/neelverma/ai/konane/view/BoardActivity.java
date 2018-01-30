@@ -178,21 +178,42 @@ public class BoardActivity extends AppCompatActivity {
                            Slot slotLeft = gameObject.boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() - 2);
                            Slot slotUp = gameObject.boardObject.getSlot(slotFrom.getRow() + 2, slotFrom.getColumn());
                            Slot slotDown = gameObject.boardObject.getSlot(slotFrom.getRow() - 2, slotFrom.getColumn());
+                           boolean pieceCanMove = false;
 
                            if (gameObject.isValidMove(slotFrom, slotRight, turnColor)) {
                               gameBoard[slotRight.getRow()][slotRight.getColumn()].setBackground(drawCell[0]);
+                              pieceCanMove = true;
                            }
 
                            if (gameObject.isValidMove(slotFrom, slotLeft, turnColor)) {
                               gameBoard[slotLeft.getRow()][slotLeft.getColumn()].setBackground(drawCell[0]);
+                              pieceCanMove = true;
                            }
 
                            if (gameObject.isValidMove(slotFrom, slotUp, turnColor)) {
                               gameBoard[slotUp.getRow()][slotUp.getColumn()].setBackground(drawCell[0]);
+                              pieceCanMove = true;
                            }
 
                            if (gameObject.isValidMove(slotFrom, slotDown, turnColor)) {
                               gameBoard[slotDown.getRow()][slotDown.getColumn()].setBackground(drawCell[0]);
+                              pieceCanMove = true;
+                           }
+
+                           if (!pieceCanMove) {
+                              AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
+                              builder.setMessage("THIS PIECE CANNOT MOVE")
+                                 .setCancelable(false)
+                                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                       return;
+                                    }
+                                 });
+
+                              AlertDialog alert = builder.create();
+                              alert.show();
+
+                              return false;
                            }
 
                            firstClick = false;
