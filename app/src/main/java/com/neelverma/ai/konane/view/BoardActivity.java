@@ -23,7 +23,6 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.neelverma.ai.konane.R;
 import com.neelverma.ai.konane.model.Board;
@@ -64,6 +63,13 @@ public class BoardActivity extends AppCompatActivity {
                                                   // can be in (empty, white, black, can move).
    private Game gameObject = new Game(); // A game object to enforce game logic on the GUI.
 
+   /**
+    * Description: Method to create the activity. It handles all GUI changing, resource loading, etc.
+    * Parameters: Bundle savedInstanceState, which is the state of the current activity's data. This
+    * is used so that, if need be, the activity can restore itself from its previous state.
+    * Returns: Nothing.
+    */
+
    @Override
    protected void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
@@ -86,6 +92,8 @@ public class BoardActivity extends AppCompatActivity {
       Button removeButton;
       removeButton = findViewById(R.id.removeButton);
 
+      // Set the on click listener for the remove button. Only after this button is pressed does all
+      // game logic start.
       removeButton.setOnClickListener(new View.OnClickListener() {
          // Invalid board parameters to start. These are used in move verification.
          private int rowFrom = -1;
@@ -98,6 +106,12 @@ public class BoardActivity extends AppCompatActivity {
 
          private boolean firstClick = true; // Boolean to verify if a click is the first or second.
 
+         /**
+          * Description: Method to handle the on click event for the remove button.
+          * Parameters: View v, which is the view object of whatever is being clicked.
+          * Returns: Nothing.
+          */
+
          @Override
          public void onClick(View v) {
             // When the button to start the game is pressed, make it disappear, remove two slots,
@@ -105,15 +119,26 @@ public class BoardActivity extends AppCompatActivity {
             // tell whose turn it is.
             Button button = (Button) v;
             button.setVisibility(View.GONE);
+
+            // Text views to display the scores and whose turn it is.
             final TextView playerBlackScore = findViewById(R.id.playerBlackScore);
             final TextView playerWhiteScore = findViewById(R.id.playerWhiteScore);
             final TextView playerBlackTurn = findViewById(R.id.playerBlackTurn);
             final TextView playerWhiteTurn = findViewById(R.id.playerWhiteTurn);
+
+            // Locate the entire layout container for this activity.
             RelativeLayout boardActivityLayout = findViewById(R.id.boardActivityLayout);
+
+            // Show player scores and that it's black's turn, because the player playing black pieces
+            // always starts.
             playerBlackScore.setVisibility(View.VISIBLE);
             playerWhiteScore.setVisibility(View.VISIBLE);
             playerBlackTurn.setVisibility(View.VISIBLE);
+
+            // Change the background to show the game name at the bottom.
             boardActivityLayout.setBackgroundResource(R.mipmap.board_background_2);
+
+            // Remove one random white and black stone each at the beginning of the game.
             Pair<Slot, Slot> removePair = gameObject.removeTwoSlots();
             int removeRowOne = removePair.first.getRow();
             int removeColumnOne = removePair.first.getColumn();
@@ -135,6 +160,7 @@ public class BoardActivity extends AppCompatActivity {
                   final int finalR = r;
                   final int finalC = c;
 
+                  // Set on click listeners for all 36 game buttons.
                   gameBoard[r][c].setOnClickListener(new View.OnClickListener() {
 
                      /**
@@ -427,6 +453,13 @@ public class BoardActivity extends AppCompatActivity {
 
                         return true;
                      }
+
+                     /**
+                      * Description: Method to handle the on click event for one out of the 36 game
+                      * buttons.
+                      * Parameters: View v, which is the view object of whatever is being clicked.
+                      * Returns: Nothing.
+                      */
 
                      @Override
                      public void onClick(View v) {

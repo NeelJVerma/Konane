@@ -25,6 +25,14 @@ import com.neelverma.ai.konane.R;
  */
 
 public class EndActivity extends AppCompatActivity {
+
+   /**
+    * Description: Method to create the activity.
+    * Parameters: Bundle savedInstanceState, which is the state of the current activity's data. This
+    * is used so that, if need be, the activity can restore itself from its previous state.
+    * Returns: Nothing.
+    */
+
    @Override
    protected void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
@@ -56,6 +64,13 @@ public class EndActivity extends AppCompatActivity {
       // If the user clicks this button, they will be sent back to the board screen to play a new
       // game.
       playAgainButton.setOnClickListener(new View.OnClickListener() {
+
+         /**
+          * Description: Method to handle the on click event for the play again button.
+          * Parameters: View v, which is the view object of whatever is being clicked.
+          * Returns: Nothing.
+          */
+
          @Override
          public void onClick(View v) {
             Intent boardIntent = new Intent(EndActivity.this,
