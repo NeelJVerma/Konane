@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -120,6 +121,9 @@ public class BoardActivity extends AppCompatActivity {
             Button button = (Button) v;
             button.setVisibility(View.GONE);
 
+            final Button endTurnButton = findViewById(R.id.endTurnButton);
+            endTurnButton.setVisibility(View.VISIBLE);
+
             // Text views to display the scores and whose turn it is.
             final TextView playerBlackScore = findViewById(R.id.playerBlackScore);
             final TextView playerWhiteScore = findViewById(R.id.playerWhiteScore);
@@ -135,8 +139,8 @@ public class BoardActivity extends AppCompatActivity {
             playerWhiteScore.setVisibility(View.VISIBLE);
             playerBlackTurn.setVisibility(View.VISIBLE);
 
-            // Change the background to show the game name at the bottom.
-            boardActivityLayout.setBackgroundResource(R.mipmap.board_background_2);
+            // Change the background to get rid of the game name.
+            boardActivityLayout.setBackgroundColor(Color.parseColor("#4b76ad"));
 
             // Remove one random white and black stone each at the beginning of the game.
             Pair<Slot, Slot> removePair = gameObject.removeTwoSlots();
@@ -162,6 +166,8 @@ public class BoardActivity extends AppCompatActivity {
 
                   // Set on click listeners for all 36 game buttons.
                   gameBoard[r][c].setOnClickListener(new View.OnClickListener() {
+                     private boolean blackEndTurn;
+                     private boolean whiteEndTurn;
 
                      /**
                       * Description: Method to simulate one turn in the game.
@@ -398,6 +404,7 @@ public class BoardActivity extends AppCompatActivity {
                               potentialSuccessiveSlot.setRow(rowTo);
                               potentialSuccessiveSlot.setColumn(columnTo);
                               potentialSuccessiveSlot.setColor(Slot.BLACK);
+
                               return false;
                            }
 
@@ -428,6 +435,7 @@ public class BoardActivity extends AppCompatActivity {
                               potentialSuccessiveSlot.setRow(rowTo);
                               potentialSuccessiveSlot.setColumn(columnTo);
                               potentialSuccessiveSlot.setColor(Slot.WHITE);
+
                               return false;
                            }
 
