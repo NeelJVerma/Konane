@@ -37,6 +37,17 @@ public class Game {
    public Player playerWhite; // The player playing white stones.
    public Board boardObject; // The current game's board.
 
+   // Invalid board parameters to start. These are used in move verification.
+   public int rowFrom;
+   public int columnFrom;
+   public int rowTo;
+   public int columnTo;
+   public Slot potentialSuccessiveSlot;
+   public Slot slotFrom;
+   public Slot slotTo;
+
+   public boolean firstClick; // Boolean to verify if a click is the first or second.
+
    /**
     * Description: Constructor. Will initialize the current game's variables through their
     * constructors. It also sets the current turns so that black always moves first.
@@ -50,6 +61,14 @@ public class Game {
       playerWhite = new Player(Player.WHITE);
       playerWhite.setIsTurn(false);
       boardObject = new Board();
+      rowFrom = -1;
+      columnFrom = -1;
+      rowTo = -1;
+      columnTo = -1;
+      potentialSuccessiveSlot = new Slot(Board.MAX_ROW, Board.MAX_COLUMN, 2);
+      slotFrom = boardObject.getSlot(rowFrom, columnFrom);
+      slotTo = boardObject.getSlot(rowTo, columnTo);
+      firstClick = true;
    }
 
    /**

@@ -8,12 +8,9 @@
 package com.neelverma.ai.konane.view;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -26,7 +23,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.neelverma.ai.konane.R;
-import com.neelverma.ai.konane.model.Board;
 import com.neelverma.ai.konane.model.Game;
 import com.neelverma.ai.konane.model.Slot;
 
@@ -53,16 +49,21 @@ import com.neelverma.ai.konane.model.Slot;
 
 public class BoardActivity extends AppCompatActivity {
    // Symbolic constants.
-   private static final int MAX_ROW = 6; // The max amount of rows in the board.
-   private static final int MAX_COL = 6; // The max amount of columns in the board.
+   public static final int MAX_ROW = 6; // The max amount of rows in the board.
+   public static final int MAX_COL = 6; // The max amount of columns in the board.
 
-   private ImageButton[][] gameBoard = new ImageButton[MAX_ROW][MAX_COL]; // A 2D array of image
-                                                                          // buttons to hold the game
-                                                                          // board.
-   private Context context; // A context variable to obtain access to resources.
-   private Drawable drawCell[] = new Drawable[4]; // An array to hold the different states each cell
-                                                  // can be in (empty, white, black, can move).
-   private Game gameObject = new Game(); // A game object to enforce game logic on the GUI.
+   public ImageButton[][] gameBoard = new ImageButton[MAX_ROW][MAX_COL]; // A 2D array of image
+   // buttons to hold the game
+   // board.
+   public Context context; // A context variable to obtain access to resources.
+   public Drawable drawCell[] = new Drawable[4]; // An array to hold the different states each cell
+   // can be in (empty, white, black, can move).
+   public Game gameObject = new Game(); // A game object to enforce game logic on the GUI.
+
+   TextView playerBlackScore;
+   TextView playerWhiteScore;
+   TextView playerBlackTurn;
+   TextView playerWhiteTurn;
 
    /**
     * Description: Method to create the activity. It handles all GUI changing, resource loading, etc.
@@ -83,52 +84,19 @@ public class BoardActivity extends AppCompatActivity {
       // Draw the initial board game of 18 black and 18 white cells.
       drawBoardGame();
 
-      // Can't press the buttons until the button to start the game is pressed.
-      for (int r = 0; r < MAX_ROW; r++) {
-         for (int c = 0; c < MAX_COL; c++) {
-            gameBoard[r][c].setEnabled(false);
-         }
-      }
-
       Button removeButton;
       removeButton = findViewById(R.id.removeButton);
 
-      // Set the on click listener for the remove button. Only after this button is pressed does all
-      // game logic start.
       removeButton.setOnClickListener(new View.OnClickListener() {
-         // Invalid board parameters to start. These are used in move verification.
-         private int rowFrom = -1;
-         private int columnFrom = -1;
-         private int rowTo = -1;
-         private int columnTo = -1;
-         private Slot potentialSuccessiveSlot = new Slot(Board.MAX_ROW, Board.MAX_COLUMN, 2);
-         Slot slotFrom = gameObject.boardObject.getSlot(rowFrom, columnFrom);
-         Slot slotTo = gameObject.boardObject.getSlot(rowTo, columnTo);
-
-         private boolean firstClick = true; // Boolean to verify if a click is the first or second.
-
-         /**
-          * Description: Method to handle the on click event for the remove button.
-          * Parameters: View v, which is the view object of whatever is being clicked.
-          * Returns: Nothing.
-          */
-
          @Override
          public void onClick(View v) {
-            // When the button to start the game is pressed, make it disappear, remove two slots,
-            // make the 36 game board buttons enabled, pop up the scores of the two players, and
-            // tell whose turn it is.
             Button button = (Button) v;
             button.setVisibility(View.GONE);
 
-            final Button endTurnButton = findViewById(R.id.endTurnButton);
-            endTurnButton.setVisibility(View.VISIBLE);
-
-            // Text views to display the scores and whose turn it is.
-            final TextView playerBlackScore = findViewById(R.id.playerBlackScore);
-            final TextView playerWhiteScore = findViewById(R.id.playerWhiteScore);
-            final TextView playerBlackTurn = findViewById(R.id.playerBlackTurn);
-            final TextView playerWhiteTurn = findViewById(R.id.playerWhiteTurn);
+            playerBlackScore = findViewById(R.id.playerBlackScore);
+            playerWhiteScore = findViewById(R.id.playerWhiteScore);
+            playerBlackTurn = findViewById(R.id.playerBlackTurn);
+            playerWhiteTurn = findViewById(R.id.playerWhiteTurn);
 
             // Locate the entire layout container for this activity.
             RelativeLayout boardActivityLayout = findViewById(R.id.boardActivityLayout);
@@ -142,378 +110,7 @@ public class BoardActivity extends AppCompatActivity {
             // Change the background to get rid of the game name.
             boardActivityLayout.setBackgroundColor(Color.parseColor("#4b76ad"));
 
-            // Remove one random white and black stone each at the beginning of the game.
-            Pair<Slot, Slot> removePair = gameObject.removeTwoSlots();
-            int removeRowOne = removePair.first.getRow();
-            int removeColumnOne = removePair.first.getColumn();
-            int removeRowTwo = removePair.second.getRow();
-            int removeColumnTwo = removePair.second.getColumn();
-            gameBoard[removeRowOne][removeColumnOne].setBackground(drawCell[3]);
-            gameBoard[removeRowTwo][removeColumnTwo].setBackground(drawCell[3]);
-
-            // After game has started, enable all game board buttons.
-            for (int r = 0; r < MAX_ROW; r++) {
-               for (int c = 0; c < MAX_COL; c++) {
-                  gameBoard[r][c].setEnabled(true);
-               }
-            }
-
-            // Set on click listeners for all 36 game buttons.
-            for (int r = 0; r < MAX_ROW; r++) {
-               for (int c = 0; c < MAX_COL; c++) {
-                  final int finalR = r;
-                  final int finalC = c;
-
-                  // Set on click listeners for all 36 game buttons.
-                  gameBoard[r][c].setOnClickListener(new View.OnClickListener() {
-                     private boolean blackEndTurn;
-                     private boolean whiteEndTurn;
-
-                     /**
-                      * Description: Method to simulate one turn in the game.
-                      * Parameters: None.
-                      * Returns: Whether or not the turn was executed successfully or not.
-                      */
-
-                     private boolean simulateTurn() {
-                        int turnColor = gameObject.playerWhite.isTurn() ? Slot.WHITE : Slot.BLACK;
-
-                        // If the first button in the turn was clicked, verify whether or not the
-                        // player is clicking their own color piece or not an empty slot.
-                        if (firstClick) {
-                           rowFrom = finalR;
-                           columnFrom = finalC;
-                           slotFrom = gameObject.boardObject.getSlot(rowFrom, columnFrom);
-
-                           if (slotFrom.getColor() != turnColor) {
-                              AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
-                              if (slotFrom.getColor() == Slot.EMPTY) {
-                                 builder.setMessage("CANNOT MOVE AN EMPTY SLOT");
-                              } else {
-                                 builder.setMessage("NOT YOUR TURN");
-                              }
-                              builder.setCancelable(false)
-                                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                       return;
-                                    }
-                                 });
-
-                              AlertDialog alert = builder.create();
-                              alert.show();
-
-                              return false;
-                           }
-
-                           // Check that if a successive move is able to be made for the player playing
-                           // black pieces, they started moving the same piece and didn't switch pieces
-                           // mid turn.
-                           if (gameObject.playerBlack.isTurn()) {
-                              if ((gameObject.canMoveAgain(potentialSuccessiveSlot, gameObject.playerBlack)) &&
-                                 (!gameObject.verifySuccessiveMove(slotFrom, potentialSuccessiveSlot))) {
-                                 AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
-                                 builder.setMessage("YOU MUST START FROM THE POSITION YOU ENDED ON")
-                                    .setCancelable(false)
-                                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                       public void onClick(DialogInterface dialog, int id) {
-                                          return;
-                                       }
-                                    });
-
-                                 AlertDialog alert = builder.create();
-                                 alert.show();
-
-                                 return false;
-                              }
-                           }
-
-                           // Check that if a successive move is able to be made for the player playing
-                           // white pieces, they started moving the same piece and didn't switch pieces
-                           // mid turn.
-                           if (gameObject.playerWhite.isTurn()) {
-                              if ((gameObject.canMoveAgain(potentialSuccessiveSlot, gameObject.playerWhite)) &&
-                                 (!gameObject.verifySuccessiveMove(slotFrom, potentialSuccessiveSlot))) {
-                                 AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
-                                 builder.setMessage("YOU MUST START FROM THE POSITION YOU ENDED ON")
-                                    .setCancelable(false)
-                                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                       public void onClick(DialogInterface dialog, int id) {
-                                          return;
-                                       }
-                                    });
-
-                                 AlertDialog alert = builder.create();
-                                 alert.show();
-
-                                 return false;
-                              }
-                           }
-
-                           // Mark off the spots that a player can move if they are making their first
-                           // click.
-                           Slot slotRight = gameObject.boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() + 2);
-                           Slot slotLeft = gameObject.boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() - 2);
-                           Slot slotUp = gameObject.boardObject.getSlot(slotFrom.getRow() + 2, slotFrom.getColumn());
-                           Slot slotDown = gameObject.boardObject.getSlot(slotFrom.getRow() - 2, slotFrom.getColumn());
-                           boolean pieceCanMove = false;
-
-                           if (gameObject.isValidMove(slotFrom, slotRight, turnColor)) {
-                              gameBoard[slotRight.getRow()][slotRight.getColumn()].setBackground(drawCell[0]);
-                              pieceCanMove = true;
-                           }
-
-                           if (gameObject.isValidMove(slotFrom, slotLeft, turnColor)) {
-                              gameBoard[slotLeft.getRow()][slotLeft.getColumn()].setBackground(drawCell[0]);
-                              pieceCanMove = true;
-                           }
-
-                           if (gameObject.isValidMove(slotFrom, slotUp, turnColor)) {
-                              gameBoard[slotUp.getRow()][slotUp.getColumn()].setBackground(drawCell[0]);
-                              pieceCanMove = true;
-                           }
-
-                           if (gameObject.isValidMove(slotFrom, slotDown, turnColor)) {
-                              gameBoard[slotDown.getRow()][slotDown.getColumn()].setBackground(drawCell[0]);
-                              pieceCanMove = true;
-                           }
-
-                           if (!pieceCanMove) {
-                              AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
-                              builder.setMessage("THIS PIECE CANNOT MOVE")
-                                 .setCancelable(false)
-                                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                       return;
-                                    }
-                                 });
-
-                              AlertDialog alert = builder.create();
-                              alert.show();
-
-                              return false;
-                           }
-
-                           firstClick = false;
-
-                           // We return because the following code only pertains to whether or not
-                           // a second click was made.
-                           return false;
-                        }
-
-                        // If they make their second click, they are immediately ready to make their
-                        // first click again.
-                        firstClick = true;
-
-                        // Un-mark the spots that a player can move if they make their second click.
-                        Slot slotRight = gameObject.boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() + 2);
-                        Slot slotLeft = gameObject.boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() - 2);
-                        Slot slotUp = gameObject.boardObject.getSlot(slotFrom.getRow() + 2, slotFrom.getColumn());
-                        Slot slotDown = gameObject.boardObject.getSlot(slotFrom.getRow() - 2, slotFrom.getColumn());
-
-                        if (gameObject.isValidMove(slotFrom, slotRight, turnColor)) {
-                           gameBoard[slotRight.getRow()][slotRight.getColumn()].setBackground(drawCell[3]);
-                        }
-
-                        if (gameObject.isValidMove(slotFrom, slotLeft, turnColor)) {
-                           gameBoard[slotLeft.getRow()][slotLeft.getColumn()].setBackground(drawCell[3]);
-                        }
-
-                        if (gameObject.isValidMove(slotFrom, slotUp, turnColor)) {
-                           gameBoard[slotUp.getRow()][slotUp.getColumn()].setBackground(drawCell[3]);
-                        }
-
-                        if (gameObject.isValidMove(slotFrom, slotDown, turnColor)) {
-                           gameBoard[slotDown.getRow()][slotDown.getColumn()].setBackground(drawCell[3]);
-                        }
-
-                        rowTo = finalR;
-                        columnTo = finalC;
-                        slotTo = gameObject.boardObject.getSlot(rowTo, columnTo);
-
-                        // Verify whether or not the move made was valid according to in bounds
-                        // verification, four direction verification, and color verification (see the
-                        // makeMove and isValidMove functions in the Game class).
-                        if (!gameObject.makeMove(slotFrom, slotTo)) {
-                           AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
-                           builder.setMessage("INVALID MOVE")
-                              .setCancelable(false)
-                              .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                 public void onClick(DialogInterface dialog, int id) {
-                                    return;
-                                 }
-                              });
-
-                           AlertDialog alert = builder.create();
-                           alert.show();
-
-                           return false;
-                        }
-
-                        // If the function got here, the first move in a possible multi-jump move was
-                        // successful.
-                        gameBoard[slotFrom.getRow()][slotFrom.getColumn()].setBackground(drawCell[3]);
-
-                        String directionMoving;
-                        if (slotFrom.getRow() == slotTo.getRow()) {
-                           if (slotFrom.getColumn() - slotTo.getColumn() == -2) {
-                              directionMoving = "right";
-                           } else {
-                              directionMoving = "left";
-                           }
-                        } else {
-                           if (slotFrom.getRow() - slotTo.getRow() == -2) {
-                              directionMoving = "down";
-                           } else {
-                              directionMoving = "up";
-                           }
-                        }
-
-                        if (directionMoving == "right") {
-                           gameBoard[slotFrom.getRow()][slotFrom.getColumn() + 1].setBackground(drawCell[3]);
-                        } else if (directionMoving == "left") {
-                           gameBoard[slotFrom.getRow()][slotFrom.getColumn() - 1].setBackground(drawCell[3]);
-                        } else if (directionMoving == "down") {
-                           gameBoard[slotFrom.getRow() + 1][slotFrom.getColumn()].setBackground(drawCell[3]);
-                        } else if (directionMoving == "up") {
-                           gameBoard[slotFrom.getRow() - 1][slotFrom.getColumn()].setBackground(drawCell[3]);
-                        }
-
-                        Drawable draw;
-
-                        if (gameObject.boardObject.getSlot(slotTo.getRow(), slotTo.getColumn()).getColor() == Slot.WHITE) {
-                           draw = drawCell[2];
-                        } else {
-                           draw = drawCell[1];
-                        }
-
-                        gameBoard[slotTo.getRow()][slotTo.getColumn()].setBackground(draw);
-
-                        // If it is black's turn, add to his/her score. Then check if
-                        // the player playing white pieces can move. If not, don't switch the turns.
-                        // Then, check if black can move again. If they can, set their
-                        // successive slot to be the current slot they just moved to. This way, we can
-                        // verify that they are the same when we come back for another click. If none
-                        // of those conditions are hit, switch the turns. Do the same thing for
-                        // white.
-                        if (gameObject.playerBlack.isTurn()) {
-                           gameObject.playerBlack.addToScore();
-                           String text = "BLACK: " + gameObject.playerBlack.getScore();
-                           playerBlackScore.setText(text.trim());
-
-                           if (gameObject.canMoveAgain(slotTo, gameObject.playerBlack)) {
-                              potentialSuccessiveSlot.setRow(rowTo);
-                              potentialSuccessiveSlot.setColumn(columnTo);
-                              potentialSuccessiveSlot.setColor(Slot.BLACK);
-
-                              return false;
-                           }
-
-                           if (!gameObject.playerCanMove(gameObject.playerWhite) && gameObject.playerCanMove(gameObject.playerBlack)) {
-                              AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
-                              builder.setMessage("WHITE CANNOT MOVE")
-                                 .setCancelable(false)
-                                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                       return;
-                                    }
-                                 });
-
-                              AlertDialog alert = builder.create();
-                              alert.show();
-
-                              return false;
-                           }
-
-                           gameObject.playerWhite.setIsTurn(true);
-                           gameObject.playerBlack.setIsTurn(false);
-                        } else {
-                           gameObject.playerWhite.addToScore();
-                           String text = "WHITE: " + gameObject.playerWhite.getScore();
-                           playerWhiteScore.setText(text.trim());
-
-                           if (gameObject.canMoveAgain(slotTo, gameObject.playerWhite)) {
-                              potentialSuccessiveSlot.setRow(rowTo);
-                              potentialSuccessiveSlot.setColumn(columnTo);
-                              potentialSuccessiveSlot.setColor(Slot.WHITE);
-
-                              return false;
-                           }
-
-                           if (!gameObject.playerCanMove(gameObject.playerBlack) && gameObject.playerCanMove(gameObject.playerWhite)) {
-                              AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
-                              builder.setMessage("BLACK CANNOT MOVE")
-                                 .setCancelable(false)
-                                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                       return;
-                                    }
-                                 });
-
-                              AlertDialog alert = builder.create();
-                              alert.show();
-
-                              return false;
-                           }
-
-                           gameObject.playerWhite.setIsTurn(false);
-                           gameObject.playerBlack.setIsTurn(true);
-                        }
-
-                        return true;
-                     }
-
-                     /**
-                      * Description: Method to handle the on click event for one out of the 36 game
-                      * buttons.
-                      * Parameters: View v, which is the view object of whatever is being clicked.
-                      * Returns: Nothing.
-                      */
-
-                     @Override
-                     public void onClick(View v) {
-                        // If the simulated turn wasn't successful, go for another one.
-                        if (!simulateTurn()) {
-                           return;
-                        }
-
-                        // Set whose turn it is in the GUI.
-                        if (gameObject.playerBlack.isTurn()) {
-                           playerBlackTurn.setVisibility(View.VISIBLE);
-                           playerWhiteTurn.setVisibility(View.INVISIBLE);
-                        } else if (gameObject.playerWhite.isTurn()) {
-                           playerBlackTurn.setVisibility(View.INVISIBLE);
-                           playerWhiteTurn.setVisibility(View.VISIBLE);
-                        }
-
-                        // If the game is over, set both turn labels as invisible, because it is no
-                        // one's turn. Pop up a dialog box displaying who won or if there was a draw.
-                        // Once it is clicked, return to MainActivity.
-                        if (!gameObject.playerCanMove(gameObject.playerWhite) && !gameObject.playerCanMove(gameObject.playerBlack)) {
-                           playerBlackTurn.setVisibility(View.INVISIBLE);
-                           playerWhiteTurn.setVisibility(View.INVISIBLE);
-
-                           AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
-
-                           builder.setMessage("GAME OVER. PRESS OK TO SEE THE RESULTS.")
-                              .setCancelable(false)
-                              .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                 public void onClick(DialogInterface dialog, int id) {
-                                    Intent endIntent = new Intent(BoardActivity.this,
-                                       EndActivity.class);
-                                    endIntent.putExtra("playerBlackScore", gameObject.playerBlack.getScore());
-                                    endIntent.putExtra("playerWhiteScore", gameObject.playerWhite.getScore());
-
-                                    startActivity(endIntent);
-                                 }
-                              });
-
-                           AlertDialog alert = builder.create();
-                           alert.show();
-                        }
-                     }
-                  });
-               }
-            }
+            enableBoard();
          }
       });
    }
@@ -548,6 +145,7 @@ public class BoardActivity extends AppCompatActivity {
          LinearLayout linRow = new LinearLayout(context);
          for (int c = 0; c < MAX_COL; c++) {
             gameBoard[r][c] = new ImageButton(context);
+            gameBoard[r][c].setEnabled(false);
             if (gameObject.boardObject.getSlot(r, c).getColor() == Slot.BLACK) {
                gameBoard[r][c].setBackground(drawCell[1]);
             } else if (gameObject.boardObject.getSlot(r, c).getColor() == Slot.WHITE) {
@@ -570,5 +168,18 @@ public class BoardActivity extends AppCompatActivity {
       Resources resources = context.getResources();
       DisplayMetrics dm = resources.getDisplayMetrics();
       return dm.widthPixels;
+   }
+
+   public void enableBoard() {
+      Pair<Slot, Slot> slotPair = gameObject.removeTwoSlots();
+      gameBoard[slotPair.first.getRow()][slotPair.first.getColumn()].setBackground(drawCell[3]);
+      gameBoard[slotPair.second.getRow()][slotPair.second.getColumn()].setBackground(drawCell[3]);
+
+      for (int r = 0; r < MAX_ROW; r++) {
+         for (int c = 0; c < MAX_COL; c++) {
+            gameBoard[r][c].setEnabled(true);
+            gameBoard[r][c].setOnClickListener(new GameBoardClickListener(r, c, BoardActivity.this));
+         }
+      }
    }
 }
