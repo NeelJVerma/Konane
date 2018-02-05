@@ -1,8 +1,8 @@
 /************************************************************
  * Name: Neel Verma                                         *
- * Project: Project 1 - Two Player Konane                   *
+ * Project: Project 2 - Two Player Konane                   *
  * Class: CMPS331 - Artificial Intelligence                 *
- * Date: 2/02/2018                                          *
+ * Due Date: 2/16/2018                                      *
  ************************************************************/
 
 package com.neelverma.ai.konane.model;
@@ -33,11 +33,10 @@ import java.util.Random;
  */
 
 public class Game {
-   public Player playerBlack; // The player playing black stones.
-   public Player playerWhite; // The player playing white stones.
-   public Board boardObject; // The current game's board.
+   public Player playerBlack;
+   public Player playerWhite;
+   public Board boardObject;
 
-   // Invalid board parameters to start. These are used in move verification.
    public int rowFrom;
    public int columnFrom;
    public int rowTo;
@@ -46,7 +45,7 @@ public class Game {
    public Slot slotFrom;
    public Slot slotTo;
 
-   public boolean firstClick; // Boolean to verify if a click is the first or second.
+   public boolean firstClick;
 
    /**
     * Description: Constructor. Will initialize the current game's variables through their
@@ -61,6 +60,8 @@ public class Game {
       playerWhite = new Player(Player.WHITE);
       playerWhite.setIsTurn(false);
       boardObject = new Board();
+
+      // Set invalid parameters to start. This is used in move verification.
       rowFrom = -1;
       columnFrom = -1;
       rowTo = -1;
@@ -68,6 +69,8 @@ public class Game {
       potentialSuccessiveSlot = new Slot(Board.MAX_ROW, Board.MAX_COLUMN, 2);
       slotFrom = boardObject.getSlot(rowFrom, columnFrom);
       slotTo = boardObject.getSlot(rowTo, columnTo);
+
+      // First click is always true in the starting game state.
       firstClick = true;
    }
 
@@ -110,8 +113,10 @@ public class Game {
       // In bounds verification.
       boolean slotFromGood = ((slotFrom.getRow() < Board.MAX_ROW && slotFrom.getRow() >= Board.MIN_ROW) &&
          (slotFrom.getColumn() < Board.MAX_COLUMN && slotFrom.getColumn() >= Board.MIN_COLUMN));
+
       boolean slotToGood = ((slotTo.getRow() < Board.MAX_ROW && slotTo.getRow() >= Board.MIN_ROW) &&
          (slotTo.getColumn() < Board.MAX_COLUMN && slotTo.getColumn() >= Board.MIN_COLUMN));
+
       boolean bothSlotsPositionsGood = (slotFromGood && slotToGood);
 
       if (!bothSlotsPositionsGood) {
@@ -148,6 +153,7 @@ public class Game {
       }
 
       String directionMoving;
+
       if (slotFrom.getRow() == slotTo.getRow()) {
          if (slotFrom.getColumn() - slotTo.getColumn() == -2) {
             directionMoving = "right";
@@ -183,6 +189,7 @@ public class Game {
             return false;
          }
       }
+
       return true;
    }
 
@@ -196,6 +203,7 @@ public class Game {
    public boolean makeMove(Slot slotFrom, Slot slotTo) {
       String directionMoving;
       int color = slotFrom.getColor();
+
       if (isValidMove(slotFrom, slotTo, color)) {
          boardObject.setSlotColor(slotFrom, Slot.EMPTY);
          boardObject.setSlotColor(slotTo, color);
@@ -228,8 +236,10 @@ public class Game {
          } else {
             boardObject.setSlotColor(slotDown, Slot.EMPTY);
          }
+
          return true;
       }
+
       return false;
    }
 
@@ -242,7 +252,6 @@ public class Game {
    public boolean playerCanMove(Player playerObject) {
       for (int r = 0; r < Board.MAX_ROW; r++) {
          for (int c = 0; c < Board.MAX_COLUMN; c++) {
-            // Check all four movements.
             Slot slotFrom = boardObject.getSlot(r, c);
             Slot slotRight = boardObject.getSlot(r, c + 2);
             Slot slotLeft = boardObject.getSlot(r, c - 2);
@@ -266,6 +275,7 @@ public class Game {
             }
          }
       }
+
       return false;
    }
 

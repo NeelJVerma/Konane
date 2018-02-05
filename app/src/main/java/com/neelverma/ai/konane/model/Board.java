@@ -1,8 +1,8 @@
 /************************************************************
  * Name: Neel Verma                                         *
- * Project: Project 1 - Two Player Konane                   *
+ * Project: Project 2 - Two Player Konane                   *
  * Class: CMPS331 - Artificial Intelligence                 *
- * Date: 2/02/2018                                          *
+ * Due Date: 2/16/2018                                      *
  ************************************************************/
 
 package com.neelverma.ai.konane.model;
@@ -13,11 +13,11 @@ package com.neelverma.ai.konane.model;
  */
 
 public class Board {
-   // Symbolic constants.
    public static final int MAX_ROW = 6;
    public static final int MAX_COLUMN = 6;
    public static final int MIN_ROW = 0;
    public static final int MIN_COLUMN = 0;
+
    private Slot[][] gameBoard = new Slot[MAX_ROW][MAX_COLUMN]; // A 2D array of slots as the board.
 
    /**
@@ -29,6 +29,7 @@ public class Board {
 
    public Board() {
       int currentColor = Slot.BLACK;
+
       for (int r = 0; r < MAX_ROW; r++) {
          for (int c = 0; c < MAX_COLUMN; c++) {
             Slot currentSlot = new Slot(r, c, currentColor);

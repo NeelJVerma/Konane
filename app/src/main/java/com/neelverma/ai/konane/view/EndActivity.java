@@ -1,8 +1,8 @@
 /************************************************************
  * Name: Neel Verma                                         *
- * Project: Project 1 - Two Player Konane                   *
+ * Project: Project 2 - Two Player Konane                   *
  * Class: CMPS331 - Artificial Intelligence                 *
- * Date: 2/02/2018                                          *
+ * Due Date: 2/16/2018                                      *
  ************************************************************/
 
 package com.neelverma.ai.konane.view;
@@ -25,14 +25,6 @@ import com.neelverma.ai.konane.R;
  */
 
 public class EndActivity extends AppCompatActivity {
-
-   /**
-    * Description: Method to create the activity.
-    * Parameters: Bundle savedInstanceState, which is the state of the current activity's data. This
-    * is used so that, if need be, the activity can restore itself from its previous state.
-    * Returns: Nothing.
-    */
-
    @Override
    protected void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
@@ -46,11 +38,9 @@ public class EndActivity extends AppCompatActivity {
       int playerBlackScore = bundle.getInt("playerBlackScore");
       int playerWhiteScore = bundle.getInt("playerWhiteScore");
 
-      // Set the respective text views with the black and white scores.
       blackScoreTextView.setText(playerBlackScore + " POINTS");
       whiteScoreTextView.setText(playerWhiteScore + " POINTS");
 
-      // Display who won or if there was a draw.
       if (playerBlackScore > playerWhiteScore) {
          winnerTextView.setText("BLACK WINS!");
       } else if (playerBlackScore < playerWhiteScore) {
@@ -61,16 +51,7 @@ public class EndActivity extends AppCompatActivity {
 
       Button playAgainButton = findViewById(R.id.playAgainButton);
 
-      // If the user clicks this button, they will be sent back to the board screen to play a new
-      // game.
       playAgainButton.setOnClickListener(new View.OnClickListener() {
-
-         /**
-          * Description: Method to handle the on click event for the play again button.
-          * Parameters: View v, which is the view object of whatever is being clicked.
-          * Returns: Nothing.
-          */
-
          @Override
          public void onClick(View v) {
             Intent boardIntent = new Intent(EndActivity.this,

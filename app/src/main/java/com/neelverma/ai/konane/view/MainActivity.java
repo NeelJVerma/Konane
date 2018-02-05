@@ -1,8 +1,8 @@
 /************************************************************
  * Name: Neel Verma                                         *
- * Project: Project 1 - Two Player Konane                   *
+ * Project: Project 2 - Two Player Konane                   *
  * Class: CMPS331 - Artificial Intelligence                 *
- * Date: 2/02/2018                                          *
+ * Due Date: 2/16/2018                                      *
  ************************************************************/
 
 package com.neelverma.ai.konane.view;
@@ -25,14 +25,6 @@ import com.neelverma.ai.konane.R;
 
 
 public class MainActivity extends AppCompatActivity {
-
-   /**
-    * Description: Method to create the activity.
-    * Parameters: Bundle savedInstanceState, which is the state of the current activity's data. This
-    * is used so that, if need be, the activity can restore itself from its previous state.
-    * Returns: Nothing.
-    */
-
    @Override
    protected void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
@@ -42,13 +34,6 @@ public class MainActivity extends AppCompatActivity {
       beginButton = findViewById(R.id.beginButton);
 
       beginButton.setOnClickListener(new View.OnClickListener() {
-
-         /**
-          * Description: Method to handle the on click event for the begin button.
-          * Parameters: View v, which is the view object of whatever is being clicked.
-          * Returns: Nothing.
-          */
-
          @Override
          public void onClick(View v) {
             Intent boardIntent = new Intent(MainActivity.this,

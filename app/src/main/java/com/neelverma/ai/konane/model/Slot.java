@@ -1,8 +1,8 @@
 /************************************************************
  * Name: Neel Verma                                         *
- * Project: Project 1 - Two Player Konane                   *
+ * Project: Project 2 - Two Player Konane                   *
  * Class: CMPS331 - Artificial Intelligence                 *
- * Date: 2/02/2018                                          *
+ * Due Date: 2/16/2018                                      *
  ************************************************************/
 
 package com.neelverma.ai.konane.model;
@@ -13,11 +13,10 @@ package com.neelverma.ai.konane.model;
  */
 
 public class Slot {
-   private int row; // The row of the slot.
-   private int column; // The column of the slot.
-   private int color; // The color of the slot (black, white, or empty).
+   private int row;
+   private int column;
+   private int color;
 
-   // Symbolic constants.
    public static final int BLACK = 1;
    public static final int WHITE = -1;
    public static final int EMPTY = 0;
@@ -77,6 +76,7 @@ public class Slot {
       if (row < Board.MAX_ROW && row >= Board.MIN_ROW) {
          return row;
       }
+
       return -1;
    }
 
@@ -92,6 +92,7 @@ public class Slot {
       if (row < Board.MAX_COLUMN && column >= Board.MIN_COLUMN) {
          return column;
       }
+
       return -1;
    }
 

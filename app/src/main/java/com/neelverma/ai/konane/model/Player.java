@@ -1,8 +1,8 @@
 /************************************************************
  * Name: Neel Verma                                         *
- * Project: Project 1 - Two Player Konane                   *
+ * Project: Project 2 - Two Player Konane                   *
  * Class: CMPS331 - Artificial Intelligence                 *
- * Date: 2/02/2018                                          *
+ * Due Date: 2/16/2018                                      *
  ************************************************************/
 
 package com.neelverma.ai.konane.model;
@@ -13,11 +13,10 @@ package com.neelverma.ai.konane.model;
  */
 
 public class Player {
-   private int color; // Current player's color (black or white).
-   private boolean isTurn; // Determine if it is current players turn.
-   private int score; // Keep track of the current player's score.
+   private int color;
+   private boolean isTurn;
+   private int score;
 
-   // Symbolic constants.
    public static final int BLACK = 1;
    public static final int WHITE = -1;
 
