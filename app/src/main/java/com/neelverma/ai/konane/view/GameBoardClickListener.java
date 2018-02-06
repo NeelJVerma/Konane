@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 
+import com.neelverma.ai.konane.model.Game;
 import com.neelverma.ai.konane.model.Slot;
 
 /**
@@ -27,6 +28,7 @@ public class GameBoardClickListener implements View.OnClickListener {
    private BoardActivity boardActivity;
    private int currentRow;
    private int currentCol;
+   private Game gameObject;
    private Context context;
 
    /**
@@ -42,66 +44,74 @@ public class GameBoardClickListener implements View.OnClickListener {
       this.boardActivity = boardActivity;
       this.currentRow = currentRow;
       this.currentCol = currentCol;
+      this.gameObject = boardActivity.gameObject;
    }
 
    @Override
    public void onClick(View v) {
       context = v.getContext();
-      int turnColor = boardActivity.gameObject.playerWhite.isTurn() ? Slot.WHITE : Slot.BLACK;
 
-      if (boardActivity.gameObject.firstClick) {
-         boardActivity.gameObject.rowFrom = currentRow;
-         boardActivity.gameObject.columnFrom = currentCol;
-         boardActivity.gameObject.slotFrom = boardActivity.gameObject.boardObject.getSlot(currentRow, currentCol);
+      gameObject.turnColor = gameObject.playerWhite.isTurn() ? Slot.WHITE : Slot.BLACK;
 
-         if (boardActivity.gameObject.slotFrom.getColor() != turnColor) {
-            if (boardActivity.gameObject.slotFrom.getColor() == Slot.EMPTY) {
-               displayDialog("YOU CAN'T MOVE AN EMPTY SLOT", "passive");
-            } else {
-               displayDialog("NOT YOUR TURN", "passive");
-            }
+      if (gameObject.firstClick) {
+         processFirstClick();
+      } else {
+         processSecondClick();
+      }
+   }
 
-            return;
+   /**
+    * Description: Method to handle all first click functionality of the game.
+    * Parameters: None.
+    * Returns: Nothing.
+    */
+
+   private void processFirstClick() {
+      gameObject.slotFrom = gameObject.boardObject.getSlot(currentRow, currentCol);
+
+      if (gameObject.slotFrom.getColor() != gameObject.turnColor) {
+         if (gameObject.slotFrom.getColor() == Slot.EMPTY) {
+            displayDialog("YOU CAN'T MOVE AN EMPTY SLOT", "passive");
+         } else {
+            displayDialog("NOT YOUR TURN", "passive");
          }
-
-         if (boardActivity.gameObject.playerBlack.isTurn()) {
-            if ((boardActivity.gameObject.canMoveAgain(boardActivity.gameObject.potentialSuccessiveSlot, boardActivity.gameObject.playerBlack)) &&
-               (!boardActivity.gameObject.verifySuccessiveMove(boardActivity.gameObject.slotFrom, boardActivity.gameObject.potentialSuccessiveSlot))) {
-               displayDialog("YOU MUST START FROM THE POSITION YOU ENDED ON", "passive");
-
-               return;
-            }
-         }
-
-         if (boardActivity.gameObject.playerWhite.isTurn()) {
-            if ((boardActivity.gameObject.canMoveAgain(boardActivity.gameObject.potentialSuccessiveSlot, boardActivity.gameObject.playerWhite)) &&
-               (!boardActivity.gameObject.verifySuccessiveMove(boardActivity.gameObject.slotFrom, boardActivity.gameObject.potentialSuccessiveSlot))) {
-               displayDialog("YOU MUST START FROM THE POSITION YOU ENDED ON", "passive");
-
-               return;
-            }
-         }
-
-         if (!drawPotentialMoves(turnColor, boardActivity.drawCell[0])) {
-            displayDialog("THIS PIECE CAN'T MOVE", "passive");
-
-            return;
-         }
-
-         boardActivity.gameObject.firstClick = false;
 
          return;
       }
 
-      boardActivity.gameObject.firstClick = true;
+      if (gameObject.successiveMove) {
+         if ((gameObject.canMoveAgain(gameObject.potentialSuccessiveSlot, gameObject.turnColor)) &&
+            (!gameObject.verifySuccessiveMove(gameObject.slotFrom, gameObject.potentialSuccessiveSlot))) {
+            displayDialog("YOU MUST START FROM THE POSITION YOU ENDED ON", "passive");
+            return;
+         }
+      }
 
-      drawPotentialMoves(turnColor, boardActivity.drawCell[3]);
+      if (!drawPotentialMoves(gameObject.turnColor, boardActivity.drawCell[0])) {
+         displayDialog("THIS PIECE CAN'T MOVE", "passive");
 
-      boardActivity.gameObject.rowTo = currentRow;
-      boardActivity.gameObject.columnTo = currentCol;
-      boardActivity.gameObject.slotTo = boardActivity.gameObject.boardObject.getSlot(currentRow, currentCol);
+         return;
+      }
 
-      if (!boardActivity.gameObject.makeMove(boardActivity.gameObject.slotFrom, boardActivity.gameObject.slotTo)) {
+      gameObject.firstClick = false;
+   }
+
+   /**
+    * Description: Method to handle all second click functionality of the game.
+    * Parameters: None.
+    * Returns: Nothing.
+    */
+
+   private void processSecondClick() {
+      gameObject.firstClick = true;
+      gameObject.potentialSuccessiveSlot.setRow(currentRow);
+      gameObject.potentialSuccessiveSlot.setColumn(currentCol);
+
+      drawPotentialMoves(gameObject.turnColor, boardActivity.drawCell[3]);
+
+      gameObject.slotTo = gameObject.boardObject.getSlot(currentRow, currentCol);
+
+      if (!gameObject.makeMove(gameObject.slotFrom, gameObject.slotTo)) {
          displayDialog("INVALID MOVE", "passive");
 
          return;
@@ -113,7 +123,7 @@ public class GameBoardClickListener implements View.OnClickListener {
          return;
       }
 
-      if (boardActivity.gameObject.playerBlack.isTurn()) {
+      if (gameObject.playerBlack.isTurn()) {
          boardActivity.playerBlackTurn.setVisibility(View.VISIBLE);
          boardActivity.playerWhiteTurn.setVisibility(View.INVISIBLE);
       } else {
@@ -121,8 +131,12 @@ public class GameBoardClickListener implements View.OnClickListener {
          boardActivity.playerWhiteTurn.setVisibility(View.VISIBLE);
       }
 
-      if (!boardActivity.gameObject.playerCanMove(boardActivity.gameObject.playerWhite) && !boardActivity.gameObject.playerCanMove(boardActivity.gameObject.playerBlack)) {
+      if (!gameObject.playerCanMove(gameObject.playerWhite) && !gameObject.playerCanMove(gameObject.playerBlack)) {
          displayDialog("GAME OVER. PRESS OK TO SEE THE RESULTS.", "end");
+      }
+
+      if (gameObject.canMoveAgain(gameObject.slotTo, gameObject.turnColor)) {
+         showOptionDialog("WOULD YOU LIKE TO CONTINUE YOUR TURN?");
       }
    }
 
@@ -133,50 +147,34 @@ public class GameBoardClickListener implements View.OnClickListener {
     */
 
    private boolean switchTurns() {
-      if (boardActivity.gameObject.playerBlack.isTurn()) {
-         boardActivity.gameObject.playerBlack.addToScore();
+      if (gameObject.playerBlack.isTurn()) {
+         gameObject.playerBlack.addToScore();
          String text = "BLACK: " + boardActivity.gameObject.playerBlack.getScore();
          boardActivity.playerBlackScore.setText(text.trim());
 
-         if (boardActivity.gameObject.canMoveAgain(boardActivity.gameObject.slotTo, boardActivity.gameObject.playerBlack)) {
-            boardActivity.gameObject.potentialSuccessiveSlot.setRow(boardActivity.gameObject.rowTo);
-            boardActivity.gameObject.potentialSuccessiveSlot.setColumn(boardActivity.gameObject.columnTo);
-            boardActivity.gameObject.potentialSuccessiveSlot.setColor(Slot.BLACK);
-
-            return false;
-         }
-
-         if (!boardActivity.gameObject.playerCanMove(boardActivity.gameObject.playerWhite) && boardActivity.gameObject.playerCanMove(boardActivity.gameObject.playerBlack)) {
+         if (!gameObject.playerCanMove(gameObject.playerWhite) && gameObject.playerCanMove(gameObject.playerBlack)) {
             displayDialog("WHITE CAN'T MOVE", "passive");
 
             return false;
          }
 
-         boardActivity.gameObject.playerWhite.setIsTurn(true);
-         boardActivity.gameObject.playerBlack.setIsTurn(false);
+         gameObject.playerWhite.setIsTurn(true);
+         gameObject.playerBlack.setIsTurn(false);
 
          return true;
       } else {
-         boardActivity.gameObject.playerWhite.addToScore();
+         gameObject.playerWhite.addToScore();
          String text = "WHITE: " + boardActivity.gameObject.playerWhite.getScore();
          boardActivity.playerWhiteScore.setText(text.trim());
 
-         if (boardActivity.gameObject.canMoveAgain(boardActivity.gameObject.slotTo, boardActivity.gameObject.playerWhite)) {
-            boardActivity.gameObject.potentialSuccessiveSlot.setRow(boardActivity.gameObject.rowTo);
-            boardActivity.gameObject.potentialSuccessiveSlot.setColumn(boardActivity.gameObject.columnTo);
-            boardActivity.gameObject.potentialSuccessiveSlot.setColor(Slot.WHITE);
-
-            return false;
-         }
-
-         if (!boardActivity.gameObject.playerCanMove(boardActivity.gameObject.playerBlack) && boardActivity.gameObject.playerCanMove(boardActivity.gameObject.playerWhite)) {
+         if (!gameObject.playerCanMove(gameObject.playerBlack) && gameObject.playerCanMove(gameObject.playerWhite)) {
             displayDialog("BLACK CAN'T MOVE", "passive");
 
             return false;
          }
 
-         boardActivity.gameObject.playerWhite.setIsTurn(false);
-         boardActivity.gameObject.playerBlack.setIsTurn(true);
+         gameObject.playerWhite.setIsTurn(false);
+         gameObject.playerBlack.setIsTurn(true);
 
          return true;
       }
@@ -197,12 +195,13 @@ public class GameBoardClickListener implements View.OnClickListener {
       builder.setMessage(alertMessage)
          .setCancelable(false)
          .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
             public void onClick(DialogInterface dialog, int id) {
                if (type == "end") {
                   Intent endIntent = new Intent(boardActivity,
                      EndActivity.class);
-                  endIntent.putExtra("playerBlackScore", boardActivity.gameObject.playerBlack.getScore());
-                  endIntent.putExtra("playerWhiteScore", boardActivity.gameObject.playerWhite.getScore());
+                  endIntent.putExtra("playerBlackScore", gameObject.playerBlack.getScore());
+                  endIntent.putExtra("playerWhiteScore", gameObject.playerWhite.getScore());
 
                   context.startActivity(endIntent);
                }
@@ -221,17 +220,17 @@ public class GameBoardClickListener implements View.OnClickListener {
     */
 
    private void drawMoveSlots() {
-      boardActivity.gameBoard[boardActivity.gameObject.slotFrom.getRow()][boardActivity.gameObject.slotFrom.getColumn()].setBackground(boardActivity.drawCell[3]);
+      boardActivity.gameBoard[gameObject.slotFrom.getRow()][gameObject.slotFrom.getColumn()].setBackground(boardActivity.drawCell[3]);
       String directionMoving;
 
-      if (boardActivity.gameObject.slotFrom.getRow() == boardActivity.gameObject.slotTo.getRow()) {
-         if (boardActivity.gameObject.slotFrom.getColumn() - boardActivity.gameObject.slotTo.getColumn() == -2) {
+      if (gameObject.slotFrom.getRow() == gameObject.slotTo.getRow()) {
+         if (gameObject.slotFrom.getColumn() - gameObject.slotTo.getColumn() == -2) {
             directionMoving = "right";
          } else {
             directionMoving = "left";
          }
       } else {
-         if (boardActivity.gameObject.slotFrom.getRow() - boardActivity.gameObject.slotTo.getRow() == -2) {
+         if (gameObject.slotFrom.getRow() - gameObject.slotTo.getRow() == -2) {
             directionMoving = "down";
          } else {
             directionMoving = "up";
@@ -239,24 +238,24 @@ public class GameBoardClickListener implements View.OnClickListener {
       }
 
       if (directionMoving == "right") {
-         boardActivity.gameBoard[boardActivity.gameObject.slotFrom.getRow()][boardActivity.gameObject.slotFrom.getColumn() + 1].setBackground(boardActivity.drawCell[3]);
+         boardActivity.gameBoard[gameObject.slotFrom.getRow()][gameObject.slotFrom.getColumn() + 1].setBackground(boardActivity.drawCell[3]);
       } else if (directionMoving == "left") {
-         boardActivity.gameBoard[boardActivity.gameObject.slotFrom.getRow()][boardActivity.gameObject.slotFrom.getColumn() - 1].setBackground(boardActivity.drawCell[3]);
+         boardActivity.gameBoard[gameObject.slotFrom.getRow()][gameObject.slotFrom.getColumn() - 1].setBackground(boardActivity.drawCell[3]);
       } else if (directionMoving == "down") {
-         boardActivity.gameBoard[boardActivity.gameObject.slotFrom.getRow() + 1][boardActivity.gameObject.slotFrom.getColumn()].setBackground(boardActivity.drawCell[3]);
+         boardActivity.gameBoard[gameObject.slotFrom.getRow() + 1][gameObject.slotFrom.getColumn()].setBackground(boardActivity.drawCell[3]);
       } else if (directionMoving == "up") {
-         boardActivity.gameBoard[boardActivity.gameObject.slotFrom.getRow() - 1][boardActivity.gameObject.slotFrom.getColumn()].setBackground(boardActivity.drawCell[3]);
+         boardActivity.gameBoard[gameObject.slotFrom.getRow() - 1][gameObject.slotFrom.getColumn()].setBackground(boardActivity.drawCell[3]);
       }
 
       Drawable draw;
 
-      if (boardActivity.gameObject.boardObject.getSlot(boardActivity.gameObject.slotTo.getRow(), boardActivity.gameObject.slotTo.getColumn()).getColor() == Slot.WHITE) {
+      if (gameObject.boardObject.getSlot(gameObject.slotTo.getRow(), gameObject.slotTo.getColumn()).getColor() == Slot.WHITE) {
          draw = boardActivity.drawCell[2];
       } else {
          draw = boardActivity.drawCell[1];
       }
 
-      boardActivity.gameBoard[boardActivity.gameObject.slotTo.getRow()][boardActivity.gameObject.slotTo.getColumn()].setBackground(draw);
+      boardActivity.gameBoard[gameObject.slotTo.getRow()][gameObject.slotTo.getColumn()].setBackground(draw);
    }
 
    /**
@@ -268,32 +267,50 @@ public class GameBoardClickListener implements View.OnClickListener {
     */
 
    private boolean drawPotentialMoves(int turnColor, Drawable drawCell) {
-      Slot slotRight = boardActivity.gameObject.boardObject.getSlot(boardActivity.gameObject.slotFrom.getRow(), boardActivity.gameObject.slotFrom.getColumn() + 2);
-      Slot slotLeft = boardActivity.gameObject.boardObject.getSlot(boardActivity.gameObject.slotFrom.getRow(), boardActivity.gameObject.slotFrom.getColumn() - 2);
-      Slot slotUp = boardActivity.gameObject.boardObject.getSlot(boardActivity.gameObject.slotFrom.getRow() + 2, boardActivity.gameObject.slotFrom.getColumn());
-      Slot slotDown = boardActivity.gameObject.boardObject.getSlot(boardActivity.gameObject.slotFrom.getRow() - 2, boardActivity.gameObject.slotFrom.getColumn());
+      Slot slotRight = gameObject.boardObject.getSlot(gameObject.slotFrom.getRow(), gameObject.slotFrom.getColumn() + 2);
+      Slot slotLeft = gameObject.boardObject.getSlot(gameObject.slotFrom.getRow(), gameObject.slotFrom.getColumn() - 2);
+      Slot slotUp = gameObject.boardObject.getSlot(gameObject.slotFrom.getRow() + 2, gameObject.slotFrom.getColumn());
+      Slot slotDown = gameObject.boardObject.getSlot(gameObject.slotFrom.getRow() - 2, gameObject.slotFrom.getColumn());
       boolean pieceCanMove = false;
 
-      if (boardActivity.gameObject.isValidMove(boardActivity.gameObject.slotFrom, slotRight, turnColor)) {
+      if (gameObject.isValidMove(gameObject.slotFrom, slotRight, turnColor)) {
          boardActivity.gameBoard[slotRight.getRow()][slotRight.getColumn()].setBackground(drawCell);
          pieceCanMove = true;
       }
 
-      if (boardActivity.gameObject.isValidMove(boardActivity.gameObject.slotFrom, slotLeft, turnColor)) {
+      if (gameObject.isValidMove(gameObject.slotFrom, slotLeft, turnColor)) {
          boardActivity.gameBoard[slotLeft.getRow()][slotLeft.getColumn()].setBackground(drawCell);
          pieceCanMove = true;
       }
 
-      if (boardActivity.gameObject.isValidMove(boardActivity.gameObject.slotFrom, slotUp, turnColor)) {
+      if (gameObject.isValidMove(gameObject.slotFrom, slotUp, turnColor)) {
          boardActivity.gameBoard[slotUp.getRow()][slotUp.getColumn()].setBackground(drawCell);
          pieceCanMove = true;
       }
 
-      if (boardActivity.gameObject.isValidMove(boardActivity.gameObject.slotFrom, slotDown, turnColor)) {
+      if (gameObject.isValidMove(gameObject.slotFrom, slotDown, turnColor)) {
          boardActivity.gameBoard[slotDown.getRow()][slotDown.getColumn()].setBackground(drawCell);
          pieceCanMove = true;
       }
 
       return pieceCanMove;
+   }
+
+   /**
+    * Description: Method to display a dialog message asking whether the user wants to move again.
+    * Parameters: String alertMessage, which is the message to set the alert with.
+    * Returns: Nothing.
+    */
+
+   private void showOptionDialog(String alertMessage) {
+      AlertDialog.Builder builder = new AlertDialog.Builder(boardActivity);
+
+      builder.setMessage(alertMessage)
+         .setCancelable(false)
+         .setPositiveButton("YES", new OptionDialog(boardActivity, true))
+         .setNegativeButton("NO", new OptionDialog(boardActivity, false));
+
+      AlertDialog alert = builder.create();
+      alert.show();
    }
 }

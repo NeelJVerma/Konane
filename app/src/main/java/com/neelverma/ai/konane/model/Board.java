@@ -77,6 +77,7 @@ public class Board {
       if ((row < MAX_ROW && row >= MIN_ROW) && (column < MAX_COLUMN && column >= MIN_COLUMN)) {
          return gameBoard[row][column];
       }
+
       Slot ret = new Slot(MAX_ROW, MAX_COLUMN, 2);
       return ret;
    }

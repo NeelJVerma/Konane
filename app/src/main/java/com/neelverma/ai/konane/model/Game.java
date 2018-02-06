@@ -12,7 +12,7 @@ import java.util.Random;
 
 
 /**
- * Class to play the game and execute all the game logic.
+ * Class to play the game and execute all the game logic. It always holds the state of the game.
  * Created by Neel on 01/20/2018.
  *
  * GAME LOGIC:
@@ -37,15 +37,13 @@ public class Game {
    public Player playerWhite;
    public Board boardObject;
 
-   public int rowFrom;
-   public int columnFrom;
-   public int rowTo;
-   public int columnTo;
    public Slot potentialSuccessiveSlot;
    public Slot slotFrom;
    public Slot slotTo;
 
    public boolean firstClick;
+   public boolean successiveMove;
+   public int turnColor;
 
    /**
     * Description: Constructor. Will initialize the current game's variables through their
@@ -62,16 +60,15 @@ public class Game {
       boardObject = new Board();
 
       // Set invalid parameters to start. This is used in move verification.
-      rowFrom = -1;
-      columnFrom = -1;
-      rowTo = -1;
-      columnTo = -1;
       potentialSuccessiveSlot = new Slot(Board.MAX_ROW, Board.MAX_COLUMN, 2);
-      slotFrom = boardObject.getSlot(rowFrom, columnFrom);
-      slotTo = boardObject.getSlot(rowTo, columnTo);
+      slotFrom = boardObject.getSlot(-1, -1);
+      slotTo = boardObject.getSlot(-1, -1);
 
       // First click is always true in the starting game state.
       firstClick = true;
+
+      successiveMove = false;
+      turnColor = Slot.BLACK;
    }
 
    /**
@@ -282,20 +279,20 @@ public class Game {
    /**
     * Description: Method to check whether or not a player can move again.
     * Parameters: Slot slotFrom, which is the slot to move from.
-    *             Player playerObject, which is the player that can move again or not.
+    *             int turnColor, which is the color the current player is playing.
     * Returns: Whether or not the player can move again.
     */
 
-   public boolean canMoveAgain(Slot slotFrom, Player playerObject) {
+   public boolean canMoveAgain(Slot slotFrom, int turnColor) {
       Slot slotRight = boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() + 2);
       Slot slotLeft = boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() - 2);
       Slot slotUp = boardObject.getSlot(slotFrom.getRow() + 2, slotFrom.getColumn());
       Slot slotDown = boardObject.getSlot(slotFrom.getRow() - 2, slotFrom.getColumn());
 
-      return ((isValidMove(slotFrom, slotRight, playerObject.getColor())) ||
-         (isValidMove(slotFrom, slotLeft, playerObject.getColor())) ||
-         (isValidMove(slotFrom, slotUp, playerObject.getColor())) ||
-         (isValidMove(slotFrom, slotDown, playerObject.getColor())));
+      return ((isValidMove(slotFrom, slotRight, turnColor)) ||
+         (isValidMove(slotFrom, slotLeft, turnColor)) ||
+         (isValidMove(slotFrom, slotUp, turnColor)) ||
+         (isValidMove(slotFrom, slotDown, turnColor)));
    }
 
    /**

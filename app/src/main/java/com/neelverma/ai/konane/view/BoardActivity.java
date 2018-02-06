@@ -156,6 +156,12 @@ public class BoardActivity extends AppCompatActivity {
       return dm.widthPixels;
    }
 
+   /**
+    * Description: Method to enable the game board for playing.
+    * Parameters: None.
+    * Returns: Nothing.
+    */
+
    public void enableBoard() {
       Pair<Slot, Slot> slotPair = gameObject.removeTwoSlots();
       gameBoard[slotPair.first.getRow()][slotPair.first.getColumn()].setBackground(drawCell[3]);
