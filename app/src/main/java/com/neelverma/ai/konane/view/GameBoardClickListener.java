@@ -50,8 +50,9 @@ public class GameBoardClickListener implements View.OnClickListener {
    @Override
    public void onClick(View v) {
       context = v.getContext();
-
       gameObject.turnColor = gameObject.playerWhite.isTurn() ? Slot.WHITE : Slot.BLACK;
+
+      System.out.println(gameObject.potentialSuccessiveSlot.getRow() + "x" + gameObject.potentialSuccessiveSlot.getColumn());
 
       if (gameObject.firstClick) {
          processFirstClick();
@@ -104,8 +105,6 @@ public class GameBoardClickListener implements View.OnClickListener {
 
    private void processSecondClick() {
       gameObject.firstClick = true;
-      gameObject.potentialSuccessiveSlot.setRow(currentRow);
-      gameObject.potentialSuccessiveSlot.setColumn(currentCol);
 
       drawPotentialMoves(gameObject.turnColor, boardActivity.drawCell[3]);
 
@@ -151,6 +150,8 @@ public class GameBoardClickListener implements View.OnClickListener {
          gameObject.playerBlack.addToScore();
          String text = "BLACK: " + boardActivity.gameObject.playerBlack.getScore();
          boardActivity.playerBlackScore.setText(text.trim());
+         gameObject.potentialSuccessiveSlot.setRow(currentRow);
+         gameObject.potentialSuccessiveSlot.setColumn(currentCol);
 
          if (!gameObject.playerCanMove(gameObject.playerWhite) && gameObject.playerCanMove(gameObject.playerBlack)) {
             displayDialog("WHITE CAN'T MOVE", "passive");
@@ -166,6 +167,8 @@ public class GameBoardClickListener implements View.OnClickListener {
          gameObject.playerWhite.addToScore();
          String text = "WHITE: " + boardActivity.gameObject.playerWhite.getScore();
          boardActivity.playerWhiteScore.setText(text.trim());
+         gameObject.potentialSuccessiveSlot.setRow(currentRow);
+         gameObject.potentialSuccessiveSlot.setColumn(currentCol);
 
          if (!gameObject.playerCanMove(gameObject.playerBlack) && gameObject.playerCanMove(gameObject.playerWhite)) {
             displayDialog("BLACK CAN'T MOVE", "passive");
