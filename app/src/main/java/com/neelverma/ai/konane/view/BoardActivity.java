@@ -128,7 +128,7 @@ public class BoardActivity extends AppCompatActivity {
     */
 
    private void drawBoardGame() {
-      int sizeOfCell = Math.round(screenWidth() / (MAX_ROW + 1)) - 20;
+      int sizeOfCell = Math.round(screenWidth() / (MAX_ROW + 1)) - 15;
       LinearLayout.LayoutParams lpRow = new LinearLayout.LayoutParams(sizeOfCell * (MAX_ROW + 1), sizeOfCell);
       LinearLayout.LayoutParams lpCell = new LinearLayout.LayoutParams(sizeOfCell, sizeOfCell);
       LinearLayout boardLayout = findViewById(R.id.boardLayout);
@@ -139,10 +139,6 @@ public class BoardActivity extends AppCompatActivity {
          for (int c = 0; c < MAX_COL + 1; c++) {
             gameBoard[r][c] = new ImageButton(context);
             gameBoard[r][c].setEnabled(false);
-
-            if (c == 6) {
-               gameBoard[r][c].setBackground(drawCell[2]);
-            }
 
             if (gameObject.boardObject.getSlot(r, c).getColor() == Slot.BLACK) {
                gameBoard[r][c].setBackground(drawCell[1]);
@@ -182,6 +178,13 @@ public class BoardActivity extends AppCompatActivity {
 
       return dm.widthPixels;
    }
+
+   /**
+    * Description: Method to remove two slots from the board GUI. This is essentially a wrapper for the
+    * Game.removeTwoSlots method.
+    * Parameters: None.
+    * Returns: Nothing.
+    */
 
    private void removeTwoSlots() {
       Pair<Slot, Slot> slotPair = gameObject.removeTwoSlots();

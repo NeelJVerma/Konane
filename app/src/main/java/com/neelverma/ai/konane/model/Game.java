@@ -350,8 +350,13 @@ public class Game {
          }
 
          String nextPlayer = playerWhite.isTurn() ? "White" : "Black";
+         String successiveMoveCheck = successiveMove ? "Yes" : "No";
+         String potentialSuccessiveSlotCheck = Integer.toString(potentialSuccessiveSlot.getRow()) + " " +
+            Integer.toString(potentialSuccessiveSlot.getColumn());
 
          writer.println("Next player: " + nextPlayer);
+         writer.println("Successive move: " + successiveMoveCheck);
+         writer.println("Potential successive slot: " + potentialSuccessiveSlotCheck);
          writer.close();
       } catch(Exception e) {
          e.printStackTrace();
@@ -370,6 +375,8 @@ public class Game {
       int whiteScore = 0;
       int blackScore = 0;
       String turn = "black";
+      String successiveMoveCheck = "No";
+      String potentialSuccessiveSlotCheck = "0 0";
 
       try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath))) {
          String line;
@@ -392,6 +399,10 @@ public class Game {
                }
             } else if (lineCounter == 9) {
                turn = line.substring(13);
+            } else if (lineCounter == 10) {
+               successiveMoveCheck = line.substring(17);
+            } else if (lineCounter == 11) {
+               potentialSuccessiveSlotCheck = line.substring(27);
             }
 
             lineCounter++;
@@ -409,6 +420,18 @@ public class Game {
       } else {
          playerBlack.setIsTurn(true);
          playerWhite.setIsTurn(false);
+      }
+
+      if (successiveMoveCheck.equals("Yes")) {
+         successiveMove = true;
+         int spaceIndex = potentialSuccessiveSlotCheck.indexOf(" ");
+         int row = Integer.parseInt(potentialSuccessiveSlotCheck.substring(0, spaceIndex));
+         int column = Integer.parseInt(potentialSuccessiveSlotCheck.substring(spaceIndex + 1));
+
+         potentialSuccessiveSlot.setRow(row);
+         potentialSuccessiveSlot.setColumn(column);
+      } else {
+         successiveMove = false;
       }
    }
 }
