@@ -8,7 +8,7 @@
         </shape>
     </item>
     <item
-        android:width= "22dp" android:height="22dp" android:top="20dp"
+        android:width= "12dp" android:height="12dp" android:top="20dp"
         android:bottom="20dp" android:left="20dp" android:right="20dp">
         <shape android:shape="oval">
             <gradient

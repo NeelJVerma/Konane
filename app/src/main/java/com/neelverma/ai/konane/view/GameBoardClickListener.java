@@ -52,8 +52,6 @@ public class GameBoardClickListener implements View.OnClickListener {
       context = v.getContext();
       gameObject.turnColor = gameObject.playerWhite.isTurn() ? Slot.WHITE : Slot.BLACK;
 
-      System.out.println(gameObject.potentialSuccessiveSlot.getRow() + "x" + gameObject.potentialSuccessiveSlot.getColumn());
-
       if (gameObject.firstClick) {
          processFirstClick();
       } else {

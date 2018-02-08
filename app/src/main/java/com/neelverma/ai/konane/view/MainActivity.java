@@ -6,13 +6,18 @@
  ************************************************************/
 
 package com.neelverma.ai.konane.view;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
 import com.neelverma.ai.konane.R;
+
+import java.io.File;
 
 /**
  * Class to hold the beginning screen of the app.
@@ -30,14 +35,40 @@ public class MainActivity extends AppCompatActivity {
       super.onCreate(savedInstanceState);
       setContentView(R.layout.activity_main);
 
-      Button beginButton;
-      beginButton = findViewById(R.id.beginButton);
+      Button beginButton = findViewById(R.id.beginButton);
 
       beginButton.setOnClickListener(new View.OnClickListener() {
          @Override
          public void onClick(View v) {
+            SaveGameClickListener.setFilePath(null);
             Intent boardIntent = new Intent(MainActivity.this,
                BoardActivity.class);
+            boardIntent.putExtra("gameType", BoardActivity.NEW_GAME);
+            startActivity(boardIntent);
+         }
+      });
+
+      Button loadGameButton = findViewById(R.id.loadGameButton);
+
+      loadGameButton.setOnClickListener(new View.OnClickListener() {
+         @Override
+         public void onClick(View v) {
+            Intent boardIntent = new Intent(MainActivity.this,
+               BoardActivity.class);
+
+            int gameState = SaveGameClickListener.getFilePath() == null ? BoardActivity.NEW_GAME : BoardActivity.LOADED_GAME;
+
+            if (gameState == BoardActivity.NEW_GAME) {
+               final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+               builder.setMessage("NO SAVE FILES. NEW GAME BEING LOADED.")
+                  .setCancelable(true);
+
+               AlertDialog alert = builder.create();
+               alert.show();
+            }
+
+            boardIntent.putExtra("gameType", gameState);
             startActivity(boardIntent);
          }
       });

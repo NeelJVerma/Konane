@@ -54,8 +54,9 @@ public class EndActivity extends AppCompatActivity {
       playAgainButton.setOnClickListener(new View.OnClickListener() {
          @Override
          public void onClick(View v) {
+            SaveGameClickListener.setFilePath(null);
             Intent boardIntent = new Intent(EndActivity.this,
-               BoardActivity.class);
+               MainActivity.class);
             startActivity(boardIntent);
          }
       });

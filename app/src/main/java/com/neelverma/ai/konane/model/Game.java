@@ -6,8 +6,13 @@
  ************************************************************/
 
 package com.neelverma.ai.konane.model;
+import android.content.Context;
 import android.util.Pair;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.PrintWriter;
 import java.util.Random;
 
 
@@ -306,5 +311,104 @@ public class Game {
    public boolean verifySuccessiveMove(Slot potentialSlotFrom, Slot slotFrom) {
       return ((slotFrom.getRow() == potentialSlotFrom.getRow()) &&
          (slotFrom.getColumn() == potentialSlotFrom.getColumn()));
+   }
+
+   /**
+    * Description: Method to save the game state.
+    * Parameters: String fileName, which is the name of the file to create/write.
+    *             Context context, which is the context in which to look for internal storage
+    *             directories.
+    * Returns: The name of the full path to the file.
+    */
+
+   public String saveGame(String fileName, Context context) {
+      File file = new File(context.getFilesDir(),"saved_games");
+
+      if(!file.exists()){
+         file.mkdir();
+      }
+
+      File saveFile = new File(file, fileName);
+
+      try {
+         PrintWriter writer = new PrintWriter(saveFile.getAbsolutePath(), "UTF-8");
+         writer.println("Black: " + playerBlack.getScore());
+         writer.println("White: " + playerWhite.getScore());
+         writer.println("Board:");
+
+         for (int r = 0; r < boardObject.MAX_ROW; r++) {
+            for (int c = 0; c < boardObject.MAX_COLUMN; c++) {
+               if (boardObject.getSlot(r, c).getColor() == Slot.BLACK) {
+                  writer.print("B ");
+               } else if (boardObject.getSlot(r, c).getColor() == Slot.WHITE) {
+                  writer.print("W ");
+               } else {
+                  writer.print("O ");
+               }
+            }
+            writer.println();
+         }
+
+         String nextPlayer = playerWhite.isTurn() ? "White" : "Black";
+
+         writer.println("Next player: " + nextPlayer);
+         writer.close();
+      } catch(Exception e) {
+         e.printStackTrace();
+      }
+
+      return saveFile.getAbsolutePath();
+   }
+
+   /**
+    * Description: Method to set the game state.
+    * Parameters: String filePath, which is the full path of the file that contains the game state.
+    * Returns: Nothing.
+    */
+
+   public void setGameFromState(String filePath) {
+      int whiteScore = 0;
+      int blackScore = 0;
+      String turn = "black";
+
+      try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath))) {
+         String line;
+         int lineCounter = 0;
+
+         while ((line = bufferedReader.readLine()) != null) {
+            if (lineCounter == 0) {
+               blackScore = Integer.parseInt(line.substring(7));
+            } else if (lineCounter == 1) {
+               whiteScore = Integer.parseInt(line.substring(7));
+            } else if (lineCounter >= 3 && lineCounter <= 8) {
+               for (int c = 0; c < line.length(); c += 2) {
+                  if (line.charAt(c) == 'B') {
+                     boardObject.setSlotColor(boardObject.getSlot(lineCounter - 3, c / 2), Slot.BLACK);
+                  } else if (line.charAt(c) == 'W') {
+                     boardObject.setSlotColor(boardObject.getSlot(lineCounter - 3, c / 2), Slot.WHITE);
+                  } else if (line.charAt(c) == 'O') {
+                     boardObject.setSlotColor(boardObject.getSlot(lineCounter - 3, c / 2), Slot.EMPTY);
+                  }
+               }
+            } else if (lineCounter == 9) {
+               turn = line.substring(13);
+            }
+
+            lineCounter++;
+         }
+      } catch(Exception e) {
+         e.printStackTrace();
+      }
+
+      playerWhite.setScore(whiteScore);
+      playerBlack.setScore(blackScore);
+
+      if (turn.equals("White")) {
+         playerWhite.setIsTurn(true);
+         playerBlack.setIsTurn(false);
+      } else {
+         playerBlack.setIsTurn(true);
+         playerWhite.setIsTurn(false);
+      }
    }
 }

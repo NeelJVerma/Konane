@@ -84,4 +84,14 @@ public class Player {
    public int getScore() {
       return score;
    }
+
+   /**
+    * Description: A method to set the score of the current player.
+    * Parameters: int score, the score to set.
+    * Returns: Nothing.
+    */
+
+   public void setScore(int score) {
+      this.score = score;
+   }
 }

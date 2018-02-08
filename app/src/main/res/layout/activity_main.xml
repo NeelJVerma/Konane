@@ -20,4 +20,18 @@
         android:textColor="#4b76ad"
         android:textScaleX="2"
         android:textSize="20dp" />
+
+    <Button
+        android:id="@+id/loadGameButton"
+        style="@style/Widget.AppCompat.Button.Small"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignStart="@+id/beginButton"
+        android:layout_marginBottom="11dp"
+        android:fontFamily="@font/bamboo"
+        android:text="Load"
+        android:textColor="#4b76ad"
+        android:textScaleX="2"
+        android:textSize="20dp" />
 </RelativeLayout>

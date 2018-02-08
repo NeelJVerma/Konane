@@ -50,11 +50,16 @@ import com.neelverma.ai.konane.model.Slot;
 public class BoardActivity extends AppCompatActivity {
    public static final int MAX_ROW = 6;
    public static final int MAX_COL = 6;
+   public static final int NEW_GAME = 0;
+   public static final int LOADED_GAME = 1;
 
-   public ImageButton[][] gameBoard = new ImageButton[MAX_ROW][MAX_COL];
+   // MAX_ROW + 1 and MAX_COL + 1 to put in labels for rows and columns.
+   public ImageButton[][] gameBoard = new ImageButton[MAX_ROW + 1][MAX_COL + 1];
    public Context context;
-   public Drawable drawCell[] = new Drawable[4];
+   public Drawable drawCell[] = new Drawable[5];
+   public Drawable drawNumbers[] = new Drawable[6];
    public Game gameObject = new Game();
+   public int gameType;
 
    public TextView playerBlackScore;
    public TextView playerWhiteScore;
@@ -62,39 +67,37 @@ public class BoardActivity extends AppCompatActivity {
    public TextView playerWhiteTurn;
 
    @Override
-   protected void onCreate(Bundle savedInstanceState) {
+   protected void onCreate(final Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
       setContentView(R.layout.activity_board);
       context = this;
 
+      Bundle bundle = getIntent().getExtras();
+      gameType = bundle.getInt("gameType");
+
       loadResources();
-      drawBoardGame();
 
       Button removeButton;
       removeButton = findViewById(R.id.removeButton);
 
-      removeButton.setOnClickListener(new View.OnClickListener() {
-         @Override
-         public void onClick(View v) {
-            Button button = (Button) v;
-            button.setVisibility(View.GONE);
+      if (gameType == LOADED_GAME) {
+         removeButton.setVisibility(View.GONE);
+         gameObject.setGameFromState(SaveGameClickListener.getFilePath());
+         drawBoardGame();
+         startGame();
+      } else {
+         drawBoardGame();
+         removeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               Button button = (Button) v;
+               button.setVisibility(View.GONE);
 
-            playerBlackScore = findViewById(R.id.playerBlackScore);
-            playerWhiteScore = findViewById(R.id.playerWhiteScore);
-            playerBlackTurn = findViewById(R.id.playerBlackTurn);
-            playerWhiteTurn = findViewById(R.id.playerWhiteTurn);
-
-            RelativeLayout boardActivityLayout = findViewById(R.id.boardActivityLayout);
-
-            playerBlackScore.setVisibility(View.VISIBLE);
-            playerWhiteScore.setVisibility(View.VISIBLE);
-            playerBlackTurn.setVisibility(View.VISIBLE);
-
-            boardActivityLayout.setBackgroundColor(Color.parseColor("#4b76ad"));
-
-            enableBoard();
-         }
-      });
+               startGame();
+               removeTwoSlots();
+            }
+         });
+      }
    }
 
    /**
@@ -108,6 +111,14 @@ public class BoardActivity extends AppCompatActivity {
       drawCell[1] = context.getResources().getDrawable(R.drawable.circle_black);
       drawCell[2] = context.getResources().getDrawable(R.drawable.circle_white);
       drawCell[3] = context.getResources().getDrawable(R.drawable.board_bg);
+      drawCell[4] = null;
+
+      drawNumbers[0] = context.getResources().getDrawable(R.drawable.number_one);
+      drawNumbers[1] = context.getResources().getDrawable(R.drawable.number_two);
+      drawNumbers[2] = context.getResources().getDrawable(R.drawable.number_three);
+      drawNumbers[3] = context.getResources().getDrawable(R.drawable.number_four);
+      drawNumbers[4] = context.getResources().getDrawable(R.drawable.number_five);
+      drawNumbers[5] = context.getResources().getDrawable(R.drawable.number_six);
    }
 
    /**
@@ -117,22 +128,28 @@ public class BoardActivity extends AppCompatActivity {
     */
 
    private void drawBoardGame() {
-      int sizeOfCell = Math.round(screenWidth() / MAX_ROW) - 20;
-      LinearLayout.LayoutParams lpRow = new LinearLayout.LayoutParams(sizeOfCell * MAX_ROW, sizeOfCell);
+      int sizeOfCell = Math.round(screenWidth() / (MAX_ROW + 1)) - 20;
+      LinearLayout.LayoutParams lpRow = new LinearLayout.LayoutParams(sizeOfCell * (MAX_ROW + 1), sizeOfCell);
       LinearLayout.LayoutParams lpCell = new LinearLayout.LayoutParams(sizeOfCell, sizeOfCell);
       LinearLayout boardLayout = findViewById(R.id.boardLayout);
 
-      for (int r = 0; r < MAX_ROW; r++) {
+      for (int r = 0; r < MAX_ROW + 1; r++) {
          LinearLayout linRow = new LinearLayout(context);
 
-         for (int c = 0; c < MAX_COL; c++) {
+         for (int c = 0; c < MAX_COL + 1; c++) {
             gameBoard[r][c] = new ImageButton(context);
             gameBoard[r][c].setEnabled(false);
+
+            if (c == 6) {
+               gameBoard[r][c].setBackground(drawCell[2]);
+            }
 
             if (gameObject.boardObject.getSlot(r, c).getColor() == Slot.BLACK) {
                gameBoard[r][c].setBackground(drawCell[1]);
             } else if (gameObject.boardObject.getSlot(r, c).getColor() == Slot.WHITE) {
                gameBoard[r][c].setBackground(drawCell[2]);
+            } else {
+               gameBoard[r][c].setBackground(drawCell[3]);
             }
 
             linRow.addView(gameBoard[r][c], lpCell);
@@ -140,6 +157,16 @@ public class BoardActivity extends AppCompatActivity {
 
          boardLayout.addView(linRow, lpRow);
       }
+
+      for (int r = 0; r < MAX_ROW; r++) {
+         gameBoard[r][MAX_COL].setBackground(drawNumbers[r]);
+      }
+
+      for (int c = 0; c < MAX_COL; c++) {
+         gameBoard[MAX_ROW][c].setBackground(drawNumbers[c]);
+      }
+
+      gameBoard[6][6].setBackground(drawCell[4]);
    }
 
    /**
@@ -156,6 +183,12 @@ public class BoardActivity extends AppCompatActivity {
       return dm.widthPixels;
    }
 
+   private void removeTwoSlots() {
+      Pair<Slot, Slot> slotPair = gameObject.removeTwoSlots();
+      gameBoard[slotPair.first.getRow()][slotPair.first.getColumn()].setBackground(drawCell[3]);
+      gameBoard[slotPair.second.getRow()][slotPair.second.getColumn()].setBackground(drawCell[3]);
+   }
+
    /**
     * Description: Method to enable the game board for playing.
     * Parameters: None.
@@ -163,15 +196,47 @@ public class BoardActivity extends AppCompatActivity {
     */
 
    public void enableBoard() {
-      Pair<Slot, Slot> slotPair = gameObject.removeTwoSlots();
-      gameBoard[slotPair.first.getRow()][slotPair.first.getColumn()].setBackground(drawCell[3]);
-      gameBoard[slotPair.second.getRow()][slotPair.second.getColumn()].setBackground(drawCell[3]);
-
       for (int r = 0; r < MAX_ROW; r++) {
          for (int c = 0; c < MAX_COL; c++) {
             gameBoard[r][c].setEnabled(true);
             gameBoard[r][c].setOnClickListener(new GameBoardClickListener(r, c, BoardActivity.this));
          }
       }
+   }
+
+   /**
+    * Description: Method to enable all game functionality.
+    * Parameters: None.
+    * Returns: Nothing.
+    */
+
+   public void startGame() {
+      playerBlackScore = findViewById(R.id.playerBlackScore);
+      playerWhiteScore = findViewById(R.id.playerWhiteScore);
+      playerBlackTurn = findViewById(R.id.playerBlackTurn);
+      playerWhiteTurn = findViewById(R.id.playerWhiteTurn);
+
+      RelativeLayout boardActivityLayout = findViewById(R.id.boardActivityLayout);
+      String blackScore = "BLACK: " + gameObject.playerBlack.getScore();
+      String whiteScore = "WHITE: " + gameObject.playerWhite.getScore();
+
+      playerBlackScore.setVisibility(View.VISIBLE);
+      playerBlackScore.setText(blackScore.trim());
+      playerWhiteScore.setVisibility(View.VISIBLE);
+      playerWhiteScore.setText(whiteScore.trim());
+
+      if (gameObject.playerBlack.isTurn()) {
+         playerBlackTurn.setVisibility(View.VISIBLE);
+      } else {
+         playerWhiteTurn.setVisibility(View.VISIBLE);
+      }
+
+      boardActivityLayout.setBackgroundColor(Color.parseColor("#4b76ad"));
+
+      Button saveGameButton = findViewById(R.id.saveGameButton);
+      saveGameButton.setVisibility(View.VISIBLE);
+      saveGameButton.setOnClickListener(new SaveGameClickListener(BoardActivity.this));
+
+      enableBoard();
    }
 }
