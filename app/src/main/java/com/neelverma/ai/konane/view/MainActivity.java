@@ -7,6 +7,7 @@
 
 package com.neelverma.ai.konane.view;
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -36,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
       beginButton.setOnClickListener(new View.OnClickListener() {
          @Override
          public void onClick(View v) {
-            SaveGameClickListener.setFilePath(null);
+            SaveGameClickListener.deleteFilePath();
             Intent boardIntent = new Intent(MainActivity.this,
                BoardActivity.class);
             boardIntent.putExtra("gameType", BoardActivity.NEW_GAME);
@@ -49,19 +50,30 @@ public class MainActivity extends AppCompatActivity {
       loadGameButton.setOnClickListener(new View.OnClickListener() {
          @Override
          public void onClick(View v) {
+            boolean hasSaveFile = true;
             Intent boardIntent = new Intent(MainActivity.this,
                BoardActivity.class);
 
             int gameState = SaveGameClickListener.getFilePath() == null ? BoardActivity.NEW_GAME : BoardActivity.LOADED_GAME;
 
             if (gameState == BoardActivity.NEW_GAME) {
-               final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+               hasSaveFile = false;
 
-               builder.setMessage("NO SAVE FILES. NEW GAME BEING LOADED.")
-                  .setCancelable(true);
+               if (!hasSaveFile) {
+                  AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 
-               AlertDialog alert = builder.create();
-               alert.show();
+                  builder.setMessage("NO SAVE FILES EXIST. START A NEW GAME.")
+                     .setCancelable(false)
+                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                           return;
+                        }
+                     });
+
+                  AlertDialog alert = builder.create();
+                  alert.show();
+               }
             }
 
             boardIntent.putExtra("gameType", gameState);

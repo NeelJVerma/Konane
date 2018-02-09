@@ -10,6 +10,8 @@ package com.neelverma.ai.konane.view;
 import android.content.DialogInterface;
 import android.view.View;
 
+import com.neelverma.ai.konane.model.Game;
+
 /**
  * Class to handle the option to move again dialog.
  * Created by Neel on 2/04/2018.
@@ -19,6 +21,7 @@ import android.view.View;
 
 public class OptionDialog implements DialogInterface.OnClickListener {
    private BoardActivity boardActivity;
+   private Game gameObject;
    boolean yesButton;
 
    /**
@@ -31,28 +34,29 @@ public class OptionDialog implements DialogInterface.OnClickListener {
    OptionDialog(BoardActivity boardActivity, boolean yesButton) {
       this.boardActivity = boardActivity;
       this.yesButton = yesButton;
+      this.gameObject = boardActivity.gameObject;
    }
 
    @Override
    public void onClick(DialogInterface dialog, int which) {
       if (yesButton) {
-         boardActivity.gameObject.successiveMove = true;
+         gameObject.successiveMove = true;
 
-         if (boardActivity.gameObject.playerWhite.isTurn()) {
-            boardActivity.gameObject.playerWhite.setIsTurn(false);
-            boardActivity.gameObject.playerBlack.setIsTurn(true);
+         if (gameObject.playerWhite.isTurn()) {
+            gameObject.playerWhite.setIsTurn(false);
+            gameObject.playerBlack.setIsTurn(true);
 
             boardActivity.playerBlackTurn.setVisibility(View.VISIBLE);
             boardActivity.playerWhiteTurn.setVisibility(View.INVISIBLE);
          } else {
-            boardActivity.gameObject.playerBlack.setIsTurn(false);
-            boardActivity.gameObject.playerWhite.setIsTurn(true);
+            gameObject.playerBlack.setIsTurn(false);
+            gameObject.playerWhite.setIsTurn(true);
 
             boardActivity.playerWhiteTurn.setVisibility(View.VISIBLE);
             boardActivity.playerBlackTurn.setVisibility(View.INVISIBLE);
          }
       } else {
-         boardActivity.gameObject.successiveMove = false;
+         gameObject.successiveMove = false;
       }
    }
 }

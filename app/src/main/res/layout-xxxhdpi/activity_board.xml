@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent" android:paddingLeft="16dp"
     android:paddingRight="16dp"
-    android:paddingBottom="16dp"
+    android:paddingBottom="0dp"
     android:paddingTop="16dp" tools:context=".view.BoardActivity"
     android:background="@mipmap/board_background"
     android:id="@+id/boardActivityLayout">
@@ -12,7 +12,7 @@
         android:id="@+id/boardLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="110dp"
         android:layout_marginBottom="40dp"
         android:background="#4b76ad"
         android:orientation="vertical"
@@ -37,7 +37,7 @@
         android:layout_alignParentTop="true"
         android:text="WHITE: 0"
         android:textColor="#fff"
-        android:textSize="35dp"
+        android:textSize="30dp"
         android:textStyle="bold"
         android:visibility="gone" />
 
@@ -50,7 +50,7 @@
         android:layout_alignParentStart="true"
         android:text="CURRENT TURN"
         android:textColor="#fff"
-        android:textSize="25dp"
+        android:textSize="20dp"
         android:textStyle="bold"
         android:visibility="invisible" />
 
@@ -61,7 +61,7 @@
         android:layout_alignParentEnd="true"
         android:text="BLACK: 0"
         android:textColor="#000"
-        android:textSize="35dp"
+        android:textSize="30dp"
         android:textStyle="bold"
         android:visibility="gone" />
 
@@ -74,7 +74,7 @@
         android:layout_marginTop="46dp"
         android:text="CURRENT TURN"
         android:textColor="#000"
-        android:textSize="25dp"
+        android:textSize="20dp"
         android:textStyle="bold"
         android:visibility="invisible" />
 
@@ -86,5 +86,14 @@
         android:layout_alignParentStart="true"
         android:text="SAVE GAME"
         android:visibility="gone" />
+
+    <Spinner
+        android:id="@+id/algorithmSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/playerBlackTurn"
+        android:layout_below="@+id/playerWhiteTurn"
+        android:layout_marginTop="20dp"
+        android:visibility="invisible" />
 
 </RelativeLayout>

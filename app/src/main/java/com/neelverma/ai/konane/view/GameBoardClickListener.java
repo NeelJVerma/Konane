@@ -13,6 +13,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.view.View;
+import android.widget.Toast;
 
 import com.neelverma.ai.konane.model.Game;
 import com.neelverma.ai.konane.model.Slot;
@@ -70,9 +71,9 @@ public class GameBoardClickListener implements View.OnClickListener {
 
       if (gameObject.slotFrom.getColor() != gameObject.turnColor) {
          if (gameObject.slotFrom.getColor() == Slot.EMPTY) {
-            displayDialog("YOU CAN'T MOVE AN EMPTY SLOT", "passive");
+            Toast.makeText(boardActivity, "YOU CAN'T MOVE AN EMPTY SLOT", Toast.LENGTH_SHORT).show();
          } else {
-            displayDialog("NOT YOUR TURN", "passive");
+            Toast.makeText(boardActivity, "NOT YOUR TURN", Toast.LENGTH_SHORT).show();
          }
 
          return;
@@ -81,13 +82,14 @@ public class GameBoardClickListener implements View.OnClickListener {
       if (gameObject.successiveMove) {
          if ((gameObject.canMoveAgain(gameObject.potentialSuccessiveSlot, gameObject.turnColor)) &&
             (!gameObject.verifySuccessiveMove(gameObject.slotFrom, gameObject.potentialSuccessiveSlot))) {
-            displayDialog("YOU MUST START FROM THE POSITION YOU ENDED ON", "passive");
+            Toast.makeText(boardActivity, "YOU MUST START FROM THE POSITION YOU ENDED ON", Toast.LENGTH_SHORT).show();
+
             return;
          }
       }
 
       if (!drawPotentialMoves(gameObject.turnColor, boardActivity.drawCell[0])) {
-         displayDialog("THIS PIECE CAN'T MOVE", "passive");
+         Toast.makeText(boardActivity, "THIS PIECE CAN'T MOVE", Toast.LENGTH_SHORT).show();
 
          return;
       }
@@ -109,7 +111,7 @@ public class GameBoardClickListener implements View.OnClickListener {
       gameObject.slotTo = gameObject.boardObject.getSlot(currentRow, currentCol);
 
       if (!gameObject.makeMove(gameObject.slotFrom, gameObject.slotTo)) {
-         displayDialog("INVALID MOVE", "passive");
+         Toast.makeText(boardActivity, "INVALID MOVE", Toast.LENGTH_SHORT).show();
 
          return;
       }
@@ -129,7 +131,7 @@ public class GameBoardClickListener implements View.OnClickListener {
       }
 
       if (!gameObject.playerCanMove(gameObject.playerWhite) && !gameObject.playerCanMove(gameObject.playerBlack)) {
-         displayDialog("GAME OVER. PRESS OK TO SEE THE RESULTS.", "end");
+         displayEndGameDialog();
       }
 
       if (gameObject.canMoveAgain(gameObject.slotTo, gameObject.turnColor)) {
@@ -146,13 +148,13 @@ public class GameBoardClickListener implements View.OnClickListener {
    private boolean switchTurns() {
       if (gameObject.playerBlack.isTurn()) {
          gameObject.playerBlack.addToScore();
-         String text = "BLACK: " + boardActivity.gameObject.playerBlack.getScore();
+         String text = "BLACK: " + gameObject.playerBlack.getScore();
          boardActivity.playerBlackScore.setText(text.trim());
          gameObject.potentialSuccessiveSlot.setRow(currentRow);
          gameObject.potentialSuccessiveSlot.setColumn(currentCol);
 
          if (!gameObject.playerCanMove(gameObject.playerWhite) && gameObject.playerCanMove(gameObject.playerBlack)) {
-            displayDialog("WHITE CAN'T MOVE", "passive");
+            Toast.makeText(boardActivity, "WHITE CAN'T MOVE", Toast.LENGTH_SHORT).show();
 
             return false;
          }
@@ -163,13 +165,13 @@ public class GameBoardClickListener implements View.OnClickListener {
          return true;
       } else {
          gameObject.playerWhite.addToScore();
-         String text = "WHITE: " + boardActivity.gameObject.playerWhite.getScore();
+         String text = "WHITE: " + gameObject.playerWhite.getScore();
          boardActivity.playerWhiteScore.setText(text.trim());
          gameObject.potentialSuccessiveSlot.setRow(currentRow);
          gameObject.potentialSuccessiveSlot.setColumn(currentCol);
 
          if (!gameObject.playerCanMove(gameObject.playerBlack) && gameObject.playerCanMove(gameObject.playerWhite)) {
-            displayDialog("BLACK CAN'T MOVE", "passive");
+            Toast.makeText(boardActivity, "BLACK CAN'T MOVE", Toast.LENGTH_SHORT).show();
 
             return false;
          }
@@ -182,30 +184,25 @@ public class GameBoardClickListener implements View.OnClickListener {
    }
 
    /**
-    * Description: Method to display a dialog message to the user.
-    * Parameters: String alertMessage, which is the message to set the alert with.
-    *             String type, which is the type of alert. It can only be "passive" or "end". Passive
-    *             denotes a dialog in which the game does not end, and end denotes a dialog to handle
-    *             the end game event.
+    * Description: Method to display the end game dialog message to the user.
+    * Parameters: None.
     * Returns: Nothing.
     */
 
-   private void displayDialog(String alertMessage, final String type) {
+   private void displayEndGameDialog() {
       AlertDialog.Builder builder = new AlertDialog.Builder(boardActivity);
 
-      builder.setMessage(alertMessage)
+      builder.setMessage("GAME OVER. PRESS OK TO CONTINUE.")
          .setCancelable(false)
          .setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int id) {
-               if (type == "end") {
-                  Intent endIntent = new Intent(boardActivity,
-                     EndActivity.class);
-                  endIntent.putExtra("playerBlackScore", gameObject.playerBlack.getScore());
-                  endIntent.putExtra("playerWhiteScore", gameObject.playerWhite.getScore());
+               Intent endIntent = new Intent(boardActivity,
+                  EndActivity.class);
+               endIntent.putExtra("playerBlackScore", gameObject.playerBlack.getScore());
+               endIntent.putExtra("playerWhiteScore", gameObject.playerWhite.getScore());
 
-                  context.startActivity(endIntent);
-               }
+               context.startActivity(endIntent);
             }
          });
 
@@ -238,13 +235,13 @@ public class GameBoardClickListener implements View.OnClickListener {
          }
       }
 
-      if (directionMoving == "right") {
+      if (directionMoving.equals("right")) {
          boardActivity.gameBoard[gameObject.slotFrom.getRow()][gameObject.slotFrom.getColumn() + 1].setBackground(boardActivity.drawCell[3]);
-      } else if (directionMoving == "left") {
+      } else if (directionMoving.equals("left")) {
          boardActivity.gameBoard[gameObject.slotFrom.getRow()][gameObject.slotFrom.getColumn() - 1].setBackground(boardActivity.drawCell[3]);
-      } else if (directionMoving == "down") {
+      } else if (directionMoving.equals("down")) {
          boardActivity.gameBoard[gameObject.slotFrom.getRow() + 1][gameObject.slotFrom.getColumn()].setBackground(boardActivity.drawCell[3]);
-      } else if (directionMoving == "up") {
+      } else if (directionMoving.equals("up")) {
          boardActivity.gameBoard[gameObject.slotFrom.getRow() - 1][gameObject.slotFrom.getColumn()].setBackground(boardActivity.drawCell[3]);
       }
 

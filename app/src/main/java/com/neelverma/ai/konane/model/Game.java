@@ -170,17 +170,17 @@ public class Game {
          }
       }
 
-      if (directionMoving == "right") {
+      if (directionMoving.equals("right")) {
          if ((boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() + 1).getColor() == color) ||
             (boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() + 1).getColor() == Slot.EMPTY)) {
             return false;
          }
-      } else if (directionMoving == "left") {
+      } else if (directionMoving.equals("left")) {
          if ((boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() - 1).getColor() == color) ||
             (boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() - 1).getColor() == Slot.EMPTY)) {
             return false;
          }
-      } else if (directionMoving == "down") {
+      } else if (directionMoving.equals("down")) {
          if ((boardObject.getSlot(slotFrom.getRow() + 1, slotFrom.getColumn()).getColor() == color) ||
             (boardObject.getSlot(slotFrom.getRow() + 1, slotFrom.getColumn()).getColor() == Slot.EMPTY)) {
             return false;
@@ -229,11 +229,11 @@ public class Game {
          Slot slotUp = boardObject.getSlot(slotFrom.getRow() + 1, slotFrom.getColumn());
          Slot slotDown = boardObject.getSlot(slotFrom.getRow() - 1, slotFrom.getColumn());
 
-         if (directionMoving == "right") {
+         if (directionMoving.equals("right")) {
             boardObject.setSlotColor(slotRight, Slot.EMPTY);
-         } else if (directionMoving == "left") {
+         } else if (directionMoving.equals("left")) {
             boardObject.setSlotColor(slotLeft, Slot.EMPTY);
-         } else if (directionMoving == "down") {
+         } else if (directionMoving.equals("down")) {
             boardObject.setSlotColor(slotUp, Slot.EMPTY);
          } else {
             boardObject.setSlotColor(slotDown, Slot.EMPTY);

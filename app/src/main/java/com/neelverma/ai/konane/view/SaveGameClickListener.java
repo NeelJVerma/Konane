@@ -10,8 +10,11 @@ package com.neelverma.ai.konane.view;
 import android.content.Context;
 import android.view.View;
 
+import com.neelverma.ai.konane.model.Game;
+
 /**
- * Class to handle an on click event for the save game button in the board activity.
+ * Class to handle an on click event for the save game button in the board activity. This is in its
+ * own class to easily reference the static file path.
  * Created by Neel on 2/05/2018.
  *
  * It handles saving a game. The current game object will then retain its state.
@@ -19,6 +22,7 @@ import android.view.View;
 
 public class SaveGameClickListener implements View.OnClickListener {
    private BoardActivity boardActivity;
+   private Game gameObject;
    private Context context;
    private static String filePath;
 
@@ -31,12 +35,13 @@ public class SaveGameClickListener implements View.OnClickListener {
 
    SaveGameClickListener(BoardActivity boardActivity) {
       this.boardActivity = boardActivity;
+      this.gameObject = boardActivity.gameObject;
    }
 
    @Override
    public void onClick(View v) {
       context = v.getContext();
-      filePath = boardActivity.gameObject.saveGame("saved_game.txt", context);
+      filePath = gameObject.saveGame("saved_game.txt", context);
    }
 
    /**
@@ -50,13 +55,12 @@ public class SaveGameClickListener implements View.OnClickListener {
    }
 
    /**
-    * Description: Method to set the file path.
-    * Parameters: String filePath1, which is the file path. (Can't reference this.filePath because it
-    * is static).
+    * Description: Method to clear out the file path.
+    * Parameters: None.
     * Returns: Nothing.
     */
 
-   public static void setFilePath(String filePath1) {
-      filePath = filePath1;
+   public static void deleteFilePath() {
+      filePath = null;
    }
 }

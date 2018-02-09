@@ -16,15 +16,21 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.neelverma.ai.konane.R;
 import com.neelverma.ai.konane.model.Game;
 import com.neelverma.ai.konane.model.Slot;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class to execute changes to the GUI, while using the model as a reference for game rules.
@@ -90,8 +96,8 @@ public class BoardActivity extends AppCompatActivity {
          removeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               Button button = (Button) v;
-               button.setVisibility(View.GONE);
+               Button thisButton = (Button) v;
+               thisButton.setVisibility(View.GONE);
 
                startGame();
                removeTwoSlots();
@@ -128,7 +134,7 @@ public class BoardActivity extends AppCompatActivity {
     */
 
    private void drawBoardGame() {
-      int sizeOfCell = Math.round(screenWidth() / (MAX_ROW + 1)) - 15;
+      int sizeOfCell = Math.round(screenWidth() / (MAX_ROW + 1)) - 10;
       LinearLayout.LayoutParams lpRow = new LinearLayout.LayoutParams(sizeOfCell * (MAX_ROW + 1), sizeOfCell);
       LinearLayout.LayoutParams lpCell = new LinearLayout.LayoutParams(sizeOfCell, sizeOfCell);
       LinearLayout boardLayout = findViewById(R.id.boardLayout);
@@ -240,6 +246,44 @@ public class BoardActivity extends AppCompatActivity {
       saveGameButton.setVisibility(View.VISIBLE);
       saveGameButton.setOnClickListener(new SaveGameClickListener(BoardActivity.this));
 
+      enableAlgorithmSpinner();
+
       enableBoard();
+   }
+
+   /**
+    * Description: Method to enable the algorithm spinner.
+    * Parameters: None.
+    * Returns: Nothing.
+    */
+
+   private void enableAlgorithmSpinner() {
+      Spinner algorithmSpinner = findViewById(R.id.algorithmSpinner);
+      algorithmSpinner.setVisibility(View.VISIBLE);
+
+      List<String> algorithmChoices = new ArrayList<>();
+      algorithmChoices.add("BREADTH FIRST");
+      algorithmChoices.add("DEPTH FIRST");
+      algorithmChoices.add("BEST FIRST");
+      algorithmChoices.add("BRANCH AND BOUND");
+
+      ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, algorithmChoices);
+      dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+      algorithmSpinner.setAdapter(dataAdapter);
+
+      algorithmSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+         @Override
+         public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+            String item = adapterView.getItemAtPosition(i).toString();
+
+            // Showing selected spinner item
+            System.out.println("Selected: " + item);
+         }
+
+         @Override
+         public void onNothingSelected(AdapterView<?> adapterView) {
+
+         }
+      });
    }
 }
