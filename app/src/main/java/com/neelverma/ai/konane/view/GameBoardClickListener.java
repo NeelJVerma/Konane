@@ -9,8 +9,6 @@ package com.neelverma.ai.konane.view;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.Toast;
@@ -194,17 +192,7 @@ public class GameBoardClickListener implements View.OnClickListener {
 
       builder.setMessage("GAME OVER. PRESS OK TO CONTINUE.")
          .setCancelable(false)
-         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int id) {
-               Intent endIntent = new Intent(boardActivity,
-                  EndActivity.class);
-               endIntent.putExtra("playerBlackScore", gameObject.playerBlack.getScore());
-               endIntent.putExtra("playerWhiteScore", gameObject.playerWhite.getScore());
-
-               context.startActivity(endIntent);
-            }
-         });
+         .setPositiveButton("OK", new EndGameDialog(boardActivity));
 
       AlertDialog alert = builder.create();
       alert.show();

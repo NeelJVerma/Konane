@@ -20,7 +20,7 @@ import com.neelverma.ai.konane.model.Game;
  * It handles saving a game. The current game object will then retain its state.
  */
 
-public class SaveGameClickListener implements View.OnClickListener {
+public class SaveGameButtonClickListener implements View.OnClickListener {
    private BoardActivity boardActivity;
    private Game gameObject;
    private Context context;
@@ -33,7 +33,7 @@ public class SaveGameClickListener implements View.OnClickListener {
     * Returns: Nothing.
     */
 
-   SaveGameClickListener(BoardActivity boardActivity) {
+   SaveGameButtonClickListener(BoardActivity boardActivity) {
       this.boardActivity = boardActivity;
       this.gameObject = boardActivity.gameObject;
    }

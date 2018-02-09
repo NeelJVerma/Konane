@@ -88,21 +88,12 @@ public class BoardActivity extends AppCompatActivity {
 
       if (gameType == LOADED_GAME) {
          removeButton.setVisibility(View.GONE);
-         gameObject.setGameFromState(SaveGameClickListener.getFilePath());
+         gameObject.setGameFromState(SaveGameButtonClickListener.getFilePath());
          drawBoardGame();
          startGame();
       } else {
          drawBoardGame();
-         removeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-               Button thisButton = (Button) v;
-               thisButton.setVisibility(View.GONE);
-
-               startGame();
-               removeTwoSlots();
-            }
-         });
+         removeButton.setOnClickListener(new RemoveButtonClickListener(BoardActivity.this));
       }
    }
 
@@ -192,7 +183,7 @@ public class BoardActivity extends AppCompatActivity {
     * Returns: Nothing.
     */
 
-   private void removeTwoSlots() {
+   public void removeTwoSlots() {
       Pair<Slot, Slot> slotPair = gameObject.removeTwoSlots();
       gameBoard[slotPair.first.getRow()][slotPair.first.getColumn()].setBackground(drawCell[3]);
       gameBoard[slotPair.second.getRow()][slotPair.second.getColumn()].setBackground(drawCell[3]);
@@ -204,7 +195,7 @@ public class BoardActivity extends AppCompatActivity {
     * Returns: Nothing.
     */
 
-   public void enableBoard() {
+   private void enableBoard() {
       for (int r = 0; r < MAX_ROW; r++) {
          for (int c = 0; c < MAX_COL; c++) {
             gameBoard[r][c].setEnabled(true);
@@ -244,7 +235,7 @@ public class BoardActivity extends AppCompatActivity {
 
       Button saveGameButton = findViewById(R.id.saveGameButton);
       saveGameButton.setVisibility(View.VISIBLE);
-      saveGameButton.setOnClickListener(new SaveGameClickListener(BoardActivity.this));
+      saveGameButton.setOnClickListener(new SaveGameButtonClickListener(BoardActivity.this));
 
       enableAlgorithmSpinner();
 
