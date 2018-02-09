@@ -60,17 +60,17 @@ public class BoardActivity extends AppCompatActivity {
    public static final int LOADED_GAME = 1;
 
    // MAX_ROW + 1 and MAX_COL + 1 to put in labels for rows and columns.
-   public ImageButton[][] gameBoard = new ImageButton[MAX_ROW + 1][MAX_COL + 1];
-   public Context context;
-   public Drawable drawCell[] = new Drawable[5];
-   public Drawable drawNumbers[] = new Drawable[6];
-   public Game gameObject = new Game();
-   public int gameType;
+   private ImageButton[][] gameBoard = new ImageButton[MAX_ROW + 1][MAX_COL + 1];
+   private Context context;
+   private Drawable drawCell[] = new Drawable[5];
+   private Drawable drawNumbers[] = new Drawable[6];
+   private Game gameObject = new Game();
+   private int gameType;
 
-   public TextView playerBlackScore;
-   public TextView playerWhiteScore;
-   public TextView playerBlackTurn;
-   public TextView playerWhiteTurn;
+   private TextView playerBlackScore;
+   private TextView playerWhiteScore;
+   private TextView playerBlackTurn;
+   private TextView playerWhiteTurn;
 
    @Override
    protected void onCreate(final Bundle savedInstanceState) {
@@ -137,9 +137,9 @@ public class BoardActivity extends AppCompatActivity {
             gameBoard[r][c] = new ImageButton(context);
             gameBoard[r][c].setEnabled(false);
 
-            if (gameObject.boardObject.getSlot(r, c).getColor() == Slot.BLACK) {
+            if (gameObject.getBoardObject().getSlot(r, c).getColor() == Slot.BLACK) {
                gameBoard[r][c].setBackground(drawCell[1]);
-            } else if (gameObject.boardObject.getSlot(r, c).getColor() == Slot.WHITE) {
+            } else if (gameObject.getBoardObject().getSlot(r, c).getColor() == Slot.WHITE) {
                gameBoard[r][c].setBackground(drawCell[2]);
             } else {
                gameBoard[r][c].setBackground(drawCell[3]);
@@ -217,15 +217,15 @@ public class BoardActivity extends AppCompatActivity {
       playerWhiteTurn = findViewById(R.id.playerWhiteTurn);
 
       RelativeLayout boardActivityLayout = findViewById(R.id.boardActivityLayout);
-      String blackScore = "BLACK: " + gameObject.playerBlack.getScore();
-      String whiteScore = "WHITE: " + gameObject.playerWhite.getScore();
+      String blackScore = "BLACK: " + gameObject.getPlayerBlack().getScore();
+      String whiteScore = "WHITE: " + gameObject.getPlayerWhite().getScore();
 
       playerBlackScore.setVisibility(View.VISIBLE);
       playerBlackScore.setText(blackScore.trim());
       playerWhiteScore.setVisibility(View.VISIBLE);
       playerWhiteScore.setText(whiteScore.trim());
 
-      if (gameObject.playerBlack.isTurn()) {
+      if (gameObject.getPlayerBlack().isTurn()) {
          playerBlackTurn.setVisibility(View.VISIBLE);
       } else {
          playerWhiteTurn.setVisibility(View.VISIBLE);
@@ -262,7 +262,7 @@ public class BoardActivity extends AppCompatActivity {
       dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
       algorithmSpinner.setAdapter(dataAdapter);
 
-      algorithmSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+      /*algorithmSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
          @Override
          public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
             String item = adapterView.getItemAtPosition(i).toString();
@@ -275,6 +275,76 @@ public class BoardActivity extends AppCompatActivity {
          public void onNothingSelected(AdapterView<?> adapterView) {
 
          }
-      });
+      });*/
+   }
+
+   /**
+    * Description: Method to get the game board.
+    * Parameters: None.
+    * Returns: The game board.
+    */
+
+   public ImageButton[][] getGameBoard() {
+      return gameBoard;
+   }
+
+   /**
+    * Description: Method to get the array of board drawables.
+    * Parameters: None.
+    * Returns: The drawcell array.
+    */
+
+   public Drawable[] getDrawCell() {
+      return drawCell;
+   }
+
+   /**
+    * Description: Method to get the game object.
+    * Parameters: None.
+    * Returns: The game object.
+    */
+
+   public Game getGameObject() {
+      return gameObject;
+   }
+
+   /**
+    * Description: Method to get the black player score text view.
+    * Parameters: None.
+    * Returns: The player black score text view.
+    */
+
+   public TextView getPlayerBlackScore() {
+      return playerBlackScore;
+   }
+
+   /**
+    * Description: Method to get the white player score text view.
+    * Parameters: None.
+    * Returns: The player white score text view.
+    */
+
+   public TextView getPlayerWhiteScore() {
+      return playerWhiteScore;
+   }
+
+   /**
+    * Description: Method to get the black player turn text view.
+    * Parameters: None.
+    * Returns: The player black turn text view.
+    */
+
+   public TextView getPlayerBlackTurn() {
+      return playerBlackTurn;
+   }
+
+   /**
+    * Description: Method to get the white player turn text view.
+    * Parameters: None.
+    * Returns: The player white turn text view.
+    */
+
+   public TextView getPlayerWhiteTurn() {
+      return playerWhiteTurn;
    }
 }

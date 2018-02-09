@@ -38,17 +38,17 @@ import java.util.Random;
  */
 
 public class Game {
-   public Player playerBlack;
-   public Player playerWhite;
-   public Board boardObject;
+   private Player playerBlack;
+   private Player playerWhite;
+   private Board boardObject;
 
-   public Slot potentialSuccessiveSlot;
-   public Slot slotFrom;
-   public Slot slotTo;
+   private Slot potentialSuccessiveSlot;
+   private Slot slotFrom;
+   private Slot slotTo;
 
-   public boolean firstClick;
-   public boolean successiveMove;
-   public int turnColor;
+   private boolean firstClick;
+   private boolean successiveMove;
+   private int turnColor;
 
    /**
     * Description: Constructor. Will initialize the current game's variables through their
@@ -350,13 +350,8 @@ public class Game {
          }
 
          String nextPlayer = playerWhite.isTurn() ? "White" : "Black";
-         String successiveMoveCheck = successiveMove ? "Yes" : "No";
-         String potentialSuccessiveSlotCheck = Integer.toString(potentialSuccessiveSlot.getRow()) + " " +
-            Integer.toString(potentialSuccessiveSlot.getColumn());
 
          writer.println("Next player: " + nextPlayer);
-         writer.println("Successive move: " + successiveMoveCheck);
-         writer.println("Potential successive slot: " + potentialSuccessiveSlotCheck);
          writer.close();
       } catch(Exception e) {
          e.printStackTrace();
@@ -375,8 +370,6 @@ public class Game {
       int whiteScore = 0;
       int blackScore = 0;
       String turn = "black";
-      String successiveMoveCheck = "No";
-      String potentialSuccessiveSlotCheck = "0 0";
 
       try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath))) {
          String line;
@@ -399,10 +392,6 @@ public class Game {
                }
             } else if (lineCounter == 9) {
                turn = line.substring(13);
-            } else if (lineCounter == 10) {
-               successiveMoveCheck = line.substring(17);
-            } else if (lineCounter == 11) {
-               potentialSuccessiveSlotCheck = line.substring(27);
             }
 
             lineCounter++;
@@ -421,17 +410,145 @@ public class Game {
          playerBlack.setIsTurn(true);
          playerWhite.setIsTurn(false);
       }
+   }
 
-      if (successiveMoveCheck.equals("Yes")) {
-         successiveMove = true;
-         int spaceIndex = potentialSuccessiveSlotCheck.indexOf(" ");
-         int row = Integer.parseInt(potentialSuccessiveSlotCheck.substring(0, spaceIndex));
-         int column = Integer.parseInt(potentialSuccessiveSlotCheck.substring(spaceIndex + 1));
+   /**
+    * Description: Method to get the black player object.
+    * Parameters: None.
+    * Returns: The black player object.
+    */
 
-         potentialSuccessiveSlot.setRow(row);
-         potentialSuccessiveSlot.setColumn(column);
-      } else {
-         successiveMove = false;
-      }
+   public Player getPlayerBlack() {
+      return playerBlack;
+   }
+
+   /**
+    * Description: Method to get the white player object.
+    * Parameters: None.
+    * Returns: The white player object.
+    */
+
+   public Player getPlayerWhite() {
+      return playerWhite;
+   }
+
+   /**
+    * Description: Method to get the board object.
+    * Parameters: None.
+    * Returns: The board object.
+    */
+
+   public Board getBoardObject() {
+      return boardObject;
+   }
+
+   /**
+    * Description: Method to get the potential successive slot object.
+    * Parameters: None.
+    * Returns: The potential successive slot object.
+    */
+
+   public Slot getPotentialSuccessiveSlot() {
+      return potentialSuccessiveSlot;
+   }
+
+   /**
+    * Description: Method to get the slot from object.
+    * Parameters: None.
+    * Returns: The slot from object.
+    */
+
+   public Slot getSlotFrom() {
+      return slotFrom;
+   }
+
+   /**
+    * Description: Method to set the slot from object.
+    * Parameters: Slot slotFrom, which is the slot to set the current slotFrom object with.
+    * Returns: Nothing.
+    */
+
+   public void setSlotFrom(Slot slotFrom) {
+      this.slotFrom = slotFrom;
+   }
+
+   /**
+    * Description: Method to get the slot to object.
+    * Parameters: None.
+    * Returns: The slot to object.
+    */
+
+   public Slot getSlotTo() {
+      return slotTo;
+   }
+
+   /**
+    * Description: Method to set the slot to object.
+    * Parameters: Slot slotTo, which is the slot to set the current slotTo object with.
+    * Returns: Nothing.
+    */
+
+   public void setSlotTo(Slot slotTo) {
+      this.slotTo = slotTo;
+   }
+
+   /**
+    * Description: Method to get the first click boolean.
+    * Parameters: None.
+    * Returns: The first click boolean.
+    */
+
+   public boolean isFirstClick() {
+      return firstClick;
+   }
+
+   /**
+    * Description: Method to set the first click boolean.
+    * Parameters: boolean firstClick, which is the value to set the first click boolean with.
+    * Returns: Nothing.
+    */
+
+   public void setFirstClick(boolean firstClick) {
+      this.firstClick = firstClick;
+   }
+
+   /**
+    * Description: Method to get the successive move boolean.
+    * Parameters: None.
+    * Returns: The successive move boolean.
+    */
+
+   public boolean isSuccessiveMove() {
+      return successiveMove;
+   }
+
+   /**
+    * Description: Method to set the successive move boolean.
+    * Parameters: boolean successiveMove, which is the value to set the successive move boolean with.
+    * Returns: Nothing.
+    */
+
+   public void setSuccessiveMove(boolean successiveMove) {
+      this.successiveMove = successiveMove;
+   }
+
+   /**
+    * Description: Method to get the turn color.
+    * Parameters: None.
+    * Returns: The turn color.
+    */
+
+   public int getTurnColor() {
+      return turnColor;
+   }
+
+   /**
+    * Description: Method to set the turn color.
+    * Parameters: int turnColor, which is the turn color to set the current turn color with.
+    * Returns: Nothing.
+    */
+
+   public void setTurnColor(int turnColor) {
+      this.turnColor = turnColor;
    }
 }

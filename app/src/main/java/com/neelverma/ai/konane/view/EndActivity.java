@@ -17,9 +17,6 @@ import com.neelverma.ai.konane.R;
 /**
  * Class to hold the end screen.
  * Created by Neel on 1/29/2018.
- *
- * It displays the end screen saying that the game is over and who won, if anyone.
- * It also has a button that can redirect to BoardActivity if the user(s) want to play again.
  */
 
 public class EndActivity extends AppCompatActivity {

@@ -13,8 +13,6 @@ import android.view.View;
 /**
  * Class to handle button click action for the begin game button.
  * Created by Neel on 2/08/2018.
- *
- * Redirects to the board activity. Also sends over the game type as an extra passed through intent.
  */
 
 public class BeginButtonClickListener implements View.OnClickListener {

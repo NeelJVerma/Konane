@@ -15,14 +15,12 @@ import com.neelverma.ai.konane.model.Game;
 /**
  * Class to handle the option to move again dialog.
  * Created by Neel on 2/04/2018.
- *
- * It handles whether the user can move again or not in the form of a dialog.
  */
 
 public class OptionDialog implements DialogInterface.OnClickListener {
    private BoardActivity boardActivity;
    private Game gameObject;
-   boolean yesButton;
+   private boolean yesButton;
 
    /**
     * Description: Constructor. Will initialize the dialog box with an activity and a button choice.
@@ -34,29 +32,29 @@ public class OptionDialog implements DialogInterface.OnClickListener {
    OptionDialog(BoardActivity boardActivity, boolean yesButton) {
       this.boardActivity = boardActivity;
       this.yesButton = yesButton;
-      this.gameObject = boardActivity.gameObject;
+      this.gameObject = boardActivity.getGameObject();
    }
 
    @Override
    public void onClick(DialogInterface dialog, int which) {
       if (yesButton) {
-         gameObject.successiveMove = true;
+         gameObject.setSuccessiveMove(true);
 
-         if (gameObject.playerWhite.isTurn()) {
-            gameObject.playerWhite.setIsTurn(false);
-            gameObject.playerBlack.setIsTurn(true);
+         if (gameObject.getPlayerWhite().isTurn()) {
+            gameObject.getPlayerWhite().setIsTurn(false);
+            gameObject.getPlayerBlack().setIsTurn(true);
 
-            boardActivity.playerBlackTurn.setVisibility(View.VISIBLE);
-            boardActivity.playerWhiteTurn.setVisibility(View.INVISIBLE);
+            boardActivity.getPlayerBlackTurn().setVisibility(View.VISIBLE);
+            boardActivity.getPlayerWhiteTurn().setVisibility(View.INVISIBLE);
          } else {
-            gameObject.playerBlack.setIsTurn(false);
-            gameObject.playerWhite.setIsTurn(true);
+            gameObject.getPlayerBlack().setIsTurn(false);
+            gameObject.getPlayerWhite().setIsTurn(true);
 
-            boardActivity.playerWhiteTurn.setVisibility(View.VISIBLE);
-            boardActivity.playerBlackTurn.setVisibility(View.INVISIBLE);
+            boardActivity.getPlayerWhiteTurn().setVisibility(View.VISIBLE);
+            boardActivity.getPlayerBlackTurn().setVisibility(View.INVISIBLE);
          }
       } else {
-         gameObject.successiveMove = false;
+         gameObject.setSuccessiveMove(false);
       }
    }
 }

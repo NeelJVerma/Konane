@@ -15,10 +15,6 @@ import com.neelverma.ai.konane.R;
 /**
  * Class to hold the beginning screen of the app.
  * Created by Neel on 01/28/2018.
- *
- * It displays the game name and has one button.
- * When this button is clicked, the app will redirect to BoardActivity, where the game will
- * begin.
  */
 
 

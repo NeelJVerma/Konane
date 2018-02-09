@@ -13,8 +13,6 @@ import android.view.View;
 /**
  * Class to handle button click action for the play again button.
  * Created by Neel on 2/08/2018.
- *
- * Redirects to the starting page of the app.
  */
 
 public class PlayAgainButtonClickListener implements View.OnClickListener {

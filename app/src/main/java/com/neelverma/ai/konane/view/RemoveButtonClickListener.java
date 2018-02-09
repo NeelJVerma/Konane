@@ -13,8 +13,6 @@ import android.widget.Button;
 /**
  * Class to handle button click action for the button to remove two slots and start the game.
  * Created by Neel on 2/08/2018.
- *
- * Handles game start and remove two slots.
  */
 
 public class RemoveButtonClickListener implements View.OnClickListener {

@@ -8,7 +8,6 @@
 package com.neelverma.ai.konane.view;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.Toast;
@@ -19,8 +18,6 @@ import com.neelverma.ai.konane.model.Slot;
 /**
  * Class to handle an on click event for a specific button in the game board.
  * Created by Neel on 2/04/2018.
- *
- * It handles all click logic for the game board, as well as all GUI logic.
  */
 
 public class GameBoardClickListener implements View.OnClickListener {
@@ -28,7 +25,6 @@ public class GameBoardClickListener implements View.OnClickListener {
    private int currentRow;
    private int currentCol;
    private Game gameObject;
-   private Context context;
 
    /**
     * Description: Constructor. Will initialize the listener with a row, column, and an instance of
@@ -43,15 +39,14 @@ public class GameBoardClickListener implements View.OnClickListener {
       this.boardActivity = boardActivity;
       this.currentRow = currentRow;
       this.currentCol = currentCol;
-      this.gameObject = boardActivity.gameObject;
+      this.gameObject = boardActivity.getGameObject();
    }
 
    @Override
    public void onClick(View v) {
-      context = v.getContext();
-      gameObject.turnColor = gameObject.playerWhite.isTurn() ? Slot.WHITE : Slot.BLACK;
+      gameObject.setTurnColor(gameObject.getPlayerWhite().isTurn() ? Slot.WHITE : Slot.BLACK);
 
-      if (gameObject.firstClick) {
+      if (gameObject.isFirstClick()) {
          processFirstClick();
       } else {
          processSecondClick();
@@ -65,10 +60,10 @@ public class GameBoardClickListener implements View.OnClickListener {
     */
 
    private void processFirstClick() {
-      gameObject.slotFrom = gameObject.boardObject.getSlot(currentRow, currentCol);
+      gameObject.setSlotFrom(gameObject.getBoardObject().getSlot(currentRow, currentCol));
 
-      if (gameObject.slotFrom.getColor() != gameObject.turnColor) {
-         if (gameObject.slotFrom.getColor() == Slot.EMPTY) {
+      if (gameObject.getSlotFrom().getColor() != gameObject.getTurnColor()) {
+         if (gameObject.getSlotFrom().getColor() == Slot.EMPTY) {
             Toast.makeText(boardActivity, "YOU CAN'T MOVE AN EMPTY SLOT", Toast.LENGTH_SHORT).show();
          } else {
             Toast.makeText(boardActivity, "NOT YOUR TURN", Toast.LENGTH_SHORT).show();
@@ -77,22 +72,22 @@ public class GameBoardClickListener implements View.OnClickListener {
          return;
       }
 
-      if (gameObject.successiveMove) {
-         if ((gameObject.canMoveAgain(gameObject.potentialSuccessiveSlot, gameObject.turnColor)) &&
-            (!gameObject.verifySuccessiveMove(gameObject.slotFrom, gameObject.potentialSuccessiveSlot))) {
+      if (gameObject.isSuccessiveMove()) {
+         if ((gameObject.canMoveAgain(gameObject.getPotentialSuccessiveSlot(), gameObject.getTurnColor())) &&
+            (!gameObject.verifySuccessiveMove(gameObject.getSlotFrom(), gameObject.getPotentialSuccessiveSlot()))) {
             Toast.makeText(boardActivity, "YOU MUST START FROM THE POSITION YOU ENDED ON", Toast.LENGTH_SHORT).show();
 
             return;
          }
       }
 
-      if (!drawPotentialMoves(gameObject.turnColor, boardActivity.drawCell[0])) {
+      if (!drawPotentialMoves(gameObject.getTurnColor(), boardActivity.getDrawCell()[0])) {
          Toast.makeText(boardActivity, "THIS PIECE CAN'T MOVE", Toast.LENGTH_SHORT).show();
 
          return;
       }
 
-      gameObject.firstClick = false;
+      gameObject.setFirstClick(false);
    }
 
    /**
@@ -102,13 +97,13 @@ public class GameBoardClickListener implements View.OnClickListener {
     */
 
    private void processSecondClick() {
-      gameObject.firstClick = true;
+      gameObject.setFirstClick(true);
 
-      drawPotentialMoves(gameObject.turnColor, boardActivity.drawCell[3]);
+      drawPotentialMoves(gameObject.getTurnColor(), boardActivity.getDrawCell()[3]);
 
-      gameObject.slotTo = gameObject.boardObject.getSlot(currentRow, currentCol);
+      gameObject.setSlotTo(gameObject.getBoardObject().getSlot(currentRow, currentCol));
 
-      if (!gameObject.makeMove(gameObject.slotFrom, gameObject.slotTo)) {
+      if (!gameObject.makeMove(gameObject.getSlotFrom(), gameObject.getSlotTo())) {
          Toast.makeText(boardActivity, "INVALID MOVE", Toast.LENGTH_SHORT).show();
 
          return;
@@ -120,19 +115,23 @@ public class GameBoardClickListener implements View.OnClickListener {
          return;
       }
 
-      if (gameObject.playerBlack.isTurn()) {
-         boardActivity.playerBlackTurn.setVisibility(View.VISIBLE);
-         boardActivity.playerWhiteTurn.setVisibility(View.INVISIBLE);
+      gameObject.setSuccessiveMove(false);
+
+      if (gameObject.getPlayerBlack().isTurn()) {
+         boardActivity.getPlayerBlackTurn().setVisibility(View.VISIBLE);
+         boardActivity.getPlayerWhiteTurn().setVisibility(View.INVISIBLE);
       } else {
-         boardActivity.playerBlackTurn.setVisibility(View.INVISIBLE);
-         boardActivity.playerWhiteTurn.setVisibility(View.VISIBLE);
+         boardActivity.getPlayerBlackTurn().setVisibility(View.INVISIBLE);
+         boardActivity.getPlayerWhiteTurn().setVisibility(View.VISIBLE);
       }
 
-      if (!gameObject.playerCanMove(gameObject.playerWhite) && !gameObject.playerCanMove(gameObject.playerBlack)) {
+      if (!gameObject.playerCanMove(gameObject.getPlayerWhite()) && !gameObject.playerCanMove(gameObject.getPlayerBlack())) {
+         boardActivity.getPlayerWhiteTurn().setVisibility(View.INVISIBLE);
+         boardActivity.getPlayerBlackTurn().setVisibility(View.INVISIBLE);
          displayEndGameDialog();
       }
 
-      if (gameObject.canMoveAgain(gameObject.slotTo, gameObject.turnColor)) {
+      if (gameObject.canMoveAgain(gameObject.getSlotTo(), gameObject.getTurnColor())) {
          showOptionDialog("WOULD YOU LIKE TO CONTINUE YOUR TURN?");
       }
    }
@@ -144,38 +143,50 @@ public class GameBoardClickListener implements View.OnClickListener {
     */
 
    private boolean switchTurns() {
-      if (gameObject.playerBlack.isTurn()) {
-         gameObject.playerBlack.addToScore();
-         String text = "BLACK: " + gameObject.playerBlack.getScore();
-         boardActivity.playerBlackScore.setText(text.trim());
-         gameObject.potentialSuccessiveSlot.setRow(currentRow);
-         gameObject.potentialSuccessiveSlot.setColumn(currentCol);
+      if (gameObject.getPlayerBlack().isTurn()) {
+         gameObject.getPlayerBlack().addToScore();
 
-         if (!gameObject.playerCanMove(gameObject.playerWhite) && gameObject.playerCanMove(gameObject.playerBlack)) {
+         String text = "BLACK: " + gameObject.getPlayerBlack().getScore();
+         boardActivity.getPlayerBlackScore().setText(text.trim());
+
+         gameObject.getPotentialSuccessiveSlot().setRow(currentRow);
+         gameObject.getPotentialSuccessiveSlot().setColumn(currentCol);
+
+         if (!gameObject.playerCanMove(gameObject.getPlayerWhite()) && gameObject.playerCanMove(gameObject.getPlayerBlack())) {
             Toast.makeText(boardActivity, "WHITE CAN'T MOVE", Toast.LENGTH_SHORT).show();
+
+            if (gameObject.canMoveAgain(gameObject.getPotentialSuccessiveSlot(), gameObject.getTurnColor())) {
+               gameObject.setSuccessiveMove(true);
+            }
 
             return false;
          }
 
-         gameObject.playerWhite.setIsTurn(true);
-         gameObject.playerBlack.setIsTurn(false);
+         gameObject.getPlayerWhite().setIsTurn(true);
+         gameObject.getPlayerBlack().setIsTurn(false);
 
          return true;
       } else {
-         gameObject.playerWhite.addToScore();
-         String text = "WHITE: " + gameObject.playerWhite.getScore();
-         boardActivity.playerWhiteScore.setText(text.trim());
-         gameObject.potentialSuccessiveSlot.setRow(currentRow);
-         gameObject.potentialSuccessiveSlot.setColumn(currentCol);
+         gameObject.getPlayerWhite().addToScore();
 
-         if (!gameObject.playerCanMove(gameObject.playerBlack) && gameObject.playerCanMove(gameObject.playerWhite)) {
+         String text = "WHITE: " + gameObject.getPlayerWhite().getScore();
+         boardActivity.getPlayerWhiteScore().setText(text.trim());
+
+         gameObject.getPotentialSuccessiveSlot().setRow(currentRow);
+         gameObject.getPotentialSuccessiveSlot().setColumn(currentCol);
+
+         if (!gameObject.playerCanMove(gameObject.getPlayerBlack()) && gameObject.playerCanMove(gameObject.getPlayerWhite())) {
             Toast.makeText(boardActivity, "BLACK CAN'T MOVE", Toast.LENGTH_SHORT).show();
+
+            if (gameObject.canMoveAgain(gameObject.getPotentialSuccessiveSlot(), gameObject.getTurnColor())) {
+               gameObject.setSuccessiveMove(true);
+            }
 
             return false;
          }
 
-         gameObject.playerWhite.setIsTurn(false);
-         gameObject.playerBlack.setIsTurn(true);
+         gameObject.getPlayerWhite().setIsTurn(false);
+         gameObject.getPlayerBlack().setIsTurn(true);
 
          return true;
       }
@@ -206,17 +217,17 @@ public class GameBoardClickListener implements View.OnClickListener {
     */
 
    private void drawMoveSlots() {
-      boardActivity.gameBoard[gameObject.slotFrom.getRow()][gameObject.slotFrom.getColumn()].setBackground(boardActivity.drawCell[3]);
+      boardActivity.getGameBoard()[gameObject.getSlotFrom().getRow()][gameObject.getSlotFrom().getColumn()].setBackground(boardActivity.getDrawCell()[3]);
       String directionMoving;
 
-      if (gameObject.slotFrom.getRow() == gameObject.slotTo.getRow()) {
-         if (gameObject.slotFrom.getColumn() - gameObject.slotTo.getColumn() == -2) {
+      if (gameObject.getSlotFrom().getRow() == gameObject.getSlotTo().getRow()) {
+         if (gameObject.getSlotFrom().getColumn() - gameObject.getSlotTo().getColumn() == -2) {
             directionMoving = "right";
          } else {
             directionMoving = "left";
          }
       } else {
-         if (gameObject.slotFrom.getRow() - gameObject.slotTo.getRow() == -2) {
+         if (gameObject.getSlotFrom().getRow() - gameObject.getSlotTo().getRow() == -2) {
             directionMoving = "down";
          } else {
             directionMoving = "up";
@@ -224,24 +235,24 @@ public class GameBoardClickListener implements View.OnClickListener {
       }
 
       if (directionMoving.equals("right")) {
-         boardActivity.gameBoard[gameObject.slotFrom.getRow()][gameObject.slotFrom.getColumn() + 1].setBackground(boardActivity.drawCell[3]);
+         boardActivity.getGameBoard()[gameObject.getSlotFrom().getRow()][gameObject.getSlotFrom().getColumn() + 1].setBackground(boardActivity.getDrawCell()[3]);
       } else if (directionMoving.equals("left")) {
-         boardActivity.gameBoard[gameObject.slotFrom.getRow()][gameObject.slotFrom.getColumn() - 1].setBackground(boardActivity.drawCell[3]);
+         boardActivity.getGameBoard()[gameObject.getSlotFrom().getRow()][gameObject.getSlotFrom().getColumn() - 1].setBackground(boardActivity.getDrawCell()[3]);
       } else if (directionMoving.equals("down")) {
-         boardActivity.gameBoard[gameObject.slotFrom.getRow() + 1][gameObject.slotFrom.getColumn()].setBackground(boardActivity.drawCell[3]);
+         boardActivity.getGameBoard()[gameObject.getSlotFrom().getRow() + 1][gameObject.getSlotFrom().getColumn()].setBackground(boardActivity.getDrawCell()[3]);
       } else if (directionMoving.equals("up")) {
-         boardActivity.gameBoard[gameObject.slotFrom.getRow() - 1][gameObject.slotFrom.getColumn()].setBackground(boardActivity.drawCell[3]);
+         boardActivity.getGameBoard()[gameObject.getSlotFrom().getRow() - 1][gameObject.getSlotFrom().getColumn()].setBackground(boardActivity.getDrawCell()[3]);
       }
 
       Drawable draw;
 
-      if (gameObject.boardObject.getSlot(gameObject.slotTo.getRow(), gameObject.slotTo.getColumn()).getColor() == Slot.WHITE) {
-         draw = boardActivity.drawCell[2];
+      if (gameObject.getBoardObject().getSlot(gameObject.getSlotTo().getRow(), gameObject.getSlotTo().getColumn()).getColor() == Slot.WHITE) {
+         draw = boardActivity.getDrawCell()[2];
       } else {
-         draw = boardActivity.drawCell[1];
+         draw = boardActivity.getDrawCell()[1];
       }
 
-      boardActivity.gameBoard[gameObject.slotTo.getRow()][gameObject.slotTo.getColumn()].setBackground(draw);
+      boardActivity.getGameBoard()[gameObject.getSlotTo().getRow()][gameObject.getSlotTo().getColumn()].setBackground(draw);
    }
 
    /**
@@ -253,29 +264,29 @@ public class GameBoardClickListener implements View.OnClickListener {
     */
 
    private boolean drawPotentialMoves(int turnColor, Drawable drawCell) {
-      Slot slotRight = gameObject.boardObject.getSlot(gameObject.slotFrom.getRow(), gameObject.slotFrom.getColumn() + 2);
-      Slot slotLeft = gameObject.boardObject.getSlot(gameObject.slotFrom.getRow(), gameObject.slotFrom.getColumn() - 2);
-      Slot slotUp = gameObject.boardObject.getSlot(gameObject.slotFrom.getRow() + 2, gameObject.slotFrom.getColumn());
-      Slot slotDown = gameObject.boardObject.getSlot(gameObject.slotFrom.getRow() - 2, gameObject.slotFrom.getColumn());
+      Slot slotRight = gameObject.getBoardObject().getSlot(gameObject.getSlotFrom().getRow(), gameObject.getSlotFrom().getColumn() + 2);
+      Slot slotLeft = gameObject.getBoardObject().getSlot(gameObject.getSlotFrom().getRow(), gameObject.getSlotFrom().getColumn() - 2);
+      Slot slotUp = gameObject.getBoardObject().getSlot(gameObject.getSlotFrom().getRow() + 2, gameObject.getSlotFrom().getColumn());
+      Slot slotDown = gameObject.getBoardObject().getSlot(gameObject.getSlotFrom().getRow() - 2, gameObject.getSlotFrom().getColumn());
       boolean pieceCanMove = false;
 
-      if (gameObject.isValidMove(gameObject.slotFrom, slotRight, turnColor)) {
-         boardActivity.gameBoard[slotRight.getRow()][slotRight.getColumn()].setBackground(drawCell);
+      if (gameObject.isValidMove(gameObject.getSlotFrom(), slotRight, turnColor)) {
+         boardActivity.getGameBoard()[slotRight.getRow()][slotRight.getColumn()].setBackground(drawCell);
          pieceCanMove = true;
       }
 
-      if (gameObject.isValidMove(gameObject.slotFrom, slotLeft, turnColor)) {
-         boardActivity.gameBoard[slotLeft.getRow()][slotLeft.getColumn()].setBackground(drawCell);
+      if (gameObject.isValidMove(gameObject.getSlotFrom(), slotLeft, turnColor)) {
+         boardActivity.getGameBoard()[slotLeft.getRow()][slotLeft.getColumn()].setBackground(drawCell);
          pieceCanMove = true;
       }
 
-      if (gameObject.isValidMove(gameObject.slotFrom, slotUp, turnColor)) {
-         boardActivity.gameBoard[slotUp.getRow()][slotUp.getColumn()].setBackground(drawCell);
+      if (gameObject.isValidMove(gameObject.getSlotFrom(), slotUp, turnColor)) {
+         boardActivity.getGameBoard()[slotUp.getRow()][slotUp.getColumn()].setBackground(drawCell);
          pieceCanMove = true;
       }
 
-      if (gameObject.isValidMove(gameObject.slotFrom, slotDown, turnColor)) {
-         boardActivity.gameBoard[slotDown.getRow()][slotDown.getColumn()].setBackground(drawCell);
+      if (gameObject.isValidMove(gameObject.getSlotFrom(), slotDown, turnColor)) {
+         boardActivity.getGameBoard()[slotDown.getRow()][slotDown.getColumn()].setBackground(drawCell);
          pieceCanMove = true;
       }
 
