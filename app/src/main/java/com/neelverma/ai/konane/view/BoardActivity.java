@@ -237,6 +237,11 @@ public class BoardActivity extends AppCompatActivity {
       saveGameButton.setVisibility(View.VISIBLE);
       saveGameButton.setOnClickListener(new SaveGameButtonClickListener(BoardActivity.this));
 
+      Button nextButton = findViewById(R.id.nextButton);
+      nextButton.setVisibility(View.VISIBLE);
+      // TODO: SET ON CLICK LISTENER FOR THE NEXT MOVE BUTTON. WILL CALL THE APPROPRIATE ALGO AND PASS IT
+      // TODO: BACK TO THE BOARD ACTIVITY.
+
       enableAlgorithmSpinner();
 
       enableBoard();
@@ -258,24 +263,12 @@ public class BoardActivity extends AppCompatActivity {
       algorithmChoices.add("BEST FIRST");
       algorithmChoices.add("BRANCH AND BOUND");
 
-      ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, algorithmChoices);
-      dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+      ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this, R.layout.spinner_layout, algorithmChoices);
+      dataAdapter.setDropDownViewResource(R.layout.spinner_layout);
       algorithmSpinner.setAdapter(dataAdapter);
+      algorithmSpinner.setOnItemSelectedListener(new AlgorithmSpinnerItemSelectedListener(BoardActivity.this));
 
-      /*algorithmSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-         @Override
-         public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-            String item = adapterView.getItemAtPosition(i).toString();
-
-            // Showing selected spinner item
-            System.out.println("Selected: " + item);
-         }
-
-         @Override
-         public void onNothingSelected(AdapterView<?> adapterView) {
-
-         }
-      });*/
+      // TODO: ABSTRACT THIS INTO ITS OWN CLASS
    }
 
    /**

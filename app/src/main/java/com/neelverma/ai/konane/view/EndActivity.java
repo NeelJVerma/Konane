@@ -45,7 +45,6 @@ public class EndActivity extends AppCompatActivity {
       }
 
       Button playAgainButton = findViewById(R.id.playAgainButton);
-
       playAgainButton.setOnClickListener(new PlayAgainButtonClickListener(EndActivity.this));
    }
 }

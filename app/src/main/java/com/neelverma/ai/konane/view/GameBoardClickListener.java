@@ -45,6 +45,7 @@ public class GameBoardClickListener implements View.OnClickListener {
    @Override
    public void onClick(View v) {
       gameObject.setTurnColor(gameObject.getPlayerWhite().isTurn() ? Slot.WHITE : Slot.BLACK);
+      System.out.println(gameObject.isSuccessiveMove());
 
       if (gameObject.isFirstClick()) {
          processFirstClick();
@@ -154,6 +155,7 @@ public class GameBoardClickListener implements View.OnClickListener {
 
          if (!gameObject.playerCanMove(gameObject.getPlayerWhite()) && gameObject.playerCanMove(gameObject.getPlayerBlack())) {
             Toast.makeText(boardActivity, "WHITE CAN'T MOVE", Toast.LENGTH_SHORT).show();
+            gameObject.setSuccessiveMove(false);
 
             if (gameObject.canMoveAgain(gameObject.getPotentialSuccessiveSlot(), gameObject.getTurnColor())) {
                gameObject.setSuccessiveMove(true);
@@ -177,6 +179,7 @@ public class GameBoardClickListener implements View.OnClickListener {
 
          if (!gameObject.playerCanMove(gameObject.getPlayerBlack()) && gameObject.playerCanMove(gameObject.getPlayerWhite())) {
             Toast.makeText(boardActivity, "BLACK CAN'T MOVE", Toast.LENGTH_SHORT).show();
+            gameObject.setSuccessiveMove(false);
 
             if (gameObject.canMoveAgain(gameObject.getPotentialSuccessiveSlot(), gameObject.getTurnColor())) {
                gameObject.setSuccessiveMove(true);
