@@ -22,7 +22,6 @@ import com.neelverma.ai.konane.model.Game;
 public class SaveGameButtonClickListener implements View.OnClickListener {
    private BoardActivity boardActivity;
    private Game gameObject;
-   private Context context;
    private static String filePath;
 
    /**
@@ -39,7 +38,7 @@ public class SaveGameButtonClickListener implements View.OnClickListener {
 
    @Override
    public void onClick(View v) {
-      context = v.getContext();
+      Context context = v.getContext();
 
       if (gameObject.isSuccessiveMove()) {
          Toast.makeText(boardActivity, "FILE NOT SAVED. CAN'T SAVE MID-TURN.", Toast.LENGTH_SHORT).show();

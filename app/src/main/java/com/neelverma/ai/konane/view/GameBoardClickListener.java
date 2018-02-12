@@ -10,6 +10,9 @@ package com.neelverma.ai.konane.view;
 import android.app.AlertDialog;
 import android.graphics.drawable.Drawable;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.neelverma.ai.konane.model.Game;
@@ -45,7 +48,6 @@ public class GameBoardClickListener implements View.OnClickListener {
    @Override
    public void onClick(View v) {
       gameObject.setTurnColor(gameObject.getPlayerWhite().isTurn() ? Slot.WHITE : Slot.BLACK);
-      System.out.println(gameObject.isSuccessiveMove());
 
       if (gameObject.isFirstClick()) {
          processFirstClick();
@@ -269,8 +271,8 @@ public class GameBoardClickListener implements View.OnClickListener {
    private boolean drawPotentialMoves(int turnColor, Drawable drawCell) {
       Slot slotRight = gameObject.getBoardObject().getSlot(gameObject.getSlotFrom().getRow(), gameObject.getSlotFrom().getColumn() + 2);
       Slot slotLeft = gameObject.getBoardObject().getSlot(gameObject.getSlotFrom().getRow(), gameObject.getSlotFrom().getColumn() - 2);
-      Slot slotUp = gameObject.getBoardObject().getSlot(gameObject.getSlotFrom().getRow() + 2, gameObject.getSlotFrom().getColumn());
-      Slot slotDown = gameObject.getBoardObject().getSlot(gameObject.getSlotFrom().getRow() - 2, gameObject.getSlotFrom().getColumn());
+      Slot slotUp = gameObject.getBoardObject().getSlot(gameObject.getSlotFrom().getRow() - 2, gameObject.getSlotFrom().getColumn());
+      Slot slotDown = gameObject.getBoardObject().getSlot(gameObject.getSlotFrom().getRow() + 2, gameObject.getSlotFrom().getColumn());
       boolean pieceCanMove = false;
 
       if (gameObject.isValidMove(gameObject.getSlotFrom(), slotRight, turnColor)) {

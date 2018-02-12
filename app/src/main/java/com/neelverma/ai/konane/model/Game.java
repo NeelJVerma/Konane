@@ -13,7 +13,14 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Random;
+import java.util.Stack;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 
 /**
@@ -226,19 +233,20 @@ public class Game {
 
          Slot slotRight = boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() + 1);
          Slot slotLeft = boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() - 1);
-         Slot slotUp = boardObject.getSlot(slotFrom.getRow() + 1, slotFrom.getColumn());
-         Slot slotDown = boardObject.getSlot(slotFrom.getRow() - 1, slotFrom.getColumn());
+         Slot slotDown = boardObject.getSlot(slotFrom.getRow() + 1, slotFrom.getColumn());
+         Slot slotUp = boardObject.getSlot(slotFrom.getRow() - 1, slotFrom.getColumn());
 
          if (directionMoving.equals("right")) {
             boardObject.setSlotColor(slotRight, Slot.EMPTY);
          } else if (directionMoving.equals("left")) {
             boardObject.setSlotColor(slotLeft, Slot.EMPTY);
          } else if (directionMoving.equals("down")) {
-            boardObject.setSlotColor(slotUp, Slot.EMPTY);
-         } else {
             boardObject.setSlotColor(slotDown, Slot.EMPTY);
+         } else {
+            boardObject.setSlotColor(slotUp, Slot.EMPTY);
          }
 
+         boardObject.printBoard();
          return true;
       }
 
@@ -257,8 +265,8 @@ public class Game {
             Slot slotFrom = boardObject.getSlot(r, c);
             Slot slotRight = boardObject.getSlot(r, c + 2);
             Slot slotLeft = boardObject.getSlot(r, c - 2);
-            Slot slotUp = boardObject.getSlot(r + 2, c);
-            Slot slotDown = boardObject.getSlot(r - 2, c);
+            Slot slotUp = boardObject.getSlot(r - 2, c);
+            Slot slotDown = boardObject.getSlot(r + 2, c);
 
             if (isValidMove(slotFrom, slotRight, playerObject.getColor())) {
                return true;
@@ -291,8 +299,8 @@ public class Game {
    public boolean canMoveAgain(Slot slotFrom, int turnColor) {
       Slot slotRight = boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() + 2);
       Slot slotLeft = boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() - 2);
-      Slot slotUp = boardObject.getSlot(slotFrom.getRow() + 2, slotFrom.getColumn());
-      Slot slotDown = boardObject.getSlot(slotFrom.getRow() - 2, slotFrom.getColumn());
+      Slot slotUp = boardObject.getSlot(slotFrom.getRow() - 2, slotFrom.getColumn());
+      Slot slotDown = boardObject.getSlot(slotFrom.getRow() + 2, slotFrom.getColumn());
 
       return ((isValidMove(slotFrom, slotRight, turnColor)) ||
          (isValidMove(slotFrom, slotLeft, turnColor)) ||
@@ -550,5 +558,130 @@ public class Game {
 
    public void setTurnColor(int turnColor) {
       this.turnColor = turnColor;
+   }
+
+   private boolean findFirstAvailableSlot(Slot visitedSlot) {
+      Slot slotRight = boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() + 2);
+      Slot slotLeft = boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() - 2);
+      Slot slotUp = boardObject.getSlot(visitedSlot.getRow() - 2, visitedSlot.getColumn());
+      Slot slotDown = boardObject.getSlot(visitedSlot.getRow() + 2, visitedSlot.getColumn());
+
+      setSlotFrom(boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn()));
+
+      if (isValidMove(slotFrom, slotUp, turnColor)) {
+         setSlotTo(boardObject.getSlot(slotUp.getRow(), slotUp.getColumn()));
+
+         return true;
+      }
+
+      if (isValidMove(slotFrom, slotRight, turnColor)) {
+         setSlotTo(boardObject.getSlot(slotRight.getRow(), slotRight.getColumn()));
+
+         return true;
+      }
+
+      if (isValidMove(slotFrom, slotDown, turnColor)) {
+         setSlotTo(boardObject.getSlot(slotDown.getRow(), slotDown.getColumn()));
+
+         return true;
+      }
+
+      if (isValidMove(slotFrom, slotLeft, turnColor)) {
+         setSlotTo(boardObject.getSlot(slotLeft.getRow(), slotLeft.getColumn()));
+
+         return true;
+      }
+
+      return false;
+   }
+
+   public void depthFirstSearch() {
+      Stack<Slot> dfsStack = new Stack<>();
+      HashSet<Slot> visitedSlots = new HashSet<>();
+      Slot startingSlot = boardObject.getSlot(0, 0);
+
+      dfsStack.push(startingSlot);
+
+      while (!dfsStack.empty()) {
+         Slot visitedSlot = dfsStack.pop();
+         int r = visitedSlot.getRow();
+         int c = visitedSlot.getColumn();
+
+         if (c == Board.MAX_COLUMN - 1) {
+            c = 0;
+         }
+
+         if (visitedSlots.contains(visitedSlot)) {
+            continue;
+         }
+
+         if (findFirstAvailableSlot(visitedSlot)) {
+            return;
+         }
+
+         visitedSlots.add(visitedSlot);
+
+         if (r + 1 < Board.MAX_ROW) {
+            dfsStack.push(boardObject.getSlot(r + 1, c));
+         }
+
+         if (r - 1 >= Board.MIN_ROW) {
+            dfsStack.push(boardObject.getSlot(r - 1, c));
+         }
+
+         if (c - 1 >= Board.MIN_COLUMN) {
+            dfsStack.push(boardObject.getSlot(r, c - 1));
+         }
+
+         if (c + 1 < Board.MAX_COLUMN) {
+            dfsStack.push(boardObject.getSlot(r, c + 1));
+         }
+      }
+   }
+
+   public void breadthFirstSearch() {
+      Queue<Slot> bfsQueue = new LinkedList<>();
+      HashSet<Slot> visitedSlots = new HashSet<>();
+      Slot startingSlot;
+
+      if (successiveMove) {
+         startingSlot = boardObject.getSlot(potentialSuccessiveSlot.getRow(), potentialSuccessiveSlot.getColumn());
+      } else {
+         startingSlot = boardObject.getSlot(0, 0);
+      }
+
+      bfsQueue.add(startingSlot);
+
+      while (!bfsQueue.isEmpty()) {
+         Slot visitedSlot = bfsQueue.poll();
+         int r = visitedSlot.getRow();
+         int c = visitedSlot.getColumn();
+
+         if (visitedSlots.contains(visitedSlot)) {
+            continue;
+         }
+
+         visitedSlots.add(visitedSlot);
+
+         if (findFirstAvailableSlot(visitedSlot)) {
+            return;
+         }
+
+         if (c - 1 >= Board.MIN_ROW) {
+            bfsQueue.add(boardObject.getSlot(r, c - 1));
+         }
+
+         if (c + 1 < Board.MAX_COLUMN) {
+            bfsQueue.add(boardObject.getSlot(r, c + 1));
+         }
+
+         if (r - 1 >= Board.MIN_ROW) {
+            bfsQueue.add(boardObject.getSlot(r - 1, c));
+         }
+
+         if (r + 1 < Board.MAX_ROW) {
+            bfsQueue.add(boardObject.getSlot(r + 1, c));
+         }
+      }
    }
 }

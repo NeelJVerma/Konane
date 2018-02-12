@@ -16,6 +16,9 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -26,6 +29,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.neelverma.ai.konane.R;
+import com.neelverma.ai.konane.model.Board;
 import com.neelverma.ai.konane.model.Game;
 import com.neelverma.ai.konane.model.Slot;
 
@@ -239,8 +243,7 @@ public class BoardActivity extends AppCompatActivity {
 
       Button nextButton = findViewById(R.id.nextButton);
       nextButton.setVisibility(View.VISIBLE);
-      // TODO: SET ON CLICK LISTENER FOR THE NEXT MOVE BUTTON. WILL CALL THE APPROPRIATE ALGO AND PASS IT
-      // TODO: BACK TO THE BOARD ACTIVITY.
+      nextButton.setOnClickListener(new NextButtonClickListener(BoardActivity.this));
 
       enableAlgorithmSpinner();
 
@@ -267,8 +270,6 @@ public class BoardActivity extends AppCompatActivity {
       dataAdapter.setDropDownViewResource(R.layout.spinner_layout);
       algorithmSpinner.setAdapter(dataAdapter);
       algorithmSpinner.setOnItemSelectedListener(new AlgorithmSpinnerItemSelectedListener(BoardActivity.this));
-
-      // TODO: ABSTRACT THIS INTO ITS OWN CLASS
    }
 
    /**

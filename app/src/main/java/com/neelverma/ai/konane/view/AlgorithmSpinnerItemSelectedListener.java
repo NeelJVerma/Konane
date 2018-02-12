@@ -57,7 +57,8 @@ public class AlgorithmSpinnerItemSelectedListener implements AdapterView.OnItemS
 
    @Override
    public void onNothingSelected(AdapterView<?> adapterView) {
-      // Need this method to implement AdapterView.OnItemSelectedListener.
+      // Need this method to implement AdapterView.OnItemSelectedListener, even though it doesns't do
+      // anything.
       return;
    }
 
