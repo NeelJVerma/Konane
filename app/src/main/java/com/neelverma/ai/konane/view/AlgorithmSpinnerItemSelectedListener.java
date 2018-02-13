@@ -17,7 +17,7 @@ import android.widget.AdapterView;
 
 public class AlgorithmSpinnerItemSelectedListener implements AdapterView.OnItemSelectedListener {
    private BoardActivity boardActivity;
-   private int algorithmType;
+   private static int algorithmType;
 
    public static final int BREADTH_FIRST = 0;
    public static final int DEPTH_FIRST = 1;
@@ -68,7 +68,7 @@ public class AlgorithmSpinnerItemSelectedListener implements AdapterView.OnItemS
     * Returns: The type of algorithm that was selected.
     */
 
-   public int getAlgorithmType() {
+   public static int getAlgorithmType() {
       return algorithmType;
    }
 }

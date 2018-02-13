@@ -10,9 +10,6 @@ package com.neelverma.ai.konane.view;
 import android.app.AlertDialog;
 import android.graphics.drawable.Drawable;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.neelverma.ai.konane.model.Game;

@@ -13,14 +13,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
 import java.util.Stack;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 
 /**
@@ -246,7 +243,6 @@ public class Game {
             boardObject.setSlotColor(slotUp, Slot.EMPTY);
          }
 
-         boardObject.printBoard();
          return true;
       }
 
@@ -560,6 +556,13 @@ public class Game {
       this.turnColor = turnColor;
    }
 
+   /**
+    * Description: Method to find the first available slot to move to as suggested by the algorithm
+    * (used with DFS and BFS).
+    * Parameters: Slot visitedSlot, which is the potential slot from.
+    * Returns: Whether or not a move was found for the visited slot.
+    */
+
    private boolean findFirstAvailableSlot(Slot visitedSlot) {
       Slot slotRight = boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() + 2);
       Slot slotLeft = boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() - 2);
@@ -595,10 +598,23 @@ public class Game {
       return false;
    }
 
+   /**
+    * Description: Method to build DFS tree and execute the algorithm. It stops when it finds the first
+    * available move.
+    * Parameters: None.
+    * Returns: Nothing.
+    */
+
    public void depthFirstSearch() {
       Stack<Slot> dfsStack = new Stack<>();
       HashSet<Slot> visitedSlots = new HashSet<>();
-      Slot startingSlot = boardObject.getSlot(0, 0);
+      Slot startingSlot;
+
+      if (successiveMove) {
+         startingSlot = boardObject.getSlot(potentialSuccessiveSlot.getRow(), potentialSuccessiveSlot.getColumn());
+      } else {
+         startingSlot = boardObject.getSlot(0, 0);
+      }
 
       dfsStack.push(startingSlot);
 
@@ -638,6 +654,13 @@ public class Game {
          }
       }
    }
+
+   /**
+    * Description: Method to build BFS tree and execute the algorithm. It stops when it finds the first
+    * available move.
+    * Parameters: None.
+    * Returns: Nothing.
+    */
 
    public void breadthFirstSearch() {
       Queue<Slot> bfsQueue = new LinkedList<>();
@@ -683,5 +706,13 @@ public class Game {
             bfsQueue.add(boardObject.getSlot(r + 1, c));
          }
       }
+   }
+
+   public void bestFirstSearch() {
+
+   }
+
+   public void branchAndBound() {
+
    }
 }
