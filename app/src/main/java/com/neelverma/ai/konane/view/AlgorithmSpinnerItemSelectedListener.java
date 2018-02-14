@@ -10,6 +10,8 @@ package com.neelverma.ai.konane.view;
 import android.view.View;
 import android.widget.AdapterView;
 
+import com.neelverma.ai.konane.model.Game;
+
 /**
  * Class to handle item selected listener for the algorithm spinner.
  * Created by Neel on 2/08/2018.
@@ -18,6 +20,7 @@ import android.widget.AdapterView;
 public class AlgorithmSpinnerItemSelectedListener implements AdapterView.OnItemSelectedListener {
    private BoardActivity boardActivity;
    private static int algorithmType;
+   private Game gameObject;
 
    public static final int BREADTH_FIRST = 0;
    public static final int DEPTH_FIRST = 1;
@@ -33,10 +36,16 @@ public class AlgorithmSpinnerItemSelectedListener implements AdapterView.OnItemS
 
    AlgorithmSpinnerItemSelectedListener(BoardActivity boardActivity) {
       this.boardActivity = boardActivity;
+      this.gameObject = boardActivity.getGameObject();
    }
 
    @Override
    public void onItemSelected(AdapterView<?> adapterView, View v, int i, long l) {
+      gameObject.getDfsMoves().clear();
+      gameObject.getBfsMoves().clear();
+      gameObject.getBestFirstSearchMoves().clear();
+      gameObject.getBranchAndBoundMoves().clear();
+
       String item = adapterView.getItemAtPosition(i).toString();
 
       switch (item) {

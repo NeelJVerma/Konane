@@ -7,10 +7,12 @@
 
 package com.neelverma.ai.konane.view;
 
-import android.app.AlertDialog;
-import android.graphics.drawable.Drawable;
+import android.util.Pair;
 import android.view.View;
-import android.widget.Toast;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.widget.ImageButton;
 
 import com.neelverma.ai.konane.model.Game;
 import com.neelverma.ai.konane.model.Slot;
@@ -18,6 +20,8 @@ import com.neelverma.ai.konane.model.Slot;
 public class NextButtonClickListener implements View.OnClickListener {
    private BoardActivity boardActivity;
    private Game gameObject;
+   private static ImageButton buttonOne;
+   private static ImageButton buttonTwo;
 
    /**
     * Description: Constructor. Will initialize the dialog box with an activity and a button choice.
@@ -28,182 +32,27 @@ public class NextButtonClickListener implements View.OnClickListener {
    NextButtonClickListener(BoardActivity boardActivity) {
       this.boardActivity = boardActivity;
       this.gameObject = boardActivity.getGameObject();
+      buttonOne = null;
+      buttonTwo = null;
    }
 
    @Override
    public void onClick(View v) {
-      if (!gameObject.isFirstClick()) {
-         Toast.makeText(boardActivity, "CAN'T FIND NEXT MOVE MID-TURN", Toast.LENGTH_SHORT).show();
+      if (buttonOne != null) {
+         buttonOne.clearAnimation();
+      }
 
-         return;
+      if (buttonTwo != null) {
+         buttonTwo.clearAnimation();
       }
 
       gameObject.setTurnColor(gameObject.getPlayerWhite().isTurn() ? Slot.WHITE : Slot.BLACK);
 
       executeAlgorithm();
-      executeMove();
-   }
 
-   /**
-    * Description: Method to execute the move suggested by the algorithm.
-    * Parameters: None.
-    * Returns: Nothing.
-    */
+      Pair<Slot, Slot> pair = gameObject.dequeueNextAvailableMove();
 
-   public void executeMove() {
-      gameObject.makeMove(gameObject.getSlotFrom(), gameObject.getSlotTo());
-
-      drawMoveSlots();
-
-      if (!switchTurns()) {
-         return;
-      }
-
-      if (gameObject.getPlayerBlack().isTurn()) {
-         boardActivity.getPlayerBlackTurn().setVisibility(View.VISIBLE);
-         boardActivity.getPlayerWhiteTurn().setVisibility(View.INVISIBLE);
-      } else {
-         boardActivity.getPlayerBlackTurn().setVisibility(View.INVISIBLE);
-         boardActivity.getPlayerWhiteTurn().setVisibility(View.VISIBLE);
-      }
-
-      if (!gameObject.playerCanMove(gameObject.getPlayerBlack()) && !gameObject.playerCanMove(gameObject.getPlayerWhite())) {
-         displayEndGameDialog();
-      }
-
-      if (gameObject.canMoveAgain(gameObject.getSlotTo(), gameObject.getTurnColor())) {
-         showOptionDialog("WOULD YOU LIKE TO CONTINUE YOUR TURN?");
-      }
-   }
-
-   /**
-    * Description: Method to display the end game dialog message to the user.
-    * Parameters: None.
-    * Returns: Nothing.
-    */
-
-   public void displayEndGameDialog() {
-      boardActivity.getPlayerWhiteTurn().setVisibility(View.INVISIBLE);
-      boardActivity.getPlayerBlackTurn().setVisibility(View.INVISIBLE);
-
-      AlertDialog.Builder builder = new AlertDialog.Builder(boardActivity);
-
-      builder.setMessage("GAME OVER. PRESS OK TO CONTINUE.")
-         .setCancelable(false)
-         .setPositiveButton("OK", new EndGameDialog(boardActivity));
-
-      AlertDialog alert = builder.create();
-      alert.show();
-   }
-
-   /**
-    * Description: Method to draw, on the GUI, the appropriate slot images onto the slots involved in
-    * a successful move.
-    * Parameters: None.
-    * Returns: Nothing.
-    */
-
-   private void drawMoveSlots() {
-      boardActivity.getGameBoard()[gameObject.getSlotFrom().getRow()][gameObject.getSlotFrom().getColumn()].setBackground(boardActivity.getDrawCell()[3]);
-      String directionMoving;
-
-      if (gameObject.getSlotFrom().getRow() == gameObject.getSlotTo().getRow()) {
-         if (gameObject.getSlotFrom().getColumn() - gameObject.getSlotTo().getColumn() == -2) {
-            directionMoving = "right";
-         } else {
-            directionMoving = "left";
-         }
-      } else {
-         if (gameObject.getSlotFrom().getRow() - gameObject.getSlotTo().getRow() == -2) {
-            directionMoving = "down";
-         } else {
-            directionMoving = "up";
-         }
-      }
-
-      if (directionMoving.equals("right")) {
-         boardActivity.getGameBoard()[gameObject.getSlotFrom().getRow()][gameObject.getSlotFrom().getColumn() + 1].setBackground(boardActivity.getDrawCell()[3]);
-      } else if (directionMoving.equals("left")) {
-         boardActivity.getGameBoard()[gameObject.getSlotFrom().getRow()][gameObject.getSlotFrom().getColumn() - 1].setBackground(boardActivity.getDrawCell()[3]);
-      } else if (directionMoving.equals("down")) {
-         boardActivity.getGameBoard()[gameObject.getSlotFrom().getRow() + 1][gameObject.getSlotFrom().getColumn()].setBackground(boardActivity.getDrawCell()[3]);
-      } else if (directionMoving.equals("up")) {
-         boardActivity.getGameBoard()[gameObject.getSlotFrom().getRow() - 1][gameObject.getSlotFrom().getColumn()].setBackground(boardActivity.getDrawCell()[3]);
-      }
-
-      Drawable draw;
-
-      if (gameObject.getTurnColor() == Slot.WHITE) {
-         draw = boardActivity.getDrawCell()[2];
-      } else {
-         draw = boardActivity.getDrawCell()[1];
-      }
-
-      boardActivity.getGameBoard()[gameObject.getSlotTo().getRow()][gameObject.getSlotTo().getColumn()].setBackground(draw);
-   }
-
-   /**
-    * Description: Method to verify a turn switch for a current turn cycle.
-    * Parameters: None.
-    * Returns: Whether or not the turn switch was successful.
-    */
-
-   private boolean switchTurns() {
-      if (gameObject.getPlayerBlack().isTurn()) {
-         gameObject.getPlayerBlack().addToScore();
-
-         String text = "BLACK: " + gameObject.getPlayerBlack().getScore();
-         boardActivity.getPlayerBlackScore().setText(text.trim());
-
-         gameObject.getPotentialSuccessiveSlot().setRow(gameObject.getSlotTo().getRow());
-         gameObject.getPotentialSuccessiveSlot().setColumn(gameObject.getSlotTo().getColumn());
-
-         if (!gameObject.playerCanMove(gameObject.getPlayerWhite()) && gameObject.playerCanMove(gameObject.getPlayerBlack())) {
-            Toast.makeText(boardActivity, "WHITE CAN'T MOVE", Toast.LENGTH_SHORT).show();
-
-            return false;
-         }
-
-         gameObject.getPlayerWhite().setIsTurn(true);
-         gameObject.getPlayerBlack().setIsTurn(false);
-      } else {
-         gameObject.getPlayerWhite().addToScore();
-
-         String text = "WHITE: " + gameObject.getPlayerWhite().getScore();
-         boardActivity.getPlayerWhiteScore().setText(text.trim());
-
-         gameObject.getPotentialSuccessiveSlot().setRow(gameObject.getSlotTo().getRow());
-         gameObject.getPotentialSuccessiveSlot().setColumn(gameObject.getSlotTo().getColumn());
-
-         if (!gameObject.playerCanMove(gameObject.getPlayerBlack()) && gameObject.playerCanMove(gameObject.getPlayerWhite())) {
-            Toast.makeText(boardActivity, "BLACK CAN'T MOVE", Toast.LENGTH_SHORT).show();
-
-            return false;
-         }
-
-         gameObject.getPlayerWhite().setIsTurn(false);
-         gameObject.getPlayerBlack().setIsTurn(true);
-      }
-
-      return true;
-   }
-
-   /**
-    * Description: Method to display a dialog message asking whether the user wants to move again.
-    * Parameters: String alertMessage, which is the message to set the alert with.
-    * Returns: Nothing.
-    */
-
-   private void showOptionDialog(String alertMessage) {
-      AlertDialog.Builder builder = new AlertDialog.Builder(boardActivity);
-
-      builder.setMessage(alertMessage)
-         .setCancelable(false)
-         .setPositiveButton("YES", new OptionDialog(boardActivity, true))
-         .setNegativeButton("NO", new OptionDialog(boardActivity, false));
-
-      AlertDialog alert = builder.create();
-      alert.show();
+      startButtonAnimations(pair);
    }
 
    /**
@@ -227,5 +76,43 @@ public class NextButtonClickListener implements View.OnClickListener {
             gameObject.branchAndBound(); // TODO: IMPLEMENT
             return;
       }
+   }
+
+   /**
+    * Description: Method to get the image button one.
+    * Parameters: None.
+    * Returns: The image button one.
+    */
+
+   public static ImageButton getButtonOne() {
+      return buttonOne;
+   }
+
+   /**
+    * Description: Method to get the image button two.
+    * Parameters: None.
+    * Returns: The image button two.
+    */
+
+   public static ImageButton getButtonTwo() {
+      return buttonTwo;
+   }
+
+   /**
+    * Description: Method to start the button blinking.
+    * Parameters: None.
+    * Returns: Nothing.
+    */
+
+   private void startButtonAnimations(Pair<Slot, Slot> pair) {
+      Animation animation = new AlphaAnimation(1, 0);
+      animation.setDuration(150);
+      animation.setInterpolator(new LinearInterpolator());
+      animation.setRepeatCount(Animation.INFINITE);
+      animation.setRepeatMode(Animation.REVERSE);
+      buttonOne = boardActivity.getGameBoard()[pair.first.getRow()][pair.first.getColumn()];
+      buttonTwo = boardActivity.getGameBoard()[pair.second.getRow()][pair.second.getColumn()];
+      buttonOne.startAnimation(animation);
+      buttonTwo.startAnimation(animation);
    }
 }

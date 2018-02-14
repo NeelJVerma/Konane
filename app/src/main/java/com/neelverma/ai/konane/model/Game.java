@@ -9,10 +9,13 @@ package com.neelverma.ai.konane.model;
 import android.content.Context;
 import android.util.Pair;
 
+import com.neelverma.ai.konane.view.AlgorithmSpinnerItemSelectedListener;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -53,6 +56,12 @@ public class Game {
    private boolean firstClick;
    private boolean successiveMove;
    private int turnColor;
+   private boolean switchedTurn;
+
+   private ArrayList<Pair<Slot, Slot>> dfsMoves;
+   private ArrayList<Pair<Slot, Slot>> bfsMoves;
+   private ArrayList<Pair<Slot, Slot>> bestFirstSearchMoves;
+   private ArrayList<Pair<Slot, Slot>> branchAndBoundMoves;
 
    /**
     * Description: Constructor. Will initialize the current game's variables through their
@@ -78,6 +87,12 @@ public class Game {
 
       successiveMove = false;
       turnColor = Slot.BLACK;
+      switchedTurn = false;
+
+      dfsMoves = new ArrayList<>();
+      bfsMoves = new ArrayList<>();
+      bestFirstSearchMoves = new ArrayList<>();
+      branchAndBoundMoves = new ArrayList<>();
    }
 
    /**
@@ -110,8 +125,8 @@ public class Game {
    /**
     * Description: Method to verify the validity of a move.
     * Parameters: Slot slotFrom, which is the slot to move from.
-    *             Slot slotTo, which is the slot to move to.
-    *             int color to verify the color restrictions of the move.
+    * Slot slotTo, which is the slot to move to.
+    * int color to verify the color restrictions of the move.
     * Returns: Whether the move is valid or not.
     */
 
@@ -202,7 +217,7 @@ public class Game {
    /**
     * Description: Method to make the specified move.
     * Parameters: Slot slotFrom, which is the slot to move from.
-    *             Slot slotTo, which is the slot to move to.
+    * Slot slotTo, which is the slot to move to.
     * Returns: Whether the move was successful or not.
     */
 
@@ -288,7 +303,7 @@ public class Game {
    /**
     * Description: Method to check whether or not a player can move again.
     * Parameters: Slot slotFrom, which is the slot to move from.
-    *             int turnColor, which is the color the current player is playing.
+    * int turnColor, which is the color the current player is playing.
     * Returns: Whether or not the player can move again.
     */
 
@@ -308,7 +323,7 @@ public class Game {
     * Description: Method to verify the validity of the possible chained jump. In a chained jump,
     * the player must move the same piece that they were already moving.
     * Parameters: Slot potentialSlotFrom, which is the potential slot to move from.
-    *             Slot slotFrom, which is the slot to move from.
+    * Slot slotFrom, which is the slot to move from.
     * Returns: Whether the move is valid or not.
     */
 
@@ -320,15 +335,15 @@ public class Game {
    /**
     * Description: Method to save the game state.
     * Parameters: String fileName, which is the name of the file to create/write.
-    *             Context context, which is the context in which to look for internal storage
-    *             directories.
+    * Context context, which is the context in which to look for internal storage
+    * directories.
     * Returns: The name of the full path to the file.
     */
 
    public String saveGame(String fileName, Context context) {
-      File file = new File(context.getFilesDir(),"saved_games");
+      File file = new File(context.getFilesDir(), "saved_games");
 
-      if(!file.exists()){
+      if (!file.exists()) {
          file.mkdir();
       }
 
@@ -357,7 +372,7 @@ public class Game {
 
          writer.println("Next player: " + nextPlayer);
          writer.close();
-      } catch(Exception e) {
+      } catch (Exception e) {
          e.printStackTrace();
       }
 
@@ -400,7 +415,7 @@ public class Game {
 
             lineCounter++;
          }
-      } catch(Exception e) {
+      } catch (Exception e) {
          e.printStackTrace();
       }
 
@@ -557,55 +572,95 @@ public class Game {
    }
 
    /**
-    * Description: Method to find the first available slot to move to as suggested by the algorithm
-    * (used with DFS and BFS).
-    * Parameters: Slot visitedSlot, which is the potential slot from.
-    * Returns: Whether or not a move was found for the visited slot.
+    * Description: Method to set switched turn.
+    * Parameters: boolean switchedTurn, which is the switched turn boolean.
+    * Returns: Nothing.
     */
 
-   private boolean findFirstAvailableSlot(Slot visitedSlot) {
+   public void setSwitchedTurn(boolean switchedTurn) {
+      this.switchedTurn = switchedTurn;
+   }
+
+   /**
+    * Description: Method to decide which algorithm to use and add it to the appropriate list of
+    * available moves.
+    * Parameters: Slot visitedSlot, which is the slot visited by the algorithm.
+    *             Slot addedSlot, which is the slot to potentially move to.
+    * Returns: Nothing.
+    */
+
+   private void decideAlgorithmAndAdd(Slot visitedSlot, Slot addedSlot) {
+      Pair<Slot, Slot> pairToAdd = new Pair<>(visitedSlot, addedSlot);
+
+      switch (AlgorithmSpinnerItemSelectedListener.getAlgorithmType()) {
+         case AlgorithmSpinnerItemSelectedListener.DEPTH_FIRST:
+            if (!dfsMoves.contains(pairToAdd)) {
+               dfsMoves.add(pairToAdd);
+            }
+
+            break;
+         case AlgorithmSpinnerItemSelectedListener.BREADTH_FIRST:
+            if (!bfsMoves.contains(pairToAdd)) {
+               bfsMoves.add(pairToAdd);
+            }
+
+            break;
+         case AlgorithmSpinnerItemSelectedListener.BEST_FIRST:
+            if (!bestFirstSearchMoves.contains(pairToAdd)) {
+               bestFirstSearchMoves.add(pairToAdd);
+            }
+
+            break;
+         case AlgorithmSpinnerItemSelectedListener.BRANCH_AND_BOUND:
+            if (!branchAndBoundMoves.contains(pairToAdd)) {
+               branchAndBoundMoves.add(pairToAdd);
+            }
+
+            break;
+      }
+   }
+
+   /**
+    * Description: Method to find the available slots that can be moved to.
+    * Parameters: Slot visitedSlot, which is the potential slot from.
+    * Returns: Nothing.
+    */
+
+   private void findAvailableSlots(Slot visitedSlot) {
       Slot slotRight = boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() + 2);
       Slot slotLeft = boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() - 2);
       Slot slotUp = boardObject.getSlot(visitedSlot.getRow() - 2, visitedSlot.getColumn());
       Slot slotDown = boardObject.getSlot(visitedSlot.getRow() + 2, visitedSlot.getColumn());
 
-      setSlotFrom(boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn()));
-
-      if (isValidMove(slotFrom, slotUp, turnColor)) {
-         setSlotTo(boardObject.getSlot(slotUp.getRow(), slotUp.getColumn()));
-
-         return true;
+      if (isValidMove(visitedSlot, slotUp, turnColor)) {
+         decideAlgorithmAndAdd(visitedSlot, slotUp);
       }
 
-      if (isValidMove(slotFrom, slotRight, turnColor)) {
-         setSlotTo(boardObject.getSlot(slotRight.getRow(), slotRight.getColumn()));
-
-         return true;
+      if (isValidMove(visitedSlot, slotRight, turnColor)) {
+         decideAlgorithmAndAdd(visitedSlot, slotRight);
       }
 
-      if (isValidMove(slotFrom, slotDown, turnColor)) {
-         setSlotTo(boardObject.getSlot(slotDown.getRow(), slotDown.getColumn()));
-
-         return true;
+      if (isValidMove(visitedSlot, slotDown, turnColor)) {
+         decideAlgorithmAndAdd(visitedSlot, slotDown);
       }
 
-      if (isValidMove(slotFrom, slotLeft, turnColor)) {
-         setSlotTo(boardObject.getSlot(slotLeft.getRow(), slotLeft.getColumn()));
-
-         return true;
+      if (isValidMove(visitedSlot, slotLeft, turnColor)) {
+         decideAlgorithmAndAdd(visitedSlot, slotLeft);
       }
-
-      return false;
    }
 
    /**
-    * Description: Method to build DFS tree and execute the algorithm. It stops when it finds the first
-    * available move.
+    * Description: Method to build DFS tree and execute the algorithm.
     * Parameters: None.
     * Returns: Nothing.
     */
 
    public void depthFirstSearch() {
+      if (switchedTurn) {
+         dfsMoves.clear();
+         switchedTurn = false;
+      }
+
       Stack<Slot> dfsStack = new Stack<>();
       HashSet<Slot> visitedSlots = new HashSet<>();
       Slot startingSlot;
@@ -631,7 +686,9 @@ public class Game {
             continue;
          }
 
-         if (findFirstAvailableSlot(visitedSlot)) {
+         findAvailableSlots(visitedSlot);
+
+         if (successiveMove) {
             return;
          }
 
@@ -645,24 +702,71 @@ public class Game {
             dfsStack.push(boardObject.getSlot(r - 1, c));
          }
 
-         if (c - 1 >= Board.MIN_COLUMN) {
-            dfsStack.push(boardObject.getSlot(r, c - 1));
-         }
-
          if (c + 1 < Board.MAX_COLUMN) {
             dfsStack.push(boardObject.getSlot(r, c + 1));
+         }
+
+         if (c - 1 >= Board.MIN_COLUMN) {
+            dfsStack.push(boardObject.getSlot(r, c - 1));
          }
       }
    }
 
    /**
-    * Description: Method to build BFS tree and execute the algorithm. It stops when it finds the first
-    * available move.
+    * Description: Method to pop off the first available move for whatever algorithm is selected.
+    * Parameters: None.
+    * Returns: A pair of slots, which is the slot to move from and the slot to move to.
+    */
+
+   public Pair<Slot, Slot> dequeueNextAvailableMove() {
+      Slot returnSlotOne;
+      Slot returnSlotTwo;
+
+      switch (AlgorithmSpinnerItemSelectedListener.getAlgorithmType()) {
+         case AlgorithmSpinnerItemSelectedListener.BREADTH_FIRST:
+            returnSlotOne = bfsMoves.get(0).first;
+            returnSlotTwo = bfsMoves.get(0).second;
+
+            bfsMoves.remove(0);
+
+            return new Pair<>(returnSlotOne, returnSlotTwo);
+         case AlgorithmSpinnerItemSelectedListener.DEPTH_FIRST:
+            returnSlotOne = dfsMoves.get(0).first;
+            returnSlotTwo = dfsMoves.get(0).second;
+
+            dfsMoves.remove(0);
+
+            return new Pair<>(returnSlotOne, returnSlotTwo);
+         case AlgorithmSpinnerItemSelectedListener.BEST_FIRST:
+            returnSlotOne = bestFirstSearchMoves.get(0).first;
+            returnSlotTwo = bestFirstSearchMoves.get(0).second;
+
+            bestFirstSearchMoves.remove(0);
+
+            return new Pair<>(returnSlotOne, returnSlotTwo);
+         // Default to handle not returning variables error.
+         default:
+            returnSlotOne = branchAndBoundMoves.get(0).first;
+            returnSlotTwo = branchAndBoundMoves.get(0).second;
+
+            branchAndBoundMoves.remove(0);
+
+            return new Pair<>(returnSlotOne, returnSlotTwo);
+      }
+   }
+
+   /**
+    * Description: Method to build BFS tree and execute the algorithm.
     * Parameters: None.
     * Returns: Nothing.
     */
 
    public void breadthFirstSearch() {
+      if (switchedTurn) {
+         bfsMoves.clear();
+         switchedTurn = false;
+      }
+
       Queue<Slot> bfsQueue = new LinkedList<>();
       HashSet<Slot> visitedSlots = new HashSet<>();
       Slot startingSlot;
@@ -684,11 +788,13 @@ public class Game {
             continue;
          }
 
-         visitedSlots.add(visitedSlot);
+         findAvailableSlots(visitedSlot);
 
-         if (findFirstAvailableSlot(visitedSlot)) {
+         if (successiveMove) {
             return;
          }
+
+         visitedSlots.add(visitedSlot);
 
          if (c - 1 >= Board.MIN_ROW) {
             bfsQueue.add(boardObject.getSlot(r, c - 1));
@@ -708,11 +814,63 @@ public class Game {
       }
    }
 
+   /**
+    * Description: Method to build best first search tree and execute the algorithm.
+    * Parameters: None.
+    * Returns: Nothing.
+    */
+
    public void bestFirstSearch() {
 
    }
 
+   /**
+    * Description: Method to build branch and bound tree and execute the algorithm.
+    * Parameters: None.
+    * Returns: Nothing.
+    */
+
    public void branchAndBound() {
 
+   }
+
+   /**
+    * Description: Method to get the list of all available moves for BFS.
+    * Parameters: None.
+    * Returns: The bfs moves list.
+    */
+
+   public ArrayList<Pair<Slot, Slot>> getBfsMoves() {
+      return bfsMoves;
+   }
+
+   /**
+    * Description: Method to get the list of all available moves for DFS.
+    * Parameters: None.
+    * Returns: The dfs moves list.
+    */
+
+   public ArrayList<Pair<Slot, Slot>> getDfsMoves() {
+      return dfsMoves;
+   }
+
+   /**
+    * Description: Method to get the list of all available moves for best first search.
+    * Parameters: None.
+    * Returns: The best first search moves list.
+    */
+
+   public ArrayList<Pair<Slot, Slot>> getBestFirstSearchMoves() {
+      return bestFirstSearchMoves;
+   }
+
+   /**
+    * Description: Method to get the list of all available moves for branch and bound.
+    * Parameters: None.
+    * Returns: The branch and bound moves list.
+    */
+
+   public ArrayList<Pair<Slot, Slot>> getBranchAndBoundMoves() {
+      return branchAndBoundMoves;
    }
 }

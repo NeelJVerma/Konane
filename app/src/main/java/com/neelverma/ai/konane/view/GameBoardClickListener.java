@@ -46,6 +46,14 @@ public class GameBoardClickListener implements View.OnClickListener {
    public void onClick(View v) {
       gameObject.setTurnColor(gameObject.getPlayerWhite().isTurn() ? Slot.WHITE : Slot.BLACK);
 
+      if (NextButtonClickListener.getButtonOne() != null) {
+         NextButtonClickListener.getButtonOne().clearAnimation();
+      }
+
+      if (NextButtonClickListener.getButtonTwo() != null) {
+         NextButtonClickListener.getButtonTwo().clearAnimation();
+      }
+
       if (gameObject.isFirstClick()) {
          processFirstClick();
       } else {
@@ -114,6 +122,8 @@ public class GameBoardClickListener implements View.OnClickListener {
       if (!switchTurns()) {
          return;
       }
+
+      gameObject.setSwitchedTurn(true);
 
       gameObject.setSuccessiveMove(false);
 
