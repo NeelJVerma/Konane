@@ -16,10 +16,16 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
+import java.util.Set;
 import java.util.Stack;
 
 
@@ -612,10 +618,6 @@ public class Game {
 
             break;
          case AlgorithmSpinnerItemSelectedListener.BRANCH_AND_BOUND:
-            if (!branchAndBoundMoves.contains(pairToAdd)) {
-               branchAndBoundMoves.add(pairToAdd);
-            }
-
             break;
       }
    }
@@ -627,6 +629,13 @@ public class Game {
     */
 
    private void findAvailableSlots(Slot visitedSlot) {
+      Integer[] slotTo = {-1, -1};
+      if (getMaxMoves(visitedSlot, slotTo, true) > 1) {
+         decideAlgorithmAndAdd(visitedSlot, boardObject.getSlot(slotTo[0], slotTo[1]));
+
+         return;
+      }
+
       Slot slotRight = boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() + 2);
       Slot slotLeft = boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() - 2);
       Slot slotUp = boardObject.getSlot(visitedSlot.getRow() - 2, visitedSlot.getColumn());
@@ -737,6 +746,7 @@ public class Game {
             dfsMoves.remove(0);
 
             return new Pair<>(returnSlotOne, returnSlotTwo);
+
          case AlgorithmSpinnerItemSelectedListener.BEST_FIRST:
             returnSlotOne = bestFirstSearchMoves.get(0).first;
             returnSlotTwo = bestFirstSearchMoves.get(0).second;
@@ -815,13 +825,172 @@ public class Game {
    }
 
    /**
+    * Description: Method to get the max distance that a given stone can go. This is used as a heuristic
+    * for best first search.
+    * Parameters: Slot slotFrom, which is the slot to move from.
+    *             Integer[] slotTo, which is the slot to move to. It is optional. It is also passed
+    *             as an integer array because that way, the modifications to it in the method will
+    *             retain outside the method.
+    *             boolean needsSlotTo, which is the boolean to determine whether or not the optional
+    *             slot to needs to be passed.
+    * Returns: The max distance that slot from can go.
+    */
+
+   private int getMaxMoves(Slot slotFrom, Integer[] slotTo, boolean needsSlotTo) {
+      ArrayList<Slot> visitedSlots = new ArrayList<>();
+
+      Stack<Slot> dfsStack = new Stack<>();
+
+      Slot startingSlot = boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn());
+      dfsStack.push(startingSlot);
+
+      HashMap<Slot, Integer> distances = new HashMap<>();
+      distances.put(startingSlot, 0);
+
+      while (!dfsStack.empty()) {
+         Slot visitedSlot = dfsStack.pop();
+
+         if (!visitedSlots.contains(visitedSlot)) {
+            visitedSlots.add(visitedSlot);
+
+            Slot slotRight = boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() + 2);
+            Slot slotLeft = boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() - 2);
+            Slot slotUp = boardObject.getSlot(visitedSlot.getRow() - 2, visitedSlot.getColumn());
+            Slot slotDown = boardObject.getSlot(visitedSlot.getRow() + 2, visitedSlot.getColumn());
+            int oppositeTurn = turnColor * -1;
+
+            boolean downGood = slotDown.getColor() == Slot.EMPTY && boardObject.getSlot(visitedSlot.getRow() + 1, visitedSlot.getColumn()).getColor() == oppositeTurn;
+            boolean upGood = slotUp.getColor() == Slot.EMPTY && boardObject.getSlot(visitedSlot.getRow() - 1, visitedSlot.getColumn()).getColor() == oppositeTurn;
+            boolean rightGood = slotRight.getColor() == Slot.EMPTY && boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() + 1).getColor() == oppositeTurn;
+            boolean leftGood = slotLeft.getColor() == Slot.EMPTY && boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() - 1).getColor() == oppositeTurn;
+
+            if (downGood && !visitedSlots.contains(slotDown)) {
+               distances.put(slotDown, distances.get(visitedSlot) + 1);
+               dfsStack.push(slotDown);
+            }
+
+            if (upGood && !visitedSlots.contains(slotUp)) {
+               distances.put(slotUp, distances.get(visitedSlot) + 1);
+               dfsStack.push(slotUp);
+            }
+
+            if (rightGood && !visitedSlots.contains(slotRight)) {
+               distances.put(slotRight, distances.get(visitedSlot) + 1);
+               dfsStack.push(slotRight);
+            }
+
+            if (leftGood && !visitedSlots.contains(slotLeft)) {
+               distances.put(slotLeft, distances.get(visitedSlot) + 1);
+               dfsStack.push(slotLeft);
+            }
+         }
+      }
+
+      int maxDistance = -1;
+
+      for (Slot key : distances.keySet()) {
+         if (distances.get(key) > maxDistance) {
+            if (needsSlotTo) {
+               slotTo[0] = key.getRow();
+               slotTo[1] = key.getColumn();
+            }
+            maxDistance = distances.get(key);
+         }
+      }
+
+      return maxDistance;
+   }
+
+   /**
     * Description: Method to build best first search tree and execute the algorithm.
     * Parameters: None.
     * Returns: Nothing.
     */
 
    public void bestFirstSearch() {
+      if (switchedTurn) {
+         bestFirstSearchMoves.clear();
+         switchedTurn = false;
+      }
 
+      Queue<Slot> bfsQueue = new LinkedList<>();
+      HashSet<Slot> visitedSlots = new HashSet<>();
+      Slot startingSlot;
+
+      HashMap<Slot, Integer> heuristics = new HashMap<>();
+
+      if (successiveMove) {
+         startingSlot = boardObject.getSlot(potentialSuccessiveSlot.getRow(), potentialSuccessiveSlot.getColumn());
+      } else {
+         startingSlot = boardObject.getSlot(0, 0);
+      }
+
+      heuristics.put(startingSlot, getMaxMoves(startingSlot, null, false));
+
+      bfsQueue.add(startingSlot);
+
+      while (!bfsQueue.isEmpty()) {
+         Slot visitedSlot = bfsQueue.poll();
+
+         if (visitedSlots.contains(visitedSlot)) {
+            continue;
+         }
+
+         if (successiveMove) {
+            break;
+         }
+
+         visitedSlots.add(visitedSlot);
+
+         Slot slotRight = boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() + 1);
+         Slot slotLeft = boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() - 1);
+         Slot slotUp = boardObject.getSlot(visitedSlot.getRow() - 1, visitedSlot.getColumn());
+         Slot slotDown = boardObject.getSlot(visitedSlot.getRow() + 1, visitedSlot.getColumn());
+
+         if (visitedSlot.getColor() == turnColor) {
+            heuristics.put(visitedSlot, getMaxMoves(visitedSlot, null, false));
+         }
+
+         if (slotLeft.getColor() != 2) {
+            bfsQueue.add(slotLeft);
+         }
+
+         if (slotRight.getColor() != 2) {
+            bfsQueue.add(slotRight);
+         }
+
+         if (slotUp.getColor() != 2) {
+            bfsQueue.add(slotUp);
+         }
+
+         if (slotDown.getColor() != 2) {
+            bfsQueue.add(slotDown);
+         }
+      }
+
+      ArrayList<Slot> possibleMoves = new ArrayList<>();
+
+      for (Slot slot : heuristics.keySet()) {
+         if (heuristics.get(slot) > 0 && slot.getColor() == turnColor) {
+            possibleMoves.add(slot);
+         }
+      }
+
+      for (int i = 0; i < possibleMoves.size() - 1; i++) {
+         for (int j = 0; j < possibleMoves.size() - i - 1; j++) {
+            if (heuristics.get(possibleMoves.get(j)) < heuristics.get(possibleMoves.get(j + 1))) {
+               Collections.swap(possibleMoves, j, j + 1);
+            }
+         }
+      }
+
+      Integer[] farthestSlot = {-1, -1};
+
+      for (Slot slot : possibleMoves) {
+         getMaxMoves(slot, farthestSlot, true);
+
+         bestFirstSearchMoves.add(new Pair<>(slot, boardObject.getSlot(farthestSlot[0], farthestSlot[1])));
+      }
    }
 
    /**
