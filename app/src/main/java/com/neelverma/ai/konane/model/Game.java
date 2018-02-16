@@ -981,6 +981,12 @@ public class Game {
             if (heuristics.get(possibleMoves.get(j)) < heuristics.get(possibleMoves.get(j + 1))) {
                Collections.swap(possibleMoves, j, j + 1);
             }
+
+            if (heuristics.get(possibleMoves.get(j)) == heuristics.get(possibleMoves.get(j + 1))) {
+               if (possibleMoves.get(j).getRow() > possibleMoves.get(j + 1).getRow()) {
+                  Collections.swap(possibleMoves, j, j + 1);
+               }
+            }
          }
       }
 
