@@ -13,6 +13,7 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.neelverma.ai.konane.model.Game;
 import com.neelverma.ai.konane.model.Slot;
@@ -38,6 +39,12 @@ public class NextButtonClickListener implements View.OnClickListener {
 
    @Override
    public void onClick(View v) {
+      if (gameObject.isSuccessiveMove()) {
+         Toast.makeText(boardActivity, "YOU CAN ONLY MOVE FROM THE POSITION YOU WERE ON", Toast.LENGTH_SHORT).show();
+
+         return;
+      }
+
       if (buttonOne != null) {
          buttonOne.clearAnimation();
       }
@@ -50,7 +57,13 @@ public class NextButtonClickListener implements View.OnClickListener {
 
       executeAlgorithm();
 
-      Pair<Slot, Slot> pair = gameObject.dequeueNextAvailableMove();
+      if (suggestedAllMoves()) {
+         Toast.makeText(boardActivity, "SUGGESTED ALL MOVES", Toast.LENGTH_SHORT).show();
+
+         return;
+      }
+
+      Pair<Slot, Slot> pair = dequeueNextAvailableMove();
 
       startButtonAnimations(pair);
    }
@@ -76,6 +89,87 @@ public class NextButtonClickListener implements View.OnClickListener {
             gameObject.branchAndBound(); // TODO: IMPLEMENT
             return;
       }
+   }
+
+   /**
+    * Description: Method to check if all the moves have been suggested.
+    * Parameters: None.
+    * Returns: Whether or not all moves have been suggested.
+    */
+
+   private boolean suggestedAllMoves() {
+      switch (AlgorithmSpinnerItemSelectedListener.getAlgorithmType()) {
+         case AlgorithmSpinnerItemSelectedListener.DEPTH_FIRST:
+            if (gameObject.getDfsMoves().size() == 0) {
+               return true;
+            }
+
+            break;
+         case AlgorithmSpinnerItemSelectedListener.BREADTH_FIRST:
+            if (gameObject.getBfsMoves().size() == 0) {
+               return true;
+            }
+
+            break;
+         case AlgorithmSpinnerItemSelectedListener.BEST_FIRST:
+            if (gameObject.getBestFirstSearchMoves().size() == 0) {
+               return true;
+            }
+
+            break;
+         case AlgorithmSpinnerItemSelectedListener.BRANCH_AND_BOUND:
+            if (gameObject.getBranchAndBoundMoves().size() == 0) {
+               return true;
+            }
+
+            break;
+      }
+
+      return false;
+   }
+
+   /**
+    * Description: Method to dequeue the next available move for whatever algorithm.
+    * Parameters: None.
+    * Returns: A pair of slots, which is the suggested move.
+    */
+
+   private Pair<Slot, Slot> dequeueNextAvailableMove() {
+      Slot returnSlotOne = new Slot(-1, -1, 2);
+      Slot returnSlotTwo = new Slot(-1, -1, 2);
+
+      switch (AlgorithmSpinnerItemSelectedListener.getAlgorithmType()) {
+         case AlgorithmSpinnerItemSelectedListener.DEPTH_FIRST:
+            returnSlotOne = gameObject.getDfsMoves().get(0).first;
+            returnSlotTwo = gameObject.getDfsMoves().get(0).second;
+
+            gameObject.getDfsMoves().remove(0);
+
+            break;
+         case AlgorithmSpinnerItemSelectedListener.BREADTH_FIRST:
+            returnSlotOne = gameObject.getBfsMoves().get(0).first;
+            returnSlotTwo = gameObject.getBfsMoves().get(0).second;
+
+            gameObject.getBfsMoves().remove(0);
+
+            break;
+         case AlgorithmSpinnerItemSelectedListener.BEST_FIRST:
+            returnSlotOne = gameObject.getBestFirstSearchMoves().get(0).first;
+            returnSlotTwo = gameObject.getBestFirstSearchMoves().get(0).second;
+
+            gameObject.getBestFirstSearchMoves().remove(0);
+
+            break;
+         case AlgorithmSpinnerItemSelectedListener.BRANCH_AND_BOUND:
+            returnSlotOne = gameObject.getBranchAndBoundMoves().get(0).first;
+            returnSlotTwo = gameObject.getBranchAndBoundMoves().get(0).second;
+
+            gameObject.getBranchAndBoundMoves().remove(0);
+
+            break;
+      }
+
+      return new Pair<>(returnSlotOne, returnSlotTwo);
    }
 
    /**
