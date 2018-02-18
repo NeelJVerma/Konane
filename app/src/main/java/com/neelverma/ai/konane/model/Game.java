@@ -595,6 +595,12 @@ public class Game {
       this.switchedTurn = switchedTurn;
    }
 
+   /**
+    * Description: Method to determine whether or not a slot can move.
+    * Parameters: Slot slot, which is the slot to check.
+    * Returns: If that slot can move or not.
+    */
+
    private boolean slotCanMove(Slot slot) {
       Slot slotRight = boardObject.getSlot(slot.getRow(), slot.getColumn() + 2);
       Slot slotLeft = boardObject.getSlot(slot.getRow(), slot.getColumn() - 2);
@@ -612,10 +618,11 @@ public class Game {
     */
 
    public void depthFirstSearch() {
-      if (switchedTurn) {
+      if (switchedTurn || AlgorithmSpinnerItemSelectedListener.isSelected()) {
          switchedTurn = false;
          dfsMoves.clear();
          startingSlotsDfs.clear();
+         AlgorithmSpinnerItemSelectedListener.setSelected(false);
 
          for (int r = 0; r < Board.MAX_ROW; r++) {
             for (int c = 0; c < Board.MAX_COLUMN; c++) {
@@ -698,10 +705,11 @@ public class Game {
     */
 
    public void breadthFirstSearch() {
-      if (switchedTurn) {
+      if (switchedTurn || AlgorithmSpinnerItemSelectedListener.isSelected()) {
          switchedTurn = false;
          bfsMoves.clear();
          startingSlotsBfs.clear();
+         AlgorithmSpinnerItemSelectedListener.setSelected(false);
 
          for (int r = 0; r < Board.MAX_ROW; r++) {
             for (int c = 0; c < Board.MAX_COLUMN; c++) {
@@ -784,10 +792,11 @@ public class Game {
     */
 
    public void bestFirstSearch() {
-      if (switchedTurn) {
+      if (switchedTurn || AlgorithmSpinnerItemSelectedListener.isSelected()) {
          switchedTurn = false;
          bestFirstSearchMoves.clear();
          startingSlotsBestFirstSearch.clear();
+         AlgorithmSpinnerItemSelectedListener.setSelected(false);
 
          for (int r = 0; r < Board.MAX_ROW; r++) {
             for (int c = 0; c < Board.MAX_COLUMN; c++) {
@@ -920,7 +929,6 @@ public class Game {
          startingSlotsBestFirstSearch.remove(0);
       }
 
-      System.out.println("NEW");
       for (Pair<Slot, Slot> p : heuristics.keySet()) {
          if (heuristics.get(p) > 0) {
             bestFirstSearchMoves.add(p);
@@ -936,9 +944,7 @@ public class Game {
             if (heuristics.get(bestFirstSearchMoves.get(j)) == heuristics.get(bestFirstSearchMoves.get(j + 1))) {
                if (bestFirstSearchMoves.get(j).first.getRow() > bestFirstSearchMoves.get(j + 1).first.getRow()) {
                   Collections.swap(bestFirstSearchMoves, j, j + 1);
-               }
-
-               if (bestFirstSearchMoves.get(j).first.getRow() == bestFirstSearchMoves.get(j + 1).first.getRow()) {
+               } else if (bestFirstSearchMoves.get(j).first.getRow() == bestFirstSearchMoves.get(j + 1).first.getRow()) {
                   if (bestFirstSearchMoves.get(j).first.getColumn() > bestFirstSearchMoves.get(j + 1).first.getColumn()) {
                      Collections.swap(bestFirstSearchMoves, j, j + 1);
                   }

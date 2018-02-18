@@ -21,6 +21,7 @@ public class AlgorithmSpinnerItemSelectedListener implements AdapterView.OnItemS
    private BoardActivity boardActivity;
    private static int algorithmType;
    private Game gameObject;
+   private static boolean selected;
 
    public static final int BREADTH_FIRST = 0;
    public static final int DEPTH_FIRST = 1;
@@ -37,10 +38,13 @@ public class AlgorithmSpinnerItemSelectedListener implements AdapterView.OnItemS
    AlgorithmSpinnerItemSelectedListener(BoardActivity boardActivity) {
       this.boardActivity = boardActivity;
       this.gameObject = boardActivity.getGameObject();
+      this.selected = false;
    }
 
    @Override
    public void onItemSelected(AdapterView<?> adapterView, View v, int i, long l) {
+      selected = true;
+
       gameObject.getDfsMoves().clear();
       gameObject.getBfsMoves().clear();
       gameObject.getBestFirstSearchMoves().clear();
@@ -79,5 +83,13 @@ public class AlgorithmSpinnerItemSelectedListener implements AdapterView.OnItemS
 
    public static int getAlgorithmType() {
       return algorithmType;
+   }
+
+   public static boolean isSelected() {
+      return selected;
+   }
+
+   public static void setSelected(boolean selectedStatic) {
+      selected = selectedStatic;
    }
 }

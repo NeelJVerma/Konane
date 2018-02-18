@@ -45,6 +45,12 @@ public class NextButtonClickListener implements View.OnClickListener {
          return;
       }
 
+      if (!gameObject.isFirstClick()) {
+         Toast.makeText(boardActivity, "CAN'T SUGGEST MOVE MID CLICK", Toast.LENGTH_SHORT).show();
+
+         return;
+      }
+
       if (buttonOne != null) {
          buttonOne.clearAnimation();
       }
