@@ -16,16 +16,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
-import java.util.Set;
 import java.util.Stack;
 
 
@@ -64,9 +60,9 @@ public class Game {
    private int turnColor;
    private boolean switchedTurn;
 
-   private ArrayList<Pair<Slot, Slot>> dfsMoves;
-   private ArrayList<Pair<Slot, Slot>> bfsMoves;
-   private ArrayList<Pair<Slot, Slot>> bestFirstSearchMoves;
+   private ArrayList<Pair<Pair<Slot, Slot>, Integer>> dfsMoves;
+   private ArrayList<Pair<Pair<Slot, Slot>, Integer>> bfsMoves;
+   private ArrayList<Pair<Pair<Slot, Slot>, Integer>> bestFirstSearchMoves;
    private ArrayList<Pair<Slot, Slot>> branchAndBoundMoves;
 
    private ArrayList<Slot> startingSlotsDfs;
@@ -642,6 +638,11 @@ public class Game {
 
       dfsStack.push(startingSlotsDfs.get(0));
 
+      HashMap<Pair<Slot, Slot>, Integer> scores = new HashMap<>();
+      scores.put(new Pair<>(startingSlotsDfs.get(0), startingSlotsDfs.get(0)), 0);
+
+      Slot previousVisited = null;
+
       while (!dfsStack.empty()) {
          Slot visitedSlot = dfsStack.pop();
 
@@ -665,34 +666,100 @@ public class Game {
          if (isValidMove(visitedSlot, slotUp, turnColor) || upGood) {
             dfsStack.push(slotUp);
 
-            if (!dfsMoves.contains(new Pair<>(startingSlotsDfs.get(0), slotUp))) {
-               dfsMoves.add(new Pair<>(startingSlotsDfs.get(0), slotUp));
+            Pair currentPair = new Pair<>(startingSlotsDfs.get(0), slotUp);
+
+            int score = 1;
+
+            if (previousVisited != null) {
+               Pair<Slot, Slot> previousPair = new Pair<>(startingSlotsDfs.get(0), visitedSlot);
+
+               if (scores.containsKey(previousPair)) {
+                  score = scores.get(previousPair) + 1;
+               }
+            }
+
+            if (!scores.containsKey(currentPair)) {
+               scores.put(currentPair, score);
+            }
+
+            if (!dfsMoves.contains(new Pair<>(new Pair<>(startingSlotsDfs.get(0), slotUp), scores.get(currentPair)))) {
+               dfsMoves.add(new Pair<>(new Pair<>(startingSlotsDfs.get(0), slotUp), scores.get(currentPair)));
             }
          }
 
          if (isValidMove(visitedSlot, slotRight, turnColor) || rightGood) {
             dfsStack.push(slotRight);
 
-            if (!dfsMoves.contains(new Pair<>(startingSlotsDfs.get(0), slotRight))) {
-               dfsMoves.add(new Pair<>(startingSlotsDfs.get(0), slotRight));
+            Pair currentPair = new Pair<>(startingSlotsDfs.get(0), slotRight);
+
+            int score = 1;
+
+            if (previousVisited != null) {
+               Pair<Slot, Slot> previousPair = new Pair<>(startingSlotsDfs.get(0), visitedSlot);
+
+               if (scores.containsKey(previousPair)) {
+                  score = scores.get(previousPair) + 1;
+               }
+            }
+
+            if (!scores.containsKey(currentPair)) {
+               scores.put(currentPair, score);
+            }
+
+            if (!dfsMoves.contains(new Pair<>(new Pair<>(startingSlotsDfs.get(0), slotRight), scores.get(currentPair)))) {
+               dfsMoves.add(new Pair<>(new Pair<>(startingSlotsDfs.get(0), slotRight), scores.get(currentPair)));
             }
          }
 
          if (isValidMove(visitedSlot, slotDown, turnColor) || downGood) {
             dfsStack.push(slotDown);
 
-            if (!dfsMoves.contains(new Pair<>(startingSlotsDfs.get(0), slotDown))) {
-               dfsMoves.add(new Pair<>(startingSlotsDfs.get(0), slotDown));
+            Pair currentPair = new Pair<>(startingSlotsDfs.get(0), slotDown);
+
+            int score = 1;
+
+            if (previousVisited != null) {
+               Pair<Slot, Slot> previousPair = new Pair<>(startingSlotsDfs.get(0), visitedSlot);
+
+               if (scores.containsKey(previousPair)) {
+                  score = scores.get(previousPair) + 1;
+               }
+            }
+
+            if (!scores.containsKey(currentPair)) {
+               scores.put(currentPair, score);
+            }
+
+            if (!dfsMoves.contains(new Pair<>(new Pair<>(startingSlotsDfs.get(0), slotDown), scores.get(currentPair)))) {
+               dfsMoves.add(new Pair<>(new Pair<>(startingSlotsDfs.get(0), slotDown), scores.get(currentPair)));
             }
          }
 
          if (isValidMove(visitedSlot, slotLeft, turnColor) || leftGood) {
             dfsStack.push(slotLeft);
 
-            if (!dfsMoves.contains(new Pair<>(startingSlotsDfs.get(0), slotLeft))) {
-               dfsMoves.add(new Pair<>(startingSlotsDfs.get(0), slotLeft));
+            Pair currentPair = new Pair<>(startingSlotsDfs.get(0), slotLeft);
+
+            int score = 1;
+
+            if (previousVisited != null) {
+               Pair<Slot, Slot> previousPair = new Pair<>(startingSlotsDfs.get(0), visitedSlot);
+
+               if (scores.containsKey(previousPair)) {
+                  score = scores.get(previousPair) + 1;
+               }
+            }
+
+            if (!scores.containsKey(currentPair)) {
+               scores.put(currentPair, score);
+            }
+
+            if (!dfsMoves.contains(new Pair<>(new Pair<>(startingSlotsDfs.get(0), slotLeft), scores.get(currentPair)))) {
+               dfsMoves.add(new Pair<>(new Pair<>(startingSlotsDfs.get(0), slotLeft), scores.get(currentPair)));
             }
          }
+
+         previousVisited = visitedSlot;
       }
 
       startingSlotsDfs.remove(0);
@@ -729,6 +796,11 @@ public class Game {
 
       bfsQueue.add(startingSlotsBfs.get(0));
 
+      HashMap<Pair<Slot, Slot>, Integer> scores = new HashMap<>();
+      scores.put(new Pair<>(startingSlotsBfs.get(0), startingSlotsBfs.get(0)), 0);
+
+      Slot previousVisited = null;
+
       while (!bfsQueue.isEmpty()) {
          Slot visitedSlot = bfsQueue.poll();
 
@@ -752,34 +824,100 @@ public class Game {
          if (isValidMove(visitedSlot, slotUp, turnColor) || upGood) {
             bfsQueue.add(slotUp);
 
-            if (!bfsMoves.contains(new Pair<>(startingSlotsBfs.get(0), slotUp))) {
-               bfsMoves.add(new Pair<>(startingSlotsBfs.get(0), slotUp));
+            Pair currentPair = new Pair<>(startingSlotsBfs.get(0), slotUp);
+
+            int score = 1;
+
+            if (previousVisited != null) {
+               Pair<Slot, Slot> previousPair = new Pair<>(startingSlotsBfs.get(0), visitedSlot);
+
+               if (scores.containsKey(previousPair)) {
+                  score = scores.get(previousPair) + 1;
+               }
+            }
+
+            if (!scores.containsKey(currentPair)) {
+               scores.put(currentPair, score);
+            }
+
+            if (!bfsMoves.contains(new Pair<>(new Pair<>(startingSlotsBfs.get(0), slotUp), scores.get(currentPair)))) {
+               bfsMoves.add(new Pair<>(new Pair<>(startingSlotsBfs.get(0), slotUp), scores.get(currentPair)));
             }
          }
 
          if (isValidMove(visitedSlot, slotRight, turnColor) || rightGood) {
             bfsQueue.add(slotRight);
 
-            if (!bfsMoves.contains(new Pair<>(startingSlotsBfs.get(0), slotRight))) {
-               bfsMoves.add(new Pair<>(startingSlotsBfs.get(0), slotRight));
+            Pair currentPair = new Pair<>(startingSlotsBfs.get(0), slotRight);
+
+            int score = 1;
+
+            if (previousVisited != null) {
+               Pair<Slot, Slot> previousPair = new Pair<>(startingSlotsBfs.get(0), visitedSlot);
+
+               if (scores.containsKey(previousPair)) {
+                  score = scores.get(previousPair) + 1;
+               }
+            }
+
+            if (!scores.containsKey(currentPair)) {
+               scores.put(currentPair, score);
+            }
+
+            if (!bfsMoves.contains(new Pair<>(new Pair<>(startingSlotsBfs.get(0), slotRight), scores.get(currentPair)))) {
+               bfsMoves.add(new Pair<>(new Pair<>(startingSlotsBfs.get(0), slotRight), scores.get(currentPair)));
             }
          }
 
          if (isValidMove(visitedSlot, slotDown, turnColor) || downGood) {
             bfsQueue.add(slotDown);
 
-            if (!bfsMoves.contains(new Pair<>(startingSlotsBfs.get(0), slotDown))) {
-               bfsMoves.add(new Pair<>(startingSlotsBfs.get(0), slotDown));
+            Pair currentPair = new Pair<>(startingSlotsBfs.get(0), slotDown);
+
+            int score = 1;
+
+            if (previousVisited != null) {
+               Pair<Slot, Slot> previousPair = new Pair<>(startingSlotsBfs.get(0), visitedSlot);
+
+               if (scores.containsKey(previousPair)) {
+                  score = scores.get(previousPair) + 1;
+               }
+            }
+
+            if (!scores.containsKey(currentPair)) {
+               scores.put(currentPair, score);
+            }
+
+            if (!bfsMoves.contains(new Pair<>(new Pair<>(startingSlotsBfs.get(0), slotDown), scores.get(currentPair)))) {
+               bfsMoves.add(new Pair<>(new Pair<>(startingSlotsBfs.get(0), slotDown), scores.get(currentPair)));
             }
          }
 
          if (isValidMove(visitedSlot, slotLeft, turnColor) || leftGood) {
             bfsQueue.add(slotLeft);
 
-            if (!bfsMoves.contains(new Pair<>(startingSlotsBfs.get(0), slotLeft))) {
-               bfsMoves.add(new Pair<>(startingSlotsBfs.get(0), slotLeft));
+            Pair currentPair = new Pair<>(startingSlotsBfs.get(0), slotLeft);
+
+            int score = 1;
+
+            if (previousVisited != null) {
+               Pair<Slot, Slot> previousPair = new Pair<>(startingSlotsBfs.get(0), visitedSlot);
+
+               if (scores.containsKey(previousPair)) {
+                  score = scores.get(previousPair) + 1;
+               }
+            }
+
+            if (!scores.containsKey(currentPair)) {
+               scores.put(currentPair, score);
+            }
+
+            if (!bfsMoves.contains(new Pair<>(new Pair<>(startingSlotsBfs.get(0), slotLeft), scores.get(currentPair)))) {
+               bfsMoves.add(new Pair<>(new Pair<>(startingSlotsBfs.get(0), slotLeft), scores.get(currentPair)));
             }
          }
+
+         previousVisited = visitedSlot;
       }
 
       startingSlotsBfs.remove(0);
@@ -931,21 +1069,21 @@ public class Game {
 
       for (Pair<Slot, Slot> p : heuristics.keySet()) {
          if (heuristics.get(p) > 0) {
-            bestFirstSearchMoves.add(p);
+            bestFirstSearchMoves.add(new Pair<>(p, heuristics.get(p)));
          }
       }
 
       for (int i = 0; i < bestFirstSearchMoves.size() - 1; i++) {
          for (int j = 0; j < bestFirstSearchMoves.size() - i - 1; j++) {
-            if (heuristics.get(bestFirstSearchMoves.get(j)) < heuristics.get(bestFirstSearchMoves.get(j + 1))) {
+            if (heuristics.get(bestFirstSearchMoves.get(j).first) < heuristics.get(bestFirstSearchMoves.get(j + 1).first)) {
                Collections.swap(bestFirstSearchMoves, j, j + 1);
             }
 
-            if (heuristics.get(bestFirstSearchMoves.get(j)) == heuristics.get(bestFirstSearchMoves.get(j + 1))) {
-               if (bestFirstSearchMoves.get(j).first.getRow() > bestFirstSearchMoves.get(j + 1).first.getRow()) {
+            if (heuristics.get(bestFirstSearchMoves.get(j).first) == heuristics.get(bestFirstSearchMoves.get(j + 1).first)) {
+               if (bestFirstSearchMoves.get(j).first.first.getRow() > bestFirstSearchMoves.get(j + 1).first.first.getRow()) {
                   Collections.swap(bestFirstSearchMoves, j, j + 1);
-               } else if (bestFirstSearchMoves.get(j).first.getRow() == bestFirstSearchMoves.get(j + 1).first.getRow()) {
-                  if (bestFirstSearchMoves.get(j).first.getColumn() > bestFirstSearchMoves.get(j + 1).first.getColumn()) {
+               } else if (bestFirstSearchMoves.get(j).first.first.getRow() == bestFirstSearchMoves.get(j + 1).first.first.getRow()) {
+                  if (bestFirstSearchMoves.get(j).first.first.getColumn() > bestFirstSearchMoves.get(j + 1).first.first.getColumn()) {
                      Collections.swap(bestFirstSearchMoves, j, j + 1);
                   }
                }
@@ -970,7 +1108,7 @@ public class Game {
     * Returns: The bfs moves list.
     */
 
-   public ArrayList<Pair<Slot, Slot>> getBfsMoves() {
+   public ArrayList<Pair<Pair<Slot, Slot>, Integer>> getBfsMoves() {
       return bfsMoves;
    }
 
@@ -980,7 +1118,7 @@ public class Game {
     * Returns: The dfs moves list.
     */
 
-   public ArrayList<Pair<Slot, Slot>> getDfsMoves() {
+   public ArrayList<Pair<Pair<Slot, Slot>, Integer>> getDfsMoves() {
       return dfsMoves;
    }
 
@@ -990,7 +1128,7 @@ public class Game {
     * Returns: The best first search moves list.
     */
 
-   public ArrayList<Pair<Slot, Slot>> getBestFirstSearchMoves() {
+   public ArrayList<Pair<Pair<Slot, Slot>, Integer>> getBestFirstSearchMoves() {
       return bestFirstSearchMoves;
    }
 

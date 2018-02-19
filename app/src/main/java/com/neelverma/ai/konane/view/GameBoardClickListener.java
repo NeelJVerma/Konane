@@ -54,6 +54,16 @@ public class GameBoardClickListener implements View.OnClickListener {
          NextButtonClickListener.getButtonTwo().clearAnimation();
       }
 
+      if (NextButtonClickListener.getPlayerScore() != null) {
+         NextButtonClickListener.getPlayerScore().clearAnimation();
+
+         String blackScore = "BLACK: " + gameObject.getPlayerBlack().getScore();
+         String whiteScore = "WHITE: " + gameObject.getPlayerWhite().getScore();
+
+         boardActivity.getPlayerBlackScore().setText(blackScore.trim());
+         boardActivity.getPlayerWhiteScore().setText(whiteScore.trim());
+      }
+
       if (gameObject.isFirstClick()) {
          processFirstClick();
       } else {
