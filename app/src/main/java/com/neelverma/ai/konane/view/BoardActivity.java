@@ -25,6 +25,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.neelverma.ai.konane.R;
+import com.neelverma.ai.konane.model.Board;
 import com.neelverma.ai.konane.model.Game;
 import com.neelverma.ai.konane.model.Slot;
 
@@ -53,8 +54,8 @@ import java.util.List;
  */
 
 public class BoardActivity extends AppCompatActivity {
-   public static final int MAX_ROW = 6;
-   public static final int MAX_COL = 6;
+   public static final int MAX_ROW = Board.MAX_ROW;
+   public static final int MAX_COL = Board.MAX_COLUMN;
    public static final int NEW_GAME = 0;
    public static final int LOADED_GAME = 1;
 

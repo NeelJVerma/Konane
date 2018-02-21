@@ -81,22 +81,4 @@ public class Board {
       Slot ret = new Slot(MAX_ROW, MAX_COLUMN, 2);
       return ret;
    }
-
-   public void printBoard() {
-      for (int i = 0; i < 6; i++) {
-         for (int j = 0; j < 6; j++) {
-            if (gameBoard[i][j].getColor() == 1) {
-               System.out.print("B ");
-            } else if (gameBoard[i][j].getColor() == -1) {
-               System.out.print("W ");
-            } else {
-               System.out.print("O ");
-            }
-         }
-
-         System.out.println();
-      }
-
-      System.out.println();
-   }
 }

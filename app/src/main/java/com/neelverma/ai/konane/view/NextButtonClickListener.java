@@ -103,7 +103,7 @@ public class NextButtonClickListener implements View.OnClickListener {
             gameObject.bestFirstSearch();
             break;
          case AlgorithmSpinnerItemSelectedListener.BRANCH_AND_BOUND:
-            gameObject.branchAndBound(); // TODO: IMPLEMENT
+            gameObject.branchAndBound();
             break;
       }
    }
@@ -182,8 +182,9 @@ public class NextButtonClickListener implements View.OnClickListener {
 
             break;
          case AlgorithmSpinnerItemSelectedListener.BRANCH_AND_BOUND:
-            returnSlotOne = gameObject.getBranchAndBoundMoves().get(0).first;
-            returnSlotTwo = gameObject.getBranchAndBoundMoves().get(0).second;
+            returnSlotOne = gameObject.getBranchAndBoundMoves().get(0).first.first;
+            returnSlotTwo = gameObject.getBranchAndBoundMoves().get(0).first.second;
+            returnScore = gameObject.getBranchAndBoundMoves().get(0).second;
 
             gameObject.getBranchAndBoundMoves().remove(0);
 
