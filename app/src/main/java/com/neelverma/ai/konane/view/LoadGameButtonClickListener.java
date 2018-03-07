@@ -8,7 +8,16 @@
 package com.neelverma.ai.konane.view;
 
 import android.content.Intent;
+import android.os.Environment;
 import android.view.View;
+import android.widget.TextView;
+
+import com.neelverma.ai.konane.R;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
  * Class to handle button click action for the load game button.
@@ -33,7 +42,7 @@ public class LoadGameButtonClickListener implements View.OnClickListener {
    public void onClick(View v) {
       Intent boardIntent = new Intent(mainActivity, BoardActivity.class);
 
-      int gameState = SaveGameButtonClickListener.getFilePath() == null ? BoardActivity.NEW_GAME : BoardActivity.LOADED_GAME;
+      int gameState = BoardActivity.LOADED_GAME;
 
       boardIntent.putExtra("gameType", gameState);
       mainActivity.startActivity(boardIntent);

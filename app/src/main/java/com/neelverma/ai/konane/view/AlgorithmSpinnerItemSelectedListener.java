@@ -9,7 +9,9 @@ package com.neelverma.ai.konane.view;
 
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
 
+import com.neelverma.ai.konane.R;
 import com.neelverma.ai.konane.model.Game;
 
 /**
@@ -28,6 +30,8 @@ public class AlgorithmSpinnerItemSelectedListener implements AdapterView.OnItemS
    public static final int BEST_FIRST = 2;
    public static final int BRANCH_AND_BOUND = 3;
 
+   private static EditText depthEditText;
+
    /**
     * Description: Constructor. Will initialize the listener with the activity on which the button
     * is clicked.
@@ -38,7 +42,8 @@ public class AlgorithmSpinnerItemSelectedListener implements AdapterView.OnItemS
    AlgorithmSpinnerItemSelectedListener(BoardActivity boardActivity) {
       this.boardActivity = boardActivity;
       this.gameObject = boardActivity.getGameObject();
-      this.selected = false;
+      selected = false;
+      depthEditText = boardActivity.findViewById(R.id.depthEditText);
    }
 
    @Override
@@ -64,7 +69,14 @@ public class AlgorithmSpinnerItemSelectedListener implements AdapterView.OnItemS
             break;
          case "BRANCH AND BOUND":
             algorithmType = BRANCH_AND_BOUND;
+
+            depthEditText.setVisibility(View.VISIBLE);
+
             break;
+      }
+
+      if (algorithmType != BRANCH_AND_BOUND) {
+         depthEditText.setVisibility(View.INVISIBLE);
       }
    }
 
@@ -91,5 +103,9 @@ public class AlgorithmSpinnerItemSelectedListener implements AdapterView.OnItemS
 
    public static void setSelected(boolean selectedStatic) {
       selected = selectedStatic;
+   }
+
+   public static EditText getDepthEditText() {
+      return depthEditText;
    }
 }

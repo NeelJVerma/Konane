@@ -7,12 +7,14 @@
 
 package com.neelverma.ai.konane.model;
 import android.content.Context;
+import android.os.Environment;
 import android.util.Pair;
 
 import com.neelverma.ai.konane.view.AlgorithmSpinnerItemSelectedListener;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -353,7 +355,12 @@ public class Game {
     */
 
    public String saveGame(String fileName, Context context) {
-      File file = new File(context.getFilesDir(), "saved_games");
+      fileName = "saved_game.txt";
+      String filePath = "/storage/download/";
+
+      File saveFile = new File(filePath, fileName);
+
+      /*File file = new File(context.getFilesDir(), "saved_games");
 
       if (!file.exists()) {
          file.mkdir();
@@ -386,7 +393,7 @@ public class Game {
          writer.close();
       } catch (Exception e) {
          e.printStackTrace();
-      }
+      }*/
 
       return saveFile.getAbsolutePath();
    }
@@ -397,12 +404,15 @@ public class Game {
     * Returns: Nothing.
     */
 
-   public void setGameFromState(String filePath) {
+   public void setGameFromState() {
+      File filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+      File readFile = new File(filePath, "serial3.txt");
+
       int whiteScore = 0;
       int blackScore = 0;
       String turn = "black";
 
-      try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath))) {
+      try (BufferedReader bufferedReader = new BufferedReader(new FileReader(readFile))) {
          String line;
          int lineCounter = 0;
 
@@ -680,9 +690,7 @@ public class Game {
                }
             }
 
-            if (!scores.containsKey(currentPair)) {
-               scores.put(currentPair, score);
-            }
+            scores.put(currentPair, score);
 
             if (!dfsMoves.contains(new Pair<>(new Pair<>(startingSlotsDfs.get(0), slotUp), scores.get(currentPair)))) {
                dfsMoves.add(new Pair<>(new Pair<>(startingSlotsDfs.get(0), slotUp), scores.get(currentPair)));
@@ -704,9 +712,7 @@ public class Game {
                }
             }
 
-            if (!scores.containsKey(currentPair)) {
-               scores.put(currentPair, score);
-            }
+            scores.put(currentPair, score);
 
             if (!dfsMoves.contains(new Pair<>(new Pair<>(startingSlotsDfs.get(0), slotRight), scores.get(currentPair)))) {
                dfsMoves.add(new Pair<>(new Pair<>(startingSlotsDfs.get(0), slotRight), scores.get(currentPair)));
@@ -728,9 +734,7 @@ public class Game {
                }
             }
 
-            if (!scores.containsKey(currentPair)) {
-               scores.put(currentPair, score);
-            }
+            scores.put(currentPair, score);
 
             if (!dfsMoves.contains(new Pair<>(new Pair<>(startingSlotsDfs.get(0), slotDown), scores.get(currentPair)))) {
                dfsMoves.add(new Pair<>(new Pair<>(startingSlotsDfs.get(0), slotDown), scores.get(currentPair)));
@@ -752,9 +756,7 @@ public class Game {
                }
             }
 
-            if (!scores.containsKey(currentPair)) {
-               scores.put(currentPair, score);
-            }
+            scores.put(currentPair, score);
 
             if (!dfsMoves.contains(new Pair<>(new Pair<>(startingSlotsDfs.get(0), slotLeft), scores.get(currentPair)))) {
                dfsMoves.add(new Pair<>(new Pair<>(startingSlotsDfs.get(0), slotLeft), scores.get(currentPair)));
@@ -838,9 +840,7 @@ public class Game {
                }
             }
 
-            if (!scores.containsKey(currentPair)) {
-               scores.put(currentPair, score);
-            }
+            scores.put(currentPair, score);
 
             if (!bfsMoves.contains(new Pair<>(new Pair<>(startingSlotsBfs.get(0), slotUp), scores.get(currentPair)))) {
                bfsMoves.add(new Pair<>(new Pair<>(startingSlotsBfs.get(0), slotUp), scores.get(currentPair)));
@@ -862,9 +862,7 @@ public class Game {
                }
             }
 
-            if (!scores.containsKey(currentPair)) {
-               scores.put(currentPair, score);
-            }
+            scores.put(currentPair, score);
 
             if (!bfsMoves.contains(new Pair<>(new Pair<>(startingSlotsBfs.get(0), slotRight), scores.get(currentPair)))) {
                bfsMoves.add(new Pair<>(new Pair<>(startingSlotsBfs.get(0), slotRight), scores.get(currentPair)));
@@ -886,9 +884,7 @@ public class Game {
                }
             }
 
-            if (!scores.containsKey(currentPair)) {
-               scores.put(currentPair, score);
-            }
+            scores.put(currentPair, score);
 
             if (!bfsMoves.contains(new Pair<>(new Pair<>(startingSlotsBfs.get(0), slotDown), scores.get(currentPair)))) {
                bfsMoves.add(new Pair<>(new Pair<>(startingSlotsBfs.get(0), slotDown), scores.get(currentPair)));
@@ -910,9 +906,7 @@ public class Game {
                }
             }
 
-            if (!scores.containsKey(currentPair)) {
-               scores.put(currentPair, score);
-            }
+            scores.put(currentPair, score);
 
             if (!bfsMoves.contains(new Pair<>(new Pair<>(startingSlotsBfs.get(0), slotLeft), scores.get(currentPair)))) {
                bfsMoves.add(new Pair<>(new Pair<>(startingSlotsBfs.get(0), slotLeft), scores.get(currentPair)));
@@ -957,7 +951,7 @@ public class Game {
          Stack<Slot> dfsStack = new Stack<>();
          HashSet<Slot> visitedSlots = new HashSet<>();
          Slot startingSlot = boardObject.getSlot(startingSlotsBestFirstSearch.get(0).getRow(), startingSlotsBestFirstSearch.get(0).getColumn());
-         dfsStack.add(startingSlot);
+         dfsStack.push(startingSlot);
 
          heuristics.put(new Pair<>(startingSlot, startingSlot), 0);
 
@@ -965,6 +959,7 @@ public class Game {
 
          while (!dfsStack.empty()) {
             Slot visitedSlot = dfsStack.pop();
+            System.out.println(visitedSlot.getRow() + "x" + visitedSlot.getColumn());
 
             if (visitedSlots.contains(visitedSlot)) {
                continue;
@@ -998,9 +993,7 @@ public class Game {
                   }
                }
 
-               if (!heuristics.containsKey(currentPair)) {
-                  heuristics.put(currentPair, heuristicValue);
-               }
+               heuristics.put(currentPair, heuristicValue);
             }
 
             if (isValidMove(startingSlot, slotRight, turnColor) || rightGood) {
@@ -1018,9 +1011,7 @@ public class Game {
                   }
                }
 
-               if (!heuristics.containsKey(currentPair)) {
-                  heuristics.put(currentPair, heuristicValue);
-               }
+               heuristics.put(currentPair, heuristicValue);
             }
 
             if (isValidMove(startingSlot, slotDown, turnColor) || downGood) {
@@ -1038,9 +1029,7 @@ public class Game {
                   }
                }
 
-               if (!heuristics.containsKey(currentPair)) {
-                  heuristics.put(currentPair, heuristicValue);
-               }
+               heuristics.put(currentPair, heuristicValue);
             }
 
             if (isValidMove(startingSlot, slotLeft, turnColor) || leftGood) {
@@ -1058,9 +1047,7 @@ public class Game {
                   }
                }
 
-               if (!heuristics.containsKey(currentPair)) {
-                  heuristics.put(currentPair, heuristicValue);
-               }
+               heuristics.put(currentPair, heuristicValue);
             }
 
             previousVisited = visitedSlot;
@@ -1100,7 +1087,7 @@ public class Game {
     * Returns: Nothing.
     */
 
-   public void branchAndBound() {
+   public void branchAndBound(int maxDepth) {
       if (switchedTurn || AlgorithmSpinnerItemSelectedListener.isSelected()) {
          switchedTurn = false;
          branchAndBoundMoves.clear();
@@ -1168,11 +1155,9 @@ public class Game {
                   }
                }
 
-               if (!depths.containsKey(currentPair)) {
-                  depths.put(currentPair, depth);
-               }
+               depths.put(currentPair, depth);
 
-               if (depths.get(currentPair) > depths.get(maxDepthPair)) {
+               if (depths.get(currentPair) > depths.get(maxDepthPair) && depths.get(currentPair) <= maxDepth) {
                   maxDepthPair = currentPair;
                }
             }
@@ -1192,11 +1177,9 @@ public class Game {
                   }
                }
 
-               if (!depths.containsKey(currentPair)) {
-                  depths.put(currentPair, depth);
-               }
+               depths.put(currentPair, depth);
 
-               if (depths.get(currentPair) > depths.get(maxDepthPair)) {
+               if (depths.get(currentPair) > depths.get(maxDepthPair) && depths.get(currentPair) <= maxDepth) {
                   maxDepthPair = currentPair;
                }
             }
@@ -1216,11 +1199,9 @@ public class Game {
                   }
                }
 
-               if (!depths.containsKey(currentPair)) {
-                  depths.put(currentPair, depth);
-               }
+               depths.put(currentPair, depth);
 
-               if (depths.get(currentPair) > depths.get(maxDepthPair)) {
+               if (depths.get(currentPair) > depths.get(maxDepthPair) && depths.get(currentPair) <= maxDepth) {
                   maxDepthPair = currentPair;
                }
             }
@@ -1240,11 +1221,9 @@ public class Game {
                   }
                }
 
-               if (!depths.containsKey(currentPair)) {
-                  depths.put(currentPair, depth);
-               }
+               depths.put(currentPair, depth);
 
-               if (depths.get(currentPair) > depths.get(maxDepthPair)) {
+               if (depths.get(currentPair) > depths.get(maxDepthPair) && depths.get(currentPair) <= maxDepth) {
                   maxDepthPair = currentPair;
                }
             }
@@ -1285,7 +1264,7 @@ public class Game {
 
             Pair currentPair = new Pair<>(maxDepthPair.first, slotUp);
 
-            if (!branchAndBoundMoves.contains(new Pair<>(new Pair<>(maxDepthPair.first, slotUp), depths.get(currentPair)))) {
+            if (!branchAndBoundMoves.contains(new Pair<>(new Pair<>(maxDepthPair.first, slotUp), depths.get(currentPair))) && depths.get(currentPair) <= maxDepth) {
                branchAndBoundMoves.add(new Pair<>(new Pair<>(maxDepthPair.first, slotUp), depths.get(currentPair)));
             }
          }
@@ -1295,7 +1274,7 @@ public class Game {
 
             Pair currentPair = new Pair<>(maxDepthPair.first, slotRight);
 
-            if (!branchAndBoundMoves.contains(new Pair<>(new Pair<>(maxDepthPair.first, slotRight), depths.get(currentPair)))) {
+            if (!branchAndBoundMoves.contains(new Pair<>(new Pair<>(maxDepthPair.first, slotRight), depths.get(currentPair))) && depths.get(currentPair) <= maxDepth) {
                branchAndBoundMoves.add(new Pair<>(new Pair<>(maxDepthPair.first, slotRight), depths.get(currentPair)));
             }
          }
@@ -1305,7 +1284,7 @@ public class Game {
 
             Pair currentPair = new Pair<>(maxDepthPair.first, slotDown);
 
-            if (!branchAndBoundMoves.contains(new Pair<>(new Pair<>(maxDepthPair.first, slotDown), depths.get(currentPair)))) {
+            if (!branchAndBoundMoves.contains(new Pair<>(new Pair<>(maxDepthPair.first, slotDown), depths.get(currentPair))) && depths.get(currentPair) <= maxDepth) {
                branchAndBoundMoves.add(new Pair<>(new Pair<>(maxDepthPair.first, slotDown), depths.get(currentPair)));
             }
          }
@@ -1315,7 +1294,7 @@ public class Game {
 
             Pair currentPair = new Pair<>(maxDepthPair.first, slotLeft);
 
-            if (!branchAndBoundMoves.contains(new Pair<>(new Pair<>(maxDepthPair.first, slotLeft), depths.get(currentPair)))) {
+            if (!branchAndBoundMoves.contains(new Pair<>(new Pair<>(maxDepthPair.first, slotLeft), depths.get(currentPair))) && depths.get(currentPair) <= maxDepth) {
                branchAndBoundMoves.add(new Pair<>(new Pair<>(maxDepthPair.first, slotLeft), depths.get(currentPair)));
             }
          }

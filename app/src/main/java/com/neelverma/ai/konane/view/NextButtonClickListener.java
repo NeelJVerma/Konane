@@ -7,7 +7,7 @@
 
 package com.neelverma.ai.konane.view;
 
-import android.support.annotation.NonNull;
+import android.content.Intent;
 import android.util.Pair;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -103,7 +103,7 @@ public class NextButtonClickListener implements View.OnClickListener {
             gameObject.bestFirstSearch();
             break;
          case AlgorithmSpinnerItemSelectedListener.BRANCH_AND_BOUND:
-            gameObject.branchAndBound();
+            gameObject.branchAndBound(Integer.parseInt(AlgorithmSpinnerItemSelectedListener.getDepthEditText().getText().toString()));
             break;
       }
    }

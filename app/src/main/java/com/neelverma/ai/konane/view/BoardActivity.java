@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -29,6 +30,7 @@ import com.neelverma.ai.konane.model.Board;
 import com.neelverma.ai.konane.model.Game;
 import com.neelverma.ai.konane.model.Slot;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,8 +89,11 @@ public class BoardActivity extends AppCompatActivity {
       removeButton = findViewById(R.id.removeButton);
 
       if (gameType == LOADED_GAME) {
-         removeButton.setVisibility(View.GONE);
-         gameObject.setGameFromState(SaveGameButtonClickListener.getFilePath());
+         removeButton.setVisibility(View.INVISIBLE);
+
+         gameObject.setGameFromState();
+         gameObject.getBoardObject().printBoard();
+
          drawBoardGame();
          startGame();
       } else {
