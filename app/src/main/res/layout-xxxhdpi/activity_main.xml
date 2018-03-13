@@ -35,4 +35,25 @@
         android:textScaleX="2"
         android:textSize="20dp" />
 
+    <EditText
+        android:id="@+id/boardSizeEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/beginButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="15dp"
+        android:ems="10"
+        android:hint="Board Size (Default is 6)"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/loadFileEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/boardSizeEditText"
+        android:layout_alignStart="@+id/boardSizeEditText"
+        android:ems="10"
+        android:hint="File Name (For loading)"
+        android:inputType="text" />
+
 </RelativeLayout>

@@ -46,24 +46,6 @@ public class GameBoardClickListener implements View.OnClickListener {
    public void onClick(View v) {
       gameObject.setTurnColor(gameObject.getPlayerWhite().isTurn() ? Slot.WHITE : Slot.BLACK);
 
-      if (NextButtonClickListener.getButtonOne() != null) {
-         NextButtonClickListener.getButtonOne().clearAnimation();
-      }
-
-      if (NextButtonClickListener.getButtonTwo() != null) {
-         NextButtonClickListener.getButtonTwo().clearAnimation();
-      }
-
-      if (NextButtonClickListener.getPlayerScore() != null) {
-         NextButtonClickListener.getPlayerScore().clearAnimation();
-
-         String blackScore = "BLACK: " + gameObject.getPlayerBlack().getScore();
-         String whiteScore = "WHITE: " + gameObject.getPlayerWhite().getScore();
-
-         boardActivity.getPlayerBlackScore().setText(blackScore.trim());
-         boardActivity.getPlayerWhiteScore().setText(whiteScore.trim());
-      }
-
       if (gameObject.isFirstClick()) {
          processFirstClick();
       } else {
@@ -99,7 +81,7 @@ public class GameBoardClickListener implements View.OnClickListener {
          }
       }
 
-      if (!drawPotentialMoves(gameObject.getTurnColor(), boardActivity.getDrawCell()[0])) {
+      if (!pieceCanMove(gameObject.getTurnColor())) {
          Toast.makeText(boardActivity, "THIS PIECE CAN'T MOVE", Toast.LENGTH_SHORT).show();
 
          return;
@@ -117,8 +99,6 @@ public class GameBoardClickListener implements View.OnClickListener {
    private void processSecondClick() {
       gameObject.setFirstClick(true);
 
-      drawPotentialMoves(gameObject.getTurnColor(), boardActivity.getDrawCell()[3]);
-
       gameObject.setSlotTo(gameObject.getBoardObject().getSlot(currentRow, currentCol));
 
       if (!gameObject.makeMove(gameObject.getSlotFrom(), gameObject.getSlotTo())) {
@@ -132,8 +112,6 @@ public class GameBoardClickListener implements View.OnClickListener {
       if (!switchTurns()) {
          return;
       }
-
-      gameObject.setSwitchedTurn(true);
 
       gameObject.setSuccessiveMove(false);
 
@@ -175,7 +153,6 @@ public class GameBoardClickListener implements View.OnClickListener {
          if (!gameObject.playerCanMove(gameObject.getPlayerWhite()) && gameObject.playerCanMove(gameObject.getPlayerBlack())) {
             Toast.makeText(boardActivity, "WHITE CAN'T MOVE", Toast.LENGTH_SHORT).show();
             gameObject.setSuccessiveMove(false);
-            gameObject.setSwitchedTurn(true);
 
             if (gameObject.canMoveAgain(gameObject.getPotentialSuccessiveSlot(), gameObject.getTurnColor())) {
                gameObject.setSuccessiveMove(true);
@@ -200,7 +177,6 @@ public class GameBoardClickListener implements View.OnClickListener {
          if (!gameObject.playerCanMove(gameObject.getPlayerBlack()) && gameObject.playerCanMove(gameObject.getPlayerWhite())) {
             Toast.makeText(boardActivity, "BLACK CAN'T MOVE", Toast.LENGTH_SHORT).show();
             gameObject.setSuccessiveMove(false);
-            gameObject.setSwitchedTurn(true);
 
             if (gameObject.canMoveAgain(gameObject.getPotentialSuccessiveSlot(), gameObject.getTurnColor())) {
                gameObject.setSuccessiveMove(true);
@@ -280,14 +256,12 @@ public class GameBoardClickListener implements View.OnClickListener {
    }
 
    /**
-    * Description: Method to draw, on the GUI, all potential moves a user has from a given position.
-    * Parameters: int turnColor, which is the current player's piece color.
-    *             Drawable drawCell, which is the image to use for drawing. This is a parameter because
-    *             we also have to handle un-drawing potential move slots, so a different image is used.
-    * Returns: Whether or not the current piece has any potential spots to move.
+    * Description: Method to verify whether or not the piece the player selected can move.
+    * Parameters: int turnColor, which is whose turn it is.
+    * Returns: Whether or not the piece can move.
     */
 
-   private boolean drawPotentialMoves(int turnColor, Drawable drawCell) {
+   private boolean pieceCanMove(int turnColor) {
       Slot slotRight = gameObject.getBoardObject().getSlot(gameObject.getSlotFrom().getRow(), gameObject.getSlotFrom().getColumn() + 2);
       Slot slotLeft = gameObject.getBoardObject().getSlot(gameObject.getSlotFrom().getRow(), gameObject.getSlotFrom().getColumn() - 2);
       Slot slotUp = gameObject.getBoardObject().getSlot(gameObject.getSlotFrom().getRow() - 2, gameObject.getSlotFrom().getColumn());
@@ -295,22 +269,18 @@ public class GameBoardClickListener implements View.OnClickListener {
       boolean pieceCanMove = false;
 
       if (gameObject.isValidMove(gameObject.getSlotFrom(), slotRight, turnColor)) {
-         boardActivity.getGameBoard()[slotRight.getRow()][slotRight.getColumn()].setBackground(drawCell);
          pieceCanMove = true;
       }
 
       if (gameObject.isValidMove(gameObject.getSlotFrom(), slotLeft, turnColor)) {
-         boardActivity.getGameBoard()[slotLeft.getRow()][slotLeft.getColumn()].setBackground(drawCell);
          pieceCanMove = true;
       }
 
       if (gameObject.isValidMove(gameObject.getSlotFrom(), slotUp, turnColor)) {
-         boardActivity.getGameBoard()[slotUp.getRow()][slotUp.getColumn()].setBackground(drawCell);
          pieceCanMove = true;
       }
 
       if (gameObject.isValidMove(gameObject.getSlotFrom(), slotDown, turnColor)) {
-         boardActivity.getGameBoard()[slotDown.getRow()][slotDown.getColumn()].setBackground(drawCell);
          pieceCanMove = true;
       }
 

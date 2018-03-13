@@ -8,10 +8,13 @@
 package com.neelverma.ai.konane.view;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.View;
 import android.widget.Toast;
 
 import com.neelverma.ai.konane.model.Game;
+
+import java.io.File;
 
 /**
  * Class to handle an on click event for the save game button in the board activity. This is in its
@@ -43,7 +46,23 @@ public class SaveGameButtonClickListener implements View.OnClickListener {
       if (gameObject.isSuccessiveMove()) {
          Toast.makeText(boardActivity, "FILE NOT SAVED. CAN'T SAVE MID-TURN.", Toast.LENGTH_SHORT).show();
       } else {
-         filePath = gameObject.saveGame("saved_game.txt", context);
+         int i = 0;
+         File dir = new File(context.getFilesDir(), "saved_games");
+
+         while (true) {
+            File file = new File(dir.toString() + "/saved_game" + i + ".txt");
+
+            if (!file.exists()) {
+               break;
+            }
+
+            i++;
+         }
+
+         filePath = gameObject.saveGame("/saved_game" + i + ".txt", context);
+
+         Intent mainIntent = new Intent(boardActivity, MainActivity.class);
+         boardActivity.startActivity(mainIntent);
       }
    }
 
@@ -55,6 +74,10 @@ public class SaveGameButtonClickListener implements View.OnClickListener {
 
    public static String getFilePath() {
       return filePath;
+   }
+
+   public static void setFilePath(String filePath1) {
+      filePath = filePath1;
    }
 
    /**

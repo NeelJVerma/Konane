@@ -13,12 +13,12 @@ package com.neelverma.ai.konane.model;
  */
 
 public class Board {
-   public static final int MAX_ROW = 6;
-   public static final int MAX_COLUMN = 6;
+   public static int MAX_ROW;
+   public static int MAX_COLUMN;
    public static final int MIN_ROW = 0;
    public static final int MIN_COLUMN = 0;
 
-   private Slot[][] gameBoard = new Slot[MAX_ROW][MAX_COLUMN]; // A 2D array of slots as the board.
+   private Slot[][] gameBoard = new Slot[MAX_ROW][MAX_COLUMN];
 
    /**
     * Description: Constructor. Will initialize the board with 36 slots, each alternating between
@@ -28,6 +28,8 @@ public class Board {
     */
 
    public Board() {
+      gameBoard = new Slot[MAX_ROW][MAX_COLUMN];
+
       int currentColor = Slot.BLACK;
 
       for (int r = 0; r < MAX_ROW; r++) {
@@ -83,8 +85,8 @@ public class Board {
    }
 
    public void printBoard() {
-      for (int i = 0; i < 6; i++) {
-         for (int j = 0; j < 6; j++) {
+      for (int i = 0; i < MAX_ROW; i++) {
+         for (int j = 0; j < MAX_COLUMN; j++) {
             if (gameBoard[i][j].getColor() == 1) {
                System.out.print("B ");
             } else if (gameBoard[i][j].getColor() == -1) {

@@ -9,30 +9,25 @@ package com.neelverma.ai.konane.view;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.neelverma.ai.konane.R;
 import com.neelverma.ai.konane.model.Board;
 import com.neelverma.ai.konane.model.Game;
 import com.neelverma.ai.konane.model.Slot;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Class to execute changes to the GUI, while using the model as a reference for game rules.
@@ -56,18 +51,15 @@ import java.util.List;
  */
 
 public class BoardActivity extends AppCompatActivity {
-   public static final int MAX_ROW = Board.MAX_ROW;
-   public static final int MAX_COL = Board.MAX_COLUMN;
+   public static int MAX_ROW;
+   public static int MAX_COL;
    public static final int NEW_GAME = 0;
    public static final int LOADED_GAME = 1;
 
-   // MAX_ROW + 1 and MAX_COL + 1 to put in labels for rows and columns.
-   private ImageButton[][] gameBoard = new ImageButton[MAX_ROW + 1][MAX_COL + 1];
+   private ImageButton[][] gameBoard = new ImageButton[MAX_ROW][MAX_COL];
    private Context context;
    private Drawable drawCell[] = new Drawable[5];
-   private Drawable drawNumbers[] = new Drawable[6];
    private Game gameObject = new Game();
-   private int gameType;
 
    private TextView playerBlackScore;
    private TextView playerWhiteScore;
@@ -81,7 +73,7 @@ public class BoardActivity extends AppCompatActivity {
       context = this;
 
       Bundle bundle = getIntent().getExtras();
-      gameType = bundle.getInt("gameType");
+      int gameType = bundle.getInt("gameType");
 
       loadResources();
 
@@ -91,8 +83,7 @@ public class BoardActivity extends AppCompatActivity {
       if (gameType == LOADED_GAME) {
          removeButton.setVisibility(View.INVISIBLE);
 
-         gameObject.setGameFromState();
-         gameObject.getBoardObject().printBoard();
+         gameObject.setGameFromState(SaveGameButtonClickListener.getFilePath(), MAX_ROW);
 
          drawBoardGame();
          startGame();
@@ -114,13 +105,6 @@ public class BoardActivity extends AppCompatActivity {
       drawCell[2] = context.getResources().getDrawable(R.drawable.circle_white);
       drawCell[3] = context.getResources().getDrawable(R.drawable.board_bg);
       drawCell[4] = null;
-
-      drawNumbers[0] = context.getResources().getDrawable(R.drawable.number_one);
-      drawNumbers[1] = context.getResources().getDrawable(R.drawable.number_two);
-      drawNumbers[2] = context.getResources().getDrawable(R.drawable.number_three);
-      drawNumbers[3] = context.getResources().getDrawable(R.drawable.number_four);
-      drawNumbers[4] = context.getResources().getDrawable(R.drawable.number_five);
-      drawNumbers[5] = context.getResources().getDrawable(R.drawable.number_six);
    }
 
    /**
@@ -130,15 +114,15 @@ public class BoardActivity extends AppCompatActivity {
     */
 
    private void drawBoardGame() {
-      int sizeOfCell = Math.round(screenWidth() / (MAX_ROW + 1)) - 10;
-      LinearLayout.LayoutParams lpRow = new LinearLayout.LayoutParams(sizeOfCell * (MAX_ROW + 1), sizeOfCell);
+      int sizeOfCell = Math.round(screenWidth() / (MAX_ROW)) - 20;
+      LinearLayout.LayoutParams lpRow = new LinearLayout.LayoutParams(sizeOfCell * (MAX_ROW), sizeOfCell);
       LinearLayout.LayoutParams lpCell = new LinearLayout.LayoutParams(sizeOfCell, sizeOfCell);
       LinearLayout boardLayout = findViewById(R.id.boardLayout);
 
-      for (int r = 0; r < MAX_ROW + 1; r++) {
+      for (int r = 0; r < MAX_ROW; r++) {
          LinearLayout linRow = new LinearLayout(context);
 
-         for (int c = 0; c < MAX_COL + 1; c++) {
+         for (int c = 0; c < MAX_COL; c++) {
             gameBoard[r][c] = new ImageButton(context);
             gameBoard[r][c].setEnabled(false);
 
@@ -155,16 +139,6 @@ public class BoardActivity extends AppCompatActivity {
 
          boardLayout.addView(linRow, lpRow);
       }
-
-      for (int r = 0; r < MAX_ROW; r++) {
-         gameBoard[r][MAX_COL].setBackground(drawNumbers[r]);
-      }
-
-      for (int c = 0; c < MAX_COL; c++) {
-         gameBoard[MAX_ROW][c].setBackground(drawNumbers[c]);
-      }
-
-      gameBoard[6][6].setBackground(drawCell[4]);
    }
 
    /**
@@ -242,35 +216,7 @@ public class BoardActivity extends AppCompatActivity {
       saveGameButton.setVisibility(View.VISIBLE);
       saveGameButton.setOnClickListener(new SaveGameButtonClickListener(BoardActivity.this));
 
-      Button nextButton = findViewById(R.id.nextButton);
-      nextButton.setVisibility(View.VISIBLE);
-      nextButton.setOnClickListener(new NextButtonClickListener(BoardActivity.this));
-
-      enableAlgorithmSpinner();
-
       enableBoard();
-   }
-
-   /**
-    * Description: Method to enable the algorithm spinner.
-    * Parameters: None.
-    * Returns: Nothing.
-    */
-
-   private void enableAlgorithmSpinner() {
-      Spinner algorithmSpinner = findViewById(R.id.algorithmSpinner);
-      algorithmSpinner.setVisibility(View.VISIBLE);
-
-      List<String> algorithmChoices = new ArrayList<>();
-      algorithmChoices.add("BREADTH FIRST");
-      algorithmChoices.add("DEPTH FIRST");
-      algorithmChoices.add("BEST FIRST");
-      algorithmChoices.add("BRANCH AND BOUND");
-
-      ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this, R.layout.spinner_layout, algorithmChoices);
-      dataAdapter.setDropDownViewResource(R.layout.spinner_layout);
-      algorithmSpinner.setAdapter(dataAdapter);
-      algorithmSpinner.setOnItemSelectedListener(new AlgorithmSpinnerItemSelectedListener(BoardActivity.this));
    }
 
    /**

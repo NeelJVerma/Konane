@@ -11,11 +11,14 @@ import android.content.Intent;
 import android.os.Environment;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.neelverma.ai.konane.R;
+import com.neelverma.ai.konane.model.Board;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
@@ -42,7 +45,53 @@ public class LoadGameButtonClickListener implements View.OnClickListener {
    public void onClick(View v) {
       Intent boardIntent = new Intent(mainActivity, BoardActivity.class);
 
-      int gameState = BoardActivity.LOADED_GAME;
+      int gameState;
+      TextView loadFileEditText = mainActivity.findViewById(R.id.loadFileEditText);
+
+      File loadFile = new File("/data/user/0/com.neelverma.ai.konane/files/saved_games/" + loadFileEditText.getText().toString());
+
+      if (!loadFile.exists() || loadFile.isDirectory()) {
+         gameState = BoardActivity.NEW_GAME;
+
+         Toast.makeText(mainActivity, "FILE DOESN'T EXIST.", Toast.LENGTH_SHORT).show();
+
+         return;
+      } else {
+         gameState = BoardActivity.LOADED_GAME;
+
+         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(loadFile.toString()))) {
+            String line;
+            int lineCounter = 0;
+
+            while ((line = bufferedReader.readLine()) != null) {
+               lineCounter++;
+            }
+
+            if (lineCounter == 10) {
+               Board.MAX_ROW = 6;
+               Board.MAX_COLUMN = 6;
+
+               BoardActivity.MAX_ROW = 6;
+               BoardActivity.MAX_COL = 6;
+            } else if (lineCounter == 12) {
+               Board.MAX_ROW = 8;
+               Board.MAX_COLUMN = 8;
+
+               BoardActivity.MAX_ROW = 8;
+               BoardActivity.MAX_COL = 8;
+            } else {
+               Board.MAX_ROW = 10;
+               Board.MAX_COLUMN = 10;
+
+               BoardActivity.MAX_ROW = 10;
+               BoardActivity.MAX_COL = 10;
+            }
+         } catch (IOException e) {
+            e.printStackTrace();
+         }
+
+         SaveGameButtonClickListener.setFilePath(loadFile.toString());
+      }
 
       boardIntent.putExtra("gameType", gameState);
       mainActivity.startActivity(boardIntent);

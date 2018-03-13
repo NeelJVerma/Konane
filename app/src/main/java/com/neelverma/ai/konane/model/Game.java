@@ -10,21 +10,13 @@ import android.content.Context;
 import android.os.Environment;
 import android.util.Pair;
 
-import com.neelverma.ai.konane.view.AlgorithmSpinnerItemSelectedListener;
+import com.neelverma.ai.konane.view.MainActivity;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Random;
-import java.util.Stack;
 
 
 /**
@@ -60,17 +52,6 @@ public class Game {
    private boolean firstClick;
    private boolean successiveMove;
    private int turnColor;
-   private boolean switchedTurn;
-
-   private ArrayList<Pair<Pair<Slot, Slot>, Integer>> dfsMoves;
-   private ArrayList<Pair<Pair<Slot, Slot>, Integer>> bfsMoves;
-   private ArrayList<Pair<Pair<Slot, Slot>, Integer>> bestFirstSearchMoves;
-   private ArrayList<Pair<Pair<Slot, Slot>, Integer>> branchAndBoundMoves;
-
-   private ArrayList<Slot> startingSlotsDfs;
-   private ArrayList<Slot> startingSlotsBfs;
-   private ArrayList<Slot> startingSlotsBestFirstSearch;
-   private ArrayList<Slot> startingSlotsBranchAndBound;
 
    /**
     * Description: Constructor. Will initialize the current game's variables through their
@@ -96,17 +77,6 @@ public class Game {
 
       successiveMove = false;
       turnColor = Slot.BLACK;
-      switchedTurn = true;
-
-      dfsMoves = new ArrayList<>();
-      bfsMoves = new ArrayList<>();
-      bestFirstSearchMoves = new ArrayList<>();
-      branchAndBoundMoves = new ArrayList<>();
-
-      startingSlotsDfs = new ArrayList<>();
-      startingSlotsBfs = new ArrayList<>();
-      startingSlotsBestFirstSearch = new ArrayList<>();
-      startingSlotsBranchAndBound = new ArrayList<>();
    }
 
    /**
@@ -355,12 +325,7 @@ public class Game {
     */
 
    public String saveGame(String fileName, Context context) {
-      fileName = "saved_game.txt";
-      String filePath = "/storage/download/";
-
-      File saveFile = new File(filePath, fileName);
-
-      /*File file = new File(context.getFilesDir(), "saved_games");
+      File file = new File(context.getFilesDir(), "saved_games");
 
       if (!file.exists()) {
          file.mkdir();
@@ -374,8 +339,8 @@ public class Game {
          writer.println("White: " + playerWhite.getScore());
          writer.println("Board:");
 
-         for (int r = 0; r < boardObject.MAX_ROW; r++) {
-            for (int c = 0; c < boardObject.MAX_COLUMN; c++) {
+         for (int r = 0; r < Board.MAX_ROW; r++) {
+            for (int c = 0; c < Board.MAX_COLUMN; c++) {
                if (boardObject.getSlot(r, c).getColor() == Slot.BLACK) {
                   writer.print("B ");
                } else if (boardObject.getSlot(r, c).getColor() == Slot.WHITE) {
@@ -393,7 +358,7 @@ public class Game {
          writer.close();
       } catch (Exception e) {
          e.printStackTrace();
-      }*/
+      }
 
       return saveFile.getAbsolutePath();
    }
@@ -401,18 +366,25 @@ public class Game {
    /**
     * Description: Method to set the game state.
     * Parameters: String filePath, which is the full path of the file that contains the game state.
+    *             int boardSize, which is the size of the board.
     * Returns: Nothing.
     */
 
-   public void setGameFromState() {
-      File filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-      File readFile = new File(filePath, "serial3.txt");
-
+   public void setGameFromState(String filePath, int boardSize) {
       int whiteScore = 0;
       int blackScore = 0;
       String turn = "black";
+      int endBoardLine;
 
-      try (BufferedReader bufferedReader = new BufferedReader(new FileReader(readFile))) {
+      if (boardSize == 6) {
+         endBoardLine = 8;
+      } else if (boardSize == 8) {
+         endBoardLine = 10;
+      } else {
+         endBoardLine = 12;
+      }
+
+      try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath))) {
          String line;
          int lineCounter = 0;
 
@@ -421,7 +393,7 @@ public class Game {
                blackScore = Integer.parseInt(line.substring(7));
             } else if (lineCounter == 1) {
                whiteScore = Integer.parseInt(line.substring(7));
-            } else if (lineCounter >= 3 && lineCounter <= 8) {
+            } else if (lineCounter >= 3 && lineCounter <= endBoardLine) {
                for (int c = 0; c < line.length(); c += 2) {
                   if (line.charAt(c) == 'B') {
                      boardObject.setSlotColor(boardObject.getSlot(lineCounter - 3, c / 2), Slot.BLACK);
@@ -431,7 +403,7 @@ public class Game {
                      boardObject.setSlotColor(boardObject.getSlot(lineCounter - 3, c / 2), Slot.EMPTY);
                   }
                }
-            } else if (lineCounter == 9) {
+            } else if (lineCounter == endBoardLine + 1) {
                turn = line.substring(13);
             }
 
@@ -594,16 +566,6 @@ public class Game {
    }
 
    /**
-    * Description: Method to set switched turn.
-    * Parameters: boolean switchedTurn, which is the switched turn boolean.
-    * Returns: Nothing.
-    */
-
-   public void setSwitchedTurn(boolean switchedTurn) {
-      this.switchedTurn = switchedTurn;
-   }
-
-   /**
     * Description: Method to determine whether or not a slot can move.
     * Parameters: Slot slot, which is the slot to check.
     * Returns: If that slot can move or not.
@@ -617,727 +579,5 @@ public class Game {
 
       return ((isValidMove(slot, slotRight, turnColor)) || (isValidMove(slot, slotLeft, turnColor)) ||
          (isValidMove(slot, slotUp, turnColor)) || (isValidMove(slot, slotDown, turnColor)));
-   }
-
-   /**
-    * Description: Method to build DFS tree and execute the algorithm.
-    * Parameters: None.
-    * Returns: Nothing.
-    */
-
-   public void depthFirstSearch() {
-      if (switchedTurn || AlgorithmSpinnerItemSelectedListener.isSelected()) {
-         switchedTurn = false;
-         dfsMoves.clear();
-         startingSlotsDfs.clear();
-         AlgorithmSpinnerItemSelectedListener.setSelected(false);
-
-         for (int r = 0; r < Board.MAX_ROW; r++) {
-            for (int c = 0; c < Board.MAX_COLUMN; c++) {
-               if (boardObject.getSlot(r, c).getColor() == turnColor && slotCanMove(boardObject.getSlot(r, c))) {
-                  startingSlotsDfs.add(boardObject.getSlot(r, c));
-               }
-            }
-         }
-      }
-
-      if (startingSlotsDfs.isEmpty()) {
-         return;
-      }
-
-      Stack<Slot> dfsStack = new Stack<>();
-      HashSet<Slot> visitedSlots = new HashSet<>();
-
-      dfsStack.push(startingSlotsDfs.get(0));
-
-      HashMap<Pair<Slot, Slot>, Integer> scores = new HashMap<>();
-      scores.put(new Pair<>(startingSlotsDfs.get(0), startingSlotsDfs.get(0)), 0);
-
-      Slot previousVisited = null;
-
-      while (!dfsStack.empty()) {
-         Slot visitedSlot = dfsStack.pop();
-
-         if (visitedSlots.contains(visitedSlot)) {
-            continue;
-         }
-
-         visitedSlots.add(visitedSlot);
-
-         Slot slotRight = boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() + 2);
-         Slot slotLeft = boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() - 2);
-         Slot slotUp = boardObject.getSlot(visitedSlot.getRow() - 2, visitedSlot.getColumn());
-         Slot slotDown = boardObject.getSlot(visitedSlot.getRow() + 2, visitedSlot.getColumn());
-         int oppositeTurn = turnColor * -1;
-
-         boolean downGood = slotDown.getColor() == Slot.EMPTY && boardObject.getSlot(visitedSlot.getRow() + 1, visitedSlot.getColumn()).getColor() == oppositeTurn;
-         boolean upGood = slotUp.getColor() == Slot.EMPTY && boardObject.getSlot(visitedSlot.getRow() - 1, visitedSlot.getColumn()).getColor() == oppositeTurn;
-         boolean rightGood = slotRight.getColor() == Slot.EMPTY && boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() + 1).getColor() == oppositeTurn;
-         boolean leftGood = slotLeft.getColor() == Slot.EMPTY && boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() - 1).getColor() == oppositeTurn;
-
-         if (isValidMove(visitedSlot, slotUp, turnColor) || upGood) {
-            dfsStack.push(slotUp);
-
-            Pair currentPair = new Pair<>(startingSlotsDfs.get(0), slotUp);
-
-            int score = 1;
-
-            if (previousVisited != null) {
-               Pair<Slot, Slot> previousPair = new Pair<>(startingSlotsDfs.get(0), visitedSlot);
-
-               if (scores.containsKey(previousPair)) {
-                  score = scores.get(previousPair) + 1;
-               }
-            }
-
-            scores.put(currentPair, score);
-
-            if (!dfsMoves.contains(new Pair<>(new Pair<>(startingSlotsDfs.get(0), slotUp), scores.get(currentPair)))) {
-               dfsMoves.add(new Pair<>(new Pair<>(startingSlotsDfs.get(0), slotUp), scores.get(currentPair)));
-            }
-         }
-
-         if (isValidMove(visitedSlot, slotRight, turnColor) || rightGood) {
-            dfsStack.push(slotRight);
-
-            Pair currentPair = new Pair<>(startingSlotsDfs.get(0), slotRight);
-
-            int score = 1;
-
-            if (previousVisited != null) {
-               Pair<Slot, Slot> previousPair = new Pair<>(startingSlotsDfs.get(0), visitedSlot);
-
-               if (scores.containsKey(previousPair)) {
-                  score = scores.get(previousPair) + 1;
-               }
-            }
-
-            scores.put(currentPair, score);
-
-            if (!dfsMoves.contains(new Pair<>(new Pair<>(startingSlotsDfs.get(0), slotRight), scores.get(currentPair)))) {
-               dfsMoves.add(new Pair<>(new Pair<>(startingSlotsDfs.get(0), slotRight), scores.get(currentPair)));
-            }
-         }
-
-         if (isValidMove(visitedSlot, slotDown, turnColor) || downGood) {
-            dfsStack.push(slotDown);
-
-            Pair currentPair = new Pair<>(startingSlotsDfs.get(0), slotDown);
-
-            int score = 1;
-
-            if (previousVisited != null) {
-               Pair<Slot, Slot> previousPair = new Pair<>(startingSlotsDfs.get(0), visitedSlot);
-
-               if (scores.containsKey(previousPair)) {
-                  score = scores.get(previousPair) + 1;
-               }
-            }
-
-            scores.put(currentPair, score);
-
-            if (!dfsMoves.contains(new Pair<>(new Pair<>(startingSlotsDfs.get(0), slotDown), scores.get(currentPair)))) {
-               dfsMoves.add(new Pair<>(new Pair<>(startingSlotsDfs.get(0), slotDown), scores.get(currentPair)));
-            }
-         }
-
-         if (isValidMove(visitedSlot, slotLeft, turnColor) || leftGood) {
-            dfsStack.push(slotLeft);
-
-            Pair currentPair = new Pair<>(startingSlotsDfs.get(0), slotLeft);
-
-            int score = 1;
-
-            if (previousVisited != null) {
-               Pair<Slot, Slot> previousPair = new Pair<>(startingSlotsDfs.get(0), visitedSlot);
-
-               if (scores.containsKey(previousPair)) {
-                  score = scores.get(previousPair) + 1;
-               }
-            }
-
-            scores.put(currentPair, score);
-
-            if (!dfsMoves.contains(new Pair<>(new Pair<>(startingSlotsDfs.get(0), slotLeft), scores.get(currentPair)))) {
-               dfsMoves.add(new Pair<>(new Pair<>(startingSlotsDfs.get(0), slotLeft), scores.get(currentPair)));
-            }
-         }
-
-         previousVisited = visitedSlot;
-      }
-
-      startingSlotsDfs.remove(0);
-   }
-
-   /**
-    * Description: Method to build BFS tree and execute the algorithm.
-    * Parameters: None.
-    * Returns: Nothing.
-    */
-
-   public void breadthFirstSearch() {
-      if (switchedTurn || AlgorithmSpinnerItemSelectedListener.isSelected()) {
-         switchedTurn = false;
-         bfsMoves.clear();
-         startingSlotsBfs.clear();
-         AlgorithmSpinnerItemSelectedListener.setSelected(false);
-
-         for (int r = 0; r < Board.MAX_ROW; r++) {
-            for (int c = 0; c < Board.MAX_COLUMN; c++) {
-               if (boardObject.getSlot(r, c).getColor() == turnColor && slotCanMove(boardObject.getSlot(r, c))) {
-                  startingSlotsBfs.add(boardObject.getSlot(r, c));
-               }
-            }
-         }
-      }
-
-      if (startingSlotsBfs.isEmpty()) {
-         return;
-      }
-
-      Queue<Slot> bfsQueue = new LinkedList<>();
-      HashSet<Slot> visitedSlots = new HashSet<>();
-
-      bfsQueue.add(startingSlotsBfs.get(0));
-
-      HashMap<Pair<Slot, Slot>, Integer> scores = new HashMap<>();
-      scores.put(new Pair<>(startingSlotsBfs.get(0), startingSlotsBfs.get(0)), 0);
-
-      Slot previousVisited = null;
-
-      while (!bfsQueue.isEmpty()) {
-         Slot visitedSlot = bfsQueue.poll();
-
-         if (visitedSlots.contains(visitedSlot)) {
-            continue;
-         }
-
-         visitedSlots.add(visitedSlot);
-
-         Slot slotRight = boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() + 2);
-         Slot slotLeft = boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() - 2);
-         Slot slotUp = boardObject.getSlot(visitedSlot.getRow() - 2, visitedSlot.getColumn());
-         Slot slotDown = boardObject.getSlot(visitedSlot.getRow() + 2, visitedSlot.getColumn());
-         int oppositeTurn = turnColor * -1;
-
-         boolean downGood = slotDown.getColor() == Slot.EMPTY && boardObject.getSlot(visitedSlot.getRow() + 1, visitedSlot.getColumn()).getColor() == oppositeTurn;
-         boolean upGood = slotUp.getColor() == Slot.EMPTY && boardObject.getSlot(visitedSlot.getRow() - 1, visitedSlot.getColumn()).getColor() == oppositeTurn;
-         boolean rightGood = slotRight.getColor() == Slot.EMPTY && boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() + 1).getColor() == oppositeTurn;
-         boolean leftGood = slotLeft.getColor() == Slot.EMPTY && boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() - 1).getColor() == oppositeTurn;
-
-         if (isValidMove(visitedSlot, slotUp, turnColor) || upGood) {
-            bfsQueue.add(slotUp);
-
-            Pair currentPair = new Pair<>(startingSlotsBfs.get(0), slotUp);
-
-            int score = 1;
-
-            if (previousVisited != null) {
-               Pair<Slot, Slot> previousPair = new Pair<>(startingSlotsBfs.get(0), visitedSlot);
-
-               if (scores.containsKey(previousPair)) {
-                  score = scores.get(previousPair) + 1;
-               }
-            }
-
-            scores.put(currentPair, score);
-
-            if (!bfsMoves.contains(new Pair<>(new Pair<>(startingSlotsBfs.get(0), slotUp), scores.get(currentPair)))) {
-               bfsMoves.add(new Pair<>(new Pair<>(startingSlotsBfs.get(0), slotUp), scores.get(currentPair)));
-            }
-         }
-
-         if (isValidMove(visitedSlot, slotRight, turnColor) || rightGood) {
-            bfsQueue.add(slotRight);
-
-            Pair currentPair = new Pair<>(startingSlotsBfs.get(0), slotRight);
-
-            int score = 1;
-
-            if (previousVisited != null) {
-               Pair<Slot, Slot> previousPair = new Pair<>(startingSlotsBfs.get(0), visitedSlot);
-
-               if (scores.containsKey(previousPair)) {
-                  score = scores.get(previousPair) + 1;
-               }
-            }
-
-            scores.put(currentPair, score);
-
-            if (!bfsMoves.contains(new Pair<>(new Pair<>(startingSlotsBfs.get(0), slotRight), scores.get(currentPair)))) {
-               bfsMoves.add(new Pair<>(new Pair<>(startingSlotsBfs.get(0), slotRight), scores.get(currentPair)));
-            }
-         }
-
-         if (isValidMove(visitedSlot, slotDown, turnColor) || downGood) {
-            bfsQueue.add(slotDown);
-
-            Pair currentPair = new Pair<>(startingSlotsBfs.get(0), slotDown);
-
-            int score = 1;
-
-            if (previousVisited != null) {
-               Pair<Slot, Slot> previousPair = new Pair<>(startingSlotsBfs.get(0), visitedSlot);
-
-               if (scores.containsKey(previousPair)) {
-                  score = scores.get(previousPair) + 1;
-               }
-            }
-
-            scores.put(currentPair, score);
-
-            if (!bfsMoves.contains(new Pair<>(new Pair<>(startingSlotsBfs.get(0), slotDown), scores.get(currentPair)))) {
-               bfsMoves.add(new Pair<>(new Pair<>(startingSlotsBfs.get(0), slotDown), scores.get(currentPair)));
-            }
-         }
-
-         if (isValidMove(visitedSlot, slotLeft, turnColor) || leftGood) {
-            bfsQueue.add(slotLeft);
-
-            Pair currentPair = new Pair<>(startingSlotsBfs.get(0), slotLeft);
-
-            int score = 1;
-
-            if (previousVisited != null) {
-               Pair<Slot, Slot> previousPair = new Pair<>(startingSlotsBfs.get(0), visitedSlot);
-
-               if (scores.containsKey(previousPair)) {
-                  score = scores.get(previousPair) + 1;
-               }
-            }
-
-            scores.put(currentPair, score);
-
-            if (!bfsMoves.contains(new Pair<>(new Pair<>(startingSlotsBfs.get(0), slotLeft), scores.get(currentPair)))) {
-               bfsMoves.add(new Pair<>(new Pair<>(startingSlotsBfs.get(0), slotLeft), scores.get(currentPair)));
-            }
-         }
-
-         previousVisited = visitedSlot;
-      }
-
-      startingSlotsBfs.remove(0);
-   }
-
-   /**
-    * Description: Method to build best first search tree and execute the algorithm.
-    * Parameters: None.
-    * Returns: Nothing.
-    */
-
-   public void bestFirstSearch() {
-      if (switchedTurn || AlgorithmSpinnerItemSelectedListener.isSelected()) {
-         switchedTurn = false;
-         bestFirstSearchMoves.clear();
-         startingSlotsBestFirstSearch.clear();
-         AlgorithmSpinnerItemSelectedListener.setSelected(false);
-
-         for (int r = 0; r < Board.MAX_ROW; r++) {
-            for (int c = 0; c < Board.MAX_COLUMN; c++) {
-               if (boardObject.getSlot(r, c).getColor() == turnColor && slotCanMove(boardObject.getSlot(r, c))) {
-                  startingSlotsBestFirstSearch.add(boardObject.getSlot(r, c));
-               }
-            }
-         }
-      }
-
-      if (startingSlotsBestFirstSearch.isEmpty()) {
-         return;
-      }
-
-      HashMap<Pair<Slot, Slot>, Integer> heuristics = new HashMap<>();
-
-      while (!startingSlotsBestFirstSearch.isEmpty()) {
-         Stack<Slot> dfsStack = new Stack<>();
-         HashSet<Slot> visitedSlots = new HashSet<>();
-         Slot startingSlot = boardObject.getSlot(startingSlotsBestFirstSearch.get(0).getRow(), startingSlotsBestFirstSearch.get(0).getColumn());
-         dfsStack.push(startingSlot);
-
-         heuristics.put(new Pair<>(startingSlot, startingSlot), 0);
-
-         Slot previousVisited = null;
-
-         while (!dfsStack.empty()) {
-            Slot visitedSlot = dfsStack.pop();
-            System.out.println(visitedSlot.getRow() + "x" + visitedSlot.getColumn());
-
-            if (visitedSlots.contains(visitedSlot)) {
-               continue;
-            }
-
-            visitedSlots.add(visitedSlot);
-
-            Slot slotRight = boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() + 2);
-            Slot slotLeft = boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() - 2);
-            Slot slotUp = boardObject.getSlot(visitedSlot.getRow() - 2, visitedSlot.getColumn());
-            Slot slotDown = boardObject.getSlot(visitedSlot.getRow() + 2, visitedSlot.getColumn());
-            int oppositeTurn = turnColor * -1;
-
-            boolean downGood = slotDown.getColor() == Slot.EMPTY && boardObject.getSlot(visitedSlot.getRow() + 1, visitedSlot.getColumn()).getColor() == oppositeTurn;
-            boolean upGood = slotUp.getColor() == Slot.EMPTY && boardObject.getSlot(visitedSlot.getRow() - 1, visitedSlot.getColumn()).getColor() == oppositeTurn;
-            boolean rightGood = slotRight.getColor() == Slot.EMPTY && boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() + 1).getColor() == oppositeTurn;
-            boolean leftGood = slotLeft.getColor() == Slot.EMPTY && boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() - 1).getColor() == oppositeTurn;
-
-            if (isValidMove(startingSlot, slotUp, turnColor) || upGood) {
-               dfsStack.push(slotUp);
-
-               Pair currentPair = new Pair<>(startingSlot, slotUp);
-
-               int heuristicValue = 1;
-
-               if (previousVisited != null) {
-                  Pair<Slot, Slot> previousPair = new Pair<>(startingSlot, visitedSlot);
-
-                  if (heuristics.containsKey(previousPair)) {
-                     heuristicValue = heuristics.get(previousPair) + 1;
-                  }
-               }
-
-               heuristics.put(currentPair, heuristicValue);
-            }
-
-            if (isValidMove(startingSlot, slotRight, turnColor) || rightGood) {
-               dfsStack.push(slotRight);
-
-               Pair currentPair = new Pair<>(startingSlot, slotRight);
-
-               int heuristicValue = 1;
-
-               if (previousVisited != null) {
-                  Pair<Slot, Slot> previousPair = new Pair<>(startingSlot, visitedSlot);
-
-                  if (heuristics.containsKey(previousPair)) {
-                     heuristicValue = heuristics.get(previousPair) + 1;
-                  }
-               }
-
-               heuristics.put(currentPair, heuristicValue);
-            }
-
-            if (isValidMove(startingSlot, slotDown, turnColor) || downGood) {
-               dfsStack.push(slotDown);
-
-               Pair currentPair = new Pair<>(startingSlot, slotDown);
-
-               int heuristicValue = 1;
-
-               if (previousVisited != null) {
-                  Pair<Slot, Slot> previousPair = new Pair<>(startingSlot, visitedSlot);
-
-                  if (heuristics.containsKey(previousPair)) {
-                     heuristicValue = heuristics.get(previousPair) + 1;
-                  }
-               }
-
-               heuristics.put(currentPair, heuristicValue);
-            }
-
-            if (isValidMove(startingSlot, slotLeft, turnColor) || leftGood) {
-               dfsStack.push(slotLeft);
-
-               Pair currentPair = new Pair<>(startingSlot, slotLeft);
-
-               int heuristicValue = 1;
-
-               if (previousVisited != null) {
-                  Pair<Slot, Slot> previousPair = new Pair<>(startingSlot, visitedSlot);
-
-                  if (heuristics.containsKey(previousPair)) {
-                     heuristicValue = heuristics.get(previousPair) + 1;
-                  }
-               }
-
-               heuristics.put(currentPair, heuristicValue);
-            }
-
-            previousVisited = visitedSlot;
-         }
-
-         startingSlotsBestFirstSearch.remove(0);
-      }
-
-      for (Pair<Slot, Slot> p : heuristics.keySet()) {
-         if (heuristics.get(p) > 0) {
-            bestFirstSearchMoves.add(new Pair<>(p, heuristics.get(p)));
-         }
-      }
-
-      for (int i = 0; i < bestFirstSearchMoves.size() - 1; i++) {
-         for (int j = 0; j < bestFirstSearchMoves.size() - i - 1; j++) {
-            if (heuristics.get(bestFirstSearchMoves.get(j).first) < heuristics.get(bestFirstSearchMoves.get(j + 1).first)) {
-               Collections.swap(bestFirstSearchMoves, j, j + 1);
-            }
-
-            if (heuristics.get(bestFirstSearchMoves.get(j).first) == heuristics.get(bestFirstSearchMoves.get(j + 1).first)) {
-               if (bestFirstSearchMoves.get(j).first.first.getRow() > bestFirstSearchMoves.get(j + 1).first.first.getRow()) {
-                  Collections.swap(bestFirstSearchMoves, j, j + 1);
-               } else if (bestFirstSearchMoves.get(j).first.first.getRow() == bestFirstSearchMoves.get(j + 1).first.first.getRow()) {
-                  if (bestFirstSearchMoves.get(j).first.first.getColumn() > bestFirstSearchMoves.get(j + 1).first.first.getColumn()) {
-                     Collections.swap(bestFirstSearchMoves, j, j + 1);
-                  }
-               }
-            }
-         }
-      }
-   }
-
-   /**
-    * Description: Method to build branch and bound tree and execute the algorithm.
-    * Parameters: None.
-    * Returns: Nothing.
-    */
-
-   public void branchAndBound(int maxDepth) {
-      if (switchedTurn || AlgorithmSpinnerItemSelectedListener.isSelected()) {
-         switchedTurn = false;
-         branchAndBoundMoves.clear();
-         startingSlotsBranchAndBound.clear();
-         AlgorithmSpinnerItemSelectedListener.setSelected(false);
-
-         for (int r = 0; r < Board.MAX_ROW; r++) {
-            for (int c = 0; c < Board.MAX_COLUMN; c++) {
-               if (boardObject.getSlot(r, c).getColor() == turnColor && slotCanMove(boardObject.getSlot(r, c))) {
-                  startingSlotsBranchAndBound.add(boardObject.getSlot(r, c));
-               }
-            }
-         }
-      }
-
-      if (startingSlotsBranchAndBound.isEmpty()) {
-         return;
-      }
-
-      HashMap<Pair<Slot, Slot>, Integer> depths = new HashMap<>();
-      Pair<Slot, Slot> maxDepthPair = new Pair<>(startingSlotsBranchAndBound.get(0), startingSlotsBranchAndBound.get(0));
-
-      while (!startingSlotsBranchAndBound.isEmpty()) {
-         Stack<Slot> dfsStack = new Stack<>();
-         HashSet<Slot> visitedSlots = new HashSet<>();
-
-         Slot startingSlot = boardObject.getSlot(startingSlotsBranchAndBound.get(0).getRow(), startingSlotsBranchAndBound.get(0).getColumn());
-         dfsStack.push(startingSlot);
-
-         depths.put(new Pair<>(startingSlot, startingSlot), 0);
-         Slot previousVisited = null;
-
-         while (!dfsStack.empty()) {
-            Slot visitedSlot = dfsStack.pop();
-
-            if (visitedSlots.contains(visitedSlot)) {
-               continue;
-            }
-
-            visitedSlots.add(visitedSlot);
-
-            Slot slotRight = boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() + 2);
-            Slot slotLeft = boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() - 2);
-            Slot slotUp = boardObject.getSlot(visitedSlot.getRow() - 2, visitedSlot.getColumn());
-            Slot slotDown = boardObject.getSlot(visitedSlot.getRow() + 2, visitedSlot.getColumn());
-            int oppositeTurn = turnColor * -1;
-
-            boolean downGood = slotDown.getColor() == Slot.EMPTY && boardObject.getSlot(visitedSlot.getRow() + 1, visitedSlot.getColumn()).getColor() == oppositeTurn;
-            boolean upGood = slotUp.getColor() == Slot.EMPTY && boardObject.getSlot(visitedSlot.getRow() - 1, visitedSlot.getColumn()).getColor() == oppositeTurn;
-            boolean rightGood = slotRight.getColor() == Slot.EMPTY && boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() + 1).getColor() == oppositeTurn;
-            boolean leftGood = slotLeft.getColor() == Slot.EMPTY && boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() - 1).getColor() == oppositeTurn;
-
-            if (isValidMove(startingSlot, slotUp, turnColor) || upGood) {
-               dfsStack.push(slotUp);
-
-               Pair currentPair = new Pair<>(startingSlot, slotUp);
-
-               int depth = 1;
-
-               if (previousVisited != null) {
-                  Pair<Slot, Slot> previousPair = new Pair<>(startingSlot, visitedSlot);
-
-                  if (depths.containsKey(previousPair)) {
-                     depth = depths.get(previousPair) + 1;
-                  }
-               }
-
-               depths.put(currentPair, depth);
-
-               if (depths.get(currentPair) > depths.get(maxDepthPair) && depths.get(currentPair) <= maxDepth) {
-                  maxDepthPair = currentPair;
-               }
-            }
-
-            if (isValidMove(startingSlot, slotRight, turnColor) || rightGood) {
-               dfsStack.push(slotRight);
-
-               Pair currentPair = new Pair<>(startingSlot, slotRight);
-
-               int depth = 1;
-
-               if (previousVisited != null) {
-                  Pair<Slot, Slot> previousPair = new Pair<>(startingSlot, visitedSlot);
-
-                  if (depths.containsKey(previousPair)) {
-                     depth = depths.get(previousPair) + 1;
-                  }
-               }
-
-               depths.put(currentPair, depth);
-
-               if (depths.get(currentPair) > depths.get(maxDepthPair) && depths.get(currentPair) <= maxDepth) {
-                  maxDepthPair = currentPair;
-               }
-            }
-
-            if (isValidMove(startingSlot, slotDown, turnColor) || downGood) {
-               dfsStack.push(slotDown);
-
-               Pair currentPair = new Pair<>(startingSlot, slotDown);
-
-               int depth = 1;
-
-               if (previousVisited != null) {
-                  Pair<Slot, Slot> previousPair = new Pair<>(startingSlot, visitedSlot);
-
-                  if (depths.containsKey(previousPair)) {
-                     depth = depths.get(previousPair) + 1;
-                  }
-               }
-
-               depths.put(currentPair, depth);
-
-               if (depths.get(currentPair) > depths.get(maxDepthPair) && depths.get(currentPair) <= maxDepth) {
-                  maxDepthPair = currentPair;
-               }
-            }
-
-            if (isValidMove(startingSlot, slotLeft, turnColor) || leftGood) {
-               dfsStack.push(slotLeft);
-
-               Pair currentPair = new Pair<>(startingSlot, slotLeft);
-
-               int depth = 1;
-
-               if (previousVisited != null) {
-                  Pair<Slot, Slot> previousPair = new Pair<>(startingSlot, visitedSlot);
-
-                  if (depths.containsKey(previousPair)) {
-                     depth = depths.get(previousPair) + 1;
-                  }
-               }
-
-               depths.put(currentPair, depth);
-
-               if (depths.get(currentPair) > depths.get(maxDepthPair) && depths.get(currentPair) <= maxDepth) {
-                  maxDepthPair = currentPair;
-               }
-            }
-
-            previousVisited = visitedSlot;
-         }
-
-         startingSlotsBranchAndBound.remove(0);
-      }
-
-      Stack<Slot> dfsStackTwo = new Stack<>();
-      HashSet<Slot> visitedSlotsTwo = new HashSet<>();
-
-      dfsStackTwo.push(maxDepthPair.first);
-
-      while (!dfsStackTwo.empty()) {
-         Slot visitedSlot = dfsStackTwo.pop();
-
-         if (visitedSlotsTwo.contains(visitedSlot)) {
-            continue;
-         }
-
-         visitedSlotsTwo.add(visitedSlot);
-
-         Slot slotRight = boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() + 2);
-         Slot slotLeft = boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() - 2);
-         Slot slotUp = boardObject.getSlot(visitedSlot.getRow() - 2, visitedSlot.getColumn());
-         Slot slotDown = boardObject.getSlot(visitedSlot.getRow() + 2, visitedSlot.getColumn());
-         int oppositeTurn = turnColor * -1;
-
-         boolean downGood = slotDown.getColor() == Slot.EMPTY && boardObject.getSlot(visitedSlot.getRow() + 1, visitedSlot.getColumn()).getColor() == oppositeTurn;
-         boolean upGood = slotUp.getColor() == Slot.EMPTY && boardObject.getSlot(visitedSlot.getRow() - 1, visitedSlot.getColumn()).getColor() == oppositeTurn;
-         boolean rightGood = slotRight.getColor() == Slot.EMPTY && boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() + 1).getColor() == oppositeTurn;
-         boolean leftGood = slotLeft.getColor() == Slot.EMPTY && boardObject.getSlot(visitedSlot.getRow(), visitedSlot.getColumn() - 1).getColor() == oppositeTurn;
-
-         if (isValidMove(visitedSlot, slotUp, turnColor) || upGood) {
-            dfsStackTwo.push(slotUp);
-
-            Pair currentPair = new Pair<>(maxDepthPair.first, slotUp);
-
-            if (!branchAndBoundMoves.contains(new Pair<>(new Pair<>(maxDepthPair.first, slotUp), depths.get(currentPair))) && depths.get(currentPair) <= maxDepth) {
-               branchAndBoundMoves.add(new Pair<>(new Pair<>(maxDepthPair.first, slotUp), depths.get(currentPair)));
-            }
-         }
-
-         if (isValidMove(visitedSlot, slotRight, turnColor) || rightGood) {
-            dfsStackTwo.push(slotRight);
-
-            Pair currentPair = new Pair<>(maxDepthPair.first, slotRight);
-
-            if (!branchAndBoundMoves.contains(new Pair<>(new Pair<>(maxDepthPair.first, slotRight), depths.get(currentPair))) && depths.get(currentPair) <= maxDepth) {
-               branchAndBoundMoves.add(new Pair<>(new Pair<>(maxDepthPair.first, slotRight), depths.get(currentPair)));
-            }
-         }
-
-         if (isValidMove(visitedSlot, slotDown, turnColor) || downGood) {
-            dfsStackTwo.push(slotDown);
-
-            Pair currentPair = new Pair<>(maxDepthPair.first, slotDown);
-
-            if (!branchAndBoundMoves.contains(new Pair<>(new Pair<>(maxDepthPair.first, slotDown), depths.get(currentPair))) && depths.get(currentPair) <= maxDepth) {
-               branchAndBoundMoves.add(new Pair<>(new Pair<>(maxDepthPair.first, slotDown), depths.get(currentPair)));
-            }
-         }
-
-         if (isValidMove(visitedSlot, slotLeft, turnColor) || leftGood) {
-            dfsStackTwo.push(slotLeft);
-
-            Pair currentPair = new Pair<>(maxDepthPair.first, slotLeft);
-
-            if (!branchAndBoundMoves.contains(new Pair<>(new Pair<>(maxDepthPair.first, slotLeft), depths.get(currentPair))) && depths.get(currentPair) <= maxDepth) {
-               branchAndBoundMoves.add(new Pair<>(new Pair<>(maxDepthPair.first, slotLeft), depths.get(currentPair)));
-            }
-         }
-      }
-   }
-
-   /**
-    * Description: Method to get the list of all available moves for BFS.
-    * Parameters: None.
-    * Returns: The bfs moves list.
-    */
-
-   public ArrayList<Pair<Pair<Slot, Slot>, Integer>> getBfsMoves() {
-      return bfsMoves;
-   }
-
-   /**
-    * Description: Method to get the list of all available moves for DFS.
-    * Parameters: None.
-    * Returns: The dfs moves list.
-    */
-
-   public ArrayList<Pair<Pair<Slot, Slot>, Integer>> getDfsMoves() {
-      return dfsMoves;
-   }
-
-   /**
-    * Description: Method to get the list of all available moves for best first search.
-    * Parameters: None.
-    * Returns: The best first search moves list.
-    */
-
-   public ArrayList<Pair<Pair<Slot, Slot>, Integer>> getBestFirstSearchMoves() {
-      return bestFirstSearchMoves;
-   }
-
-   /**
-    * Description: Method to get the list of all available moves for branch and bound.
-    * Parameters: None.
-    * Returns: The branch and bound moves list.
-    */
-
-   public ArrayList<Pair<Pair<Slot, Slot>, Integer>> getBranchAndBoundMoves() {
-      return branchAndBoundMoves;
    }
 }

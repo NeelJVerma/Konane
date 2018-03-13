@@ -87,35 +87,4 @@
         android:text="SAVE GAME"
         android:visibility="gone" />
 
-    <Spinner
-        android:id="@+id/algorithmSpinner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/playerBlackTurn"
-        android:layout_below="@+id/playerWhiteTurn"
-        android:layout_marginTop="20dp"
-        android:visibility="invisible"
-        android:gravity="center_horizontal" />
-
-    <Button
-        android:id="@+id/nextButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/playerBlackTurn"
-        android:layout_alignParentBottom="true"
-        android:text="NEXT MOVE"
-        android:visibility="invisible" />
-
-    <EditText
-        android:id="@+id/depthEditText"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/nextButton"
-        android:layout_centerHorizontal="true"
-        android:ems="10"
-        android:hint="Depth"
-        android:inputType="number"
-        android:text="1"
-        android:visibility="invisible" />
-
 </RelativeLayout>
