@@ -16,6 +16,7 @@ public class Slot {
    private int row;
    private int column;
    private int color;
+   private int heuristic;
 
    public static final int BLACK = 1;
    public static final int WHITE = -1;
@@ -104,5 +105,20 @@ public class Slot {
 
    public int getColor() {
       return color;
+   }
+
+   public int getHeuristic() {
+      return heuristic;
+   }
+
+   public void setHeuristic(int heuristic) {
+      this.heuristic = heuristic;
+   }
+
+   @Override
+   public boolean equals(Object slot) {
+      Slot tempSlot = (Slot) slot;
+
+      return row == tempSlot.row && column == tempSlot.column;
    }
 }

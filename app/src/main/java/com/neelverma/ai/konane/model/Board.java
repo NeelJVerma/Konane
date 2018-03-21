@@ -7,6 +7,9 @@
 
 package com.neelverma.ai.konane.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Class to hold the Konane game board.
  * Created by Neel on 01/20/2018.
@@ -98,5 +101,9 @@ public class Board {
 
          System.out.println();
       }
+   }
+
+   public Slot[][] getGameBoard() {
+      return gameBoard;
    }
 }

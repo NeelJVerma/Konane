@@ -20,6 +20,8 @@ public class Player {
    public static final int BLACK = 1;
    public static final int WHITE = -1;
 
+   private boolean isComputer;
+
    /**
     * Description: Constructor. Will initialize the current player with a passed in color, a false
     * turn value, and a score of 0.
@@ -31,6 +33,7 @@ public class Player {
       this.color = color;
       this.isTurn = false;
       this.score = 0;
+      this.isComputer = false;
    }
 
    /**
@@ -93,5 +96,13 @@ public class Player {
 
    public void setScore(int score) {
       this.score = score;
+   }
+
+   public void setComputer(boolean isComputer) {
+      this.isComputer = isComputer;
+   }
+
+   public boolean isComputer() {
+      return isComputer;
    }
 }

@@ -17,6 +17,8 @@ import android.widget.Button;
 
 public class RemoveButtonClickListener implements View.OnClickListener {
    private BoardActivity boardActivity;
+   private int row;
+   private int col;
 
    /**
     * Description: Constructor. Will initialize the listener with the activity on which the button
@@ -25,8 +27,10 @@ public class RemoveButtonClickListener implements View.OnClickListener {
     * Returns: Nothing.
     */
 
-   RemoveButtonClickListener(BoardActivity boardActivity) {
+   RemoveButtonClickListener(BoardActivity boardActivity, int row, int col) {
       this.boardActivity = boardActivity;
+      this.row = row;
+      this.col = col;
    }
 
    @Override
@@ -35,6 +39,6 @@ public class RemoveButtonClickListener implements View.OnClickListener {
       thisButton.setVisibility(View.GONE);
 
       boardActivity.startGame();
-      boardActivity.removeTwoSlots();
+      boardActivity.removeTwoSlots(row, col);
    }
 }

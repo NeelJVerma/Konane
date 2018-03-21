@@ -7,16 +7,17 @@
 
 package com.neelverma.ai.konane.model;
 import android.content.Context;
-import android.os.Environment;
 import android.util.Pair;
-
-import com.neelverma.ai.konane.view.MainActivity;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Random;
+import java.util.Stack;
 
 
 /**
@@ -53,6 +54,10 @@ public class Game {
    private boolean successiveMove;
    private int turnColor;
 
+   private ArrayList<MoveNode> rootValues;
+   private int plyCutoff;
+   private MoveNode minimaxMove;
+
    /**
     * Description: Constructor. Will initialize the current game's variables through their
     * constructors. It also sets the current turns so that black always moves first.
@@ -77,19 +82,46 @@ public class Game {
 
       successiveMove = false;
       turnColor = Slot.BLACK;
+
+      rootValues = new ArrayList<>();
+      plyCutoff = 0;
+      minimaxMove = null;
+   }
+
+   public MoveNode getMinimaxMove() {
+      return minimaxMove;
+   }
+
+   public void setMinimaxMove(MoveNode minimaxMove) {
+      this.minimaxMove = minimaxMove;
+   }
+
+   public void setPlyCutoff(int plyCutoff) {
+      this.plyCutoff = plyCutoff;
    }
 
    /**
     * Description: Method to remove two slots at the beginning of the game.
-    * Parameters: None.
+    * Parameters: int row, the row guess.
+    *             int col, the column guess.
     * Returns: A pair of the two slots so that the BoardActivity class can know which slots to mark
     * as empty.
     */
 
-   public Pair<Slot, Slot> removeTwoSlots() {
+   public Pair<Slot, Slot> removeTwoSlots(int row, int col) {
       int randomRowOne = new Random().nextInt(Board.MAX_ROW);
       int randomColumnOne = new Random().nextInt(Board.MAX_COLUMN);
       Slot removedSlotOne = boardObject.getSlot(randomRowOne, randomColumnOne);
+      boolean computerDetermined = false;
+
+      if (removedSlotOne.getColor() == Slot.BLACK) {
+         if (row == removedSlotOne.getRow() && col == removedSlotOne.getColumn()) {
+            playerWhite.setComputer(true);
+            playerBlack.setComputer(false);
+
+            computerDetermined = true;
+         }
+      }
 
       while (true) {
          int randomRowTwo = new Random().nextInt(Board.MAX_ROW);
@@ -99,8 +131,20 @@ public class Game {
          if ((randomRowOne != randomRowTwo) &&
             (randomColumnOne != randomColumnTwo) &&
             (removedSlotOne.getColor() != removedSlotTwo.getColor())) {
+
+            if (!computerDetermined) {
+               if (row == removedSlotTwo.getRow() && col == removedSlotTwo.getColumn()) {
+                  playerWhite.setComputer(true);
+                  playerBlack.setComputer(false);
+               } else {
+                  playerWhite.setComputer(false);
+                  playerBlack.setComputer(true);
+               }
+            }
+
             boardObject.setSlotColor(removedSlotOne, Slot.EMPTY);
             boardObject.setSlotColor(removedSlotTwo, Slot.EMPTY);
+
             return new Pair<>(removedSlotOne, removedSlotTwo);
          }
       }
@@ -565,13 +609,53 @@ public class Game {
       this.turnColor = turnColor;
    }
 
+   public Slot getRight(Slot slot) {
+      if (slot.getColumn() + 2 < Board.MAX_COLUMN &&
+         boardObject.getSlot(slot.getRow(), slot.getColumn() + 2).getColor() == Slot.EMPTY &&
+         boardObject.getSlot(slot.getRow(), slot.getColumn() + 1).getColor() != Slot.EMPTY) {
+         return new Slot(slot.getRow(), slot.getColumn() + 2, Slot.EMPTY);
+      }
+
+      return null;
+   }
+
+   public Slot getLeft(Slot slot) {
+      if (slot.getColumn() - 2 >= Board.MIN_COLUMN &&
+         boardObject.getSlot(slot.getRow(), slot.getColumn() - 2).getColor() == Slot.EMPTY &&
+         boardObject.getSlot(slot.getRow(), slot.getColumn() - 1).getColor() != Slot.EMPTY) {
+         return new Slot(slot.getRow(), slot.getColumn() - 2, Slot.EMPTY);
+      }
+
+      return null;
+   }
+
+   public Slot getUp(Slot slot) {
+      if (slot.getRow() - 2 >= Board.MIN_ROW &&
+         boardObject.getSlot(slot.getRow() - 2, slot.getColumn()).getColor() == Slot.EMPTY &&
+         boardObject.getSlot(slot.getRow() - 1, slot.getColumn()).getColor() != Slot.EMPTY) {
+         return new Slot(slot.getRow() - 2, slot.getColumn(), Slot.EMPTY);
+      }
+
+      return null;
+   }
+
+   public Slot getDown(Slot slot) {
+      if (slot.getRow() + 2 < Board.MAX_ROW &&
+         boardObject.getSlot(slot.getRow() + 2, slot.getColumn()).getColor() == Slot.EMPTY &&
+         boardObject.getSlot(slot.getRow() + 1, slot.getColumn()).getColor() != Slot.EMPTY) {
+         return new Slot(slot.getRow() + 2, slot.getColumn(), Slot.EMPTY);
+      }
+
+      return null;
+   }
+
    /**
     * Description: Method to determine whether or not a slot can move.
     * Parameters: Slot slot, which is the slot to check.
     * Returns: If that slot can move or not.
     */
 
-   private boolean slotCanMove(Slot slot) {
+   public boolean slotCanMove(Slot slot) {
       Slot slotRight = boardObject.getSlot(slot.getRow(), slot.getColumn() + 2);
       Slot slotLeft = boardObject.getSlot(slot.getRow(), slot.getColumn() - 2);
       Slot slotUp = boardObject.getSlot(slot.getRow() - 2, slot.getColumn());
@@ -579,5 +663,447 @@ public class Game {
 
       return ((isValidMove(slot, slotRight, turnColor)) || (isValidMove(slot, slotLeft, turnColor)) ||
          (isValidMove(slot, slotUp, turnColor)) || (isValidMove(slot, slotDown, turnColor)));
+   }
+
+   public void depthFirstSearch(Slot start, ArrayList<Pair<Slot, Slot>> moves, HashMap<Slot, Slot> parents) {
+      boolean[][] visitedSlots = new boolean[Board.MAX_ROW][Board.MAX_COLUMN];
+
+      for (int r = 0; r < Board.MAX_ROW; r++) {
+         for (int c = 0; c < Board.MAX_COLUMN; c++) {
+            visitedSlots[r][c] = false;
+         }
+      }
+
+      Stack<Slot> dfsStack = new Stack<>();
+      int color = start.getColor();
+
+      dfsStack.push(start);
+      Slot previous = start;
+
+      boardObject.setSlotColor(boardObject.getSlot(start.getRow(), start.getColumn()), Slot.EMPTY);
+
+      while (!dfsStack.empty()) {
+         Pair<Slot, Slot> next;
+         Slot current = dfsStack.pop();
+
+         if (!visitedSlots[current.getRow()][current.getColumn()] && !current.equals(previous)) {
+            visitedSlots[current.getRow()][current.getColumn()] = true;
+
+            next = new Pair<>(start, current);
+
+            moves.add(next);
+         }
+
+         Slot up = getUp(current);
+         Slot down = getDown(current);
+         Slot left = getLeft(current);
+         Slot right = getRight(current);
+
+         if (right != null && !visitedSlots[right.getRow()][right.getColumn()]) {
+            boolean isChild = false;
+
+            if (parents.get(current) != null) {
+               if (parents.get(current).equals(right)) {
+                  isChild = true;
+               }
+            }
+
+            if (!isChild) {
+               dfsStack.push(right);
+               parents.put(right, current);
+            }
+         }
+
+         if (down != null && !visitedSlots[down.getRow()][down.getColumn()]) {
+            boolean isChild = false;
+
+            if (parents.get(current) != null) {
+               if (parents.get(current).equals(down)) {
+                  isChild = true;
+               }
+            }
+
+            if (!isChild) {
+               dfsStack.push(down);
+               parents.put(down, current);
+            }
+         }
+
+         if (left != null && !visitedSlots[left.getRow()][left.getColumn()]) {
+            boolean isChild = false;
+
+            if (parents.get(current) != null) {
+               if (parents.get(current).equals(left)) {
+                  isChild = true;
+               }
+            }
+
+            if (!isChild) {
+               dfsStack.push(left);
+               parents.put(left, current);
+            }
+         }
+
+         if (up != null && !visitedSlots[up.getRow()][up.getColumn()]) {
+            boolean isChild = false;
+
+            if (parents.get(current) != null) {
+               if (parents.get(current).equals(up)) {
+                  isChild = true;
+               }
+            }
+
+            if (!isChild) {
+               dfsStack.push(up);
+               parents.put(up, current);
+            }
+         }
+
+         previous = current;
+      }
+
+      boardObject.setSlotColor(boardObject.getSlot(start.getRow(), start.getColumn()), color);
+   }
+
+   public ArrayList<MoveNode> getAllMoves(int slotColor) {
+      ArrayList<MoveNode> movePaths = new ArrayList<>();
+      ArrayList<Pair<Slot, Slot>> moves = new ArrayList<>();
+      HashMap<Slot, Slot> parents = new HashMap<>();
+
+      for (int r = 0; r < Board.MAX_ROW; r++) {
+         for (int c = 0; c < Board.MAX_COLUMN; c++) {
+            if (boardObject.getSlot(r, c).getColor() == slotColor) {
+               Slot slot = new Slot(r, c, slotColor);
+
+               depthFirstSearch(slot, moves, parents);
+               getPath(parents, moves, movePaths);
+
+               parents.clear();
+               moves.clear();
+            }
+         }
+      }
+
+      return movePaths;
+   }
+
+   private void getPath(HashMap<Slot, Slot> parents, ArrayList<Pair<Slot, Slot>> moves, ArrayList<MoveNode> movePaths) {
+      ArrayList<ArrayList<Slot>> path = new ArrayList<>();
+
+      for (int i = 0; i < moves.size(); i++) {
+         ArrayList<Slot> possiblePath = new ArrayList<>();
+         Slot slot = moves.get(i).second;
+
+         while (parents.containsKey(slot)) {
+            Slot parent = parents.get(slot);
+            possiblePath.add(slot);
+            slot = parent;
+         }
+
+         possiblePath.add(slot);
+         Collections.reverse(possiblePath);
+         path.add(possiblePath);
+      }
+
+      for (int i = 0; i < path.size(); i++) {
+         ArrayList<Slot> possiblePath = path.get(i);
+         Slot source = possiblePath.get(0);
+         Slot dest = possiblePath.get(possiblePath.size() - 1);
+
+         MoveNode moveNode = new MoveNode(source, dest);
+         moveNode.setMovePath(possiblePath);
+         movePaths.add(moveNode);
+      }
+   }
+
+   public int getMin(ArrayList<Integer> list) {
+      int min = Integer.MAX_VALUE;
+      int returnMin = Integer.MIN_VALUE;
+
+      for (int i = 0; i < list.size(); i++) {
+         if (list.get(i) < min) {
+            min = list.get(i);
+            returnMin = i;
+         }
+      }
+
+      return list.get(returnMin);
+   }
+
+   public int getMax(ArrayList<Integer> list) {
+      int max = Integer.MIN_VALUE;
+      int returnMax = Integer.MIN_VALUE;
+
+      for (int i = 0; i < list.size(); i++) {
+         if (list.get(i) > max) {
+            max = list.get(i);
+            returnMax = i;
+         }
+      }
+
+      return list.get(returnMax);
+   }
+
+   private void unMakeMove(Slot slotFrom, Slot slotTo) {
+      String directionMoving;
+
+      boardObject.setSlotColor(slotFrom, turnColor);
+      boardObject.setSlotColor(slotTo, Slot.EMPTY);
+
+      if (slotFrom.getRow() == slotTo.getRow()) {
+         if (slotFrom.getColumn() - slotTo.getColumn() == -2) {
+            directionMoving = "right";
+         } else {
+            directionMoving = "left";
+         }
+      } else {
+         if (slotFrom.getRow() - slotTo.getRow() == -2) {
+            directionMoving = "down";
+         } else {
+            directionMoving = "up";
+         }
+      }
+
+      Slot slotRight = boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() + 1);
+      Slot slotLeft = boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() - 1);
+      Slot slotDown = boardObject.getSlot(slotFrom.getRow() + 1, slotFrom.getColumn());
+      Slot slotUp = boardObject.getSlot(slotFrom.getRow() - 1, slotFrom.getColumn());
+
+      if (directionMoving.equals("right")) {
+         boardObject.setSlotColor(slotRight, turnColor * -1);
+      } else if (directionMoving.equals("left")) {
+         boardObject.setSlotColor(slotLeft, turnColor * -1);
+      } else if (directionMoving.equals("down")) {
+         boardObject.setSlotColor(slotDown, turnColor * -1);
+      } else {
+         boardObject.setSlotColor(slotUp, turnColor * -1);
+      }
+   }
+
+   public void callMinimax() {
+      rootValues.clear();
+
+      Player currentPlayer = turnColor == Slot.BLACK ? playerBlack : playerWhite;
+
+      minimax(0, currentPlayer);
+   }
+
+   private Player getWinner() {
+      if (playerBlack.getScore() > playerWhite.getScore()) {
+         return playerBlack;
+      }
+
+      if (playerWhite.getScore() > playerBlack.getScore()) {
+         return playerWhite;
+      }
+
+      return null;
+   }
+
+   private int getHeuristic(Player player) {
+      ArrayList<MoveNode> blackPlayerMoves = getAllMoves(playerBlack.getColor());
+      int blackPlayerMaxScore = Integer.MIN_VALUE;
+
+      for(MoveNode m : blackPlayerMoves) {
+         if(m.getScore() > blackPlayerMaxScore) {
+            blackPlayerMaxScore = m.getScore();
+         }
+      }
+
+      ArrayList<MoveNode> whitePlayerMoves = getAllMoves(playerWhite.getColor());
+      int whitePlayerMaxScore = Integer.MIN_VALUE;
+
+      for(MoveNode m : whitePlayerMoves) {
+         if(m.getScore() > whitePlayerMaxScore) {
+            whitePlayerMaxScore = m.getScore();
+         }
+      }
+
+      if (player.equals(playerWhite)) {
+         return whitePlayerMaxScore - blackPlayerMaxScore;
+      } else {
+         return blackPlayerMaxScore - whitePlayerMaxScore;
+      }
+   }
+
+   private int minimax(int depth, Player player) {
+      if (!playerCanMove(playerBlack) && !playerCanMove(playerWhite)) {
+         if (getWinner() != null && getWinner().equals(player)) {
+            return 1;
+         }
+
+         if (getWinner() != null && !getWinner().equals(player)) {
+            return -1;
+         }
+      }
+
+      if (depth > plyCutoff) {
+         return getHeuristic(playerBlack);
+      }
+
+      ArrayList<MoveNode> moves = getAllMoves(player.getColor());
+
+      if (moves.isEmpty()) {
+         return 0;
+      }
+
+      ArrayList<Integer> scores = new ArrayList<>();
+
+      Integer[][] savedBoard = new Integer[Board.MAX_ROW][Board.MAX_COLUMN];
+
+      if (plyCutoff >= depth) {
+         copyBoard(savedBoard);
+      }
+
+      Player currentPlayer = turnColor == Slot.BLACK ? playerBlack : playerWhite;
+      Player oppositePlayer = turnColor == Slot.BLACK ? playerWhite : playerBlack;
+
+      for (int i = 0; i < moves.size(); i++) {
+         MoveNode move = moves.get(i);
+
+         if (player.equals(currentPlayer)) {
+            makeMoveAlgo(move);
+
+            int currentScore = minimax(depth + 1, oppositePlayer);
+            scores.add(currentScore);
+
+            if (depth == 0) {
+               move.setMinimaxValue(currentScore);
+               rootValues.add(move);
+            }
+         } else if (player.equals(playerWhite)) {
+            makeMoveAlgo(move);
+
+            int currentScore = minimax(depth + 1, oppositePlayer);
+            scores.add(currentScore);
+         }
+
+         resetBoard(savedBoard);
+      }
+
+      if (scores.isEmpty()) {
+         return 0;
+      }
+
+      if(player.equals(currentPlayer)) {
+         return Collections.max(scores);
+      }
+
+      return Collections.min(scores);
+   }
+
+   private void copyBoard(Integer[][] savedBoard) {
+      for (int r = 0; r < Board.MAX_ROW; r++) {
+         for(int c = 0; c < Board.MAX_COLUMN; c++) {
+            savedBoard[r][c] = boardObject.getSlot(r, c).getColor();
+         }
+      }
+   }
+
+   private void resetBoard(Integer[][] savedBoard) {
+      for (int r = 0; r < Board.MAX_ROW; r++) {
+         for(int c = 0; c < Board.MAX_COLUMN; c++) {
+            boardObject.setSlotColor(boardObject.getSlot(r, c), savedBoard[r][c]);
+         }
+      }
+   }
+
+   private ArrayList<Slot> makeMoveAlgo(MoveNode move) {
+      ArrayList<Slot> path = move.getMovePath();
+      ArrayList<Slot> intermediates = new ArrayList<>();
+
+      if (path.size() == 0) {
+         return null;
+      }
+
+      Slot source = path.get(0);
+
+      boardObject.setSlotColor(boardObject.getSlot(source.getRow(), source.getColumn()), Slot.EMPTY);
+
+      for (int i = 1; i < path.size(); i++) {
+         Slot[] intermediatesTemp = new Slot[1];
+         Slot dest = path.get(i);
+
+         if (makeMoveAlgo(source, dest, intermediatesTemp)) {
+            intermediates.add(intermediatesTemp[0]);
+
+            boardObject.setSlotColor(boardObject.getSlot(dest.getRow(), dest.getColumn()), source.getColor());
+
+            source = new Slot(dest.getRow(), dest.getColumn(), source.getColor());
+         }
+      }
+
+      return intermediates;
+   }
+
+   public MoveNode getBestMove() {
+      MoveNode moveNode = rootValues.get(0);
+      int maxScore = moveNode.getScore();
+
+      for(MoveNode m : rootValues) {
+         if(m.getScore() > maxScore) {
+            moveNode = m;
+            maxScore = m.getScore();
+         }
+      }
+
+      return moveNode;
+   }
+
+   private boolean makeMoveAlgo(Slot source, Slot dest, Slot[] intermediates) {
+      boolean moveMade = false;
+      String directionMoving;
+
+      if (source.getRow() == dest.getRow()) {
+         if (source.getColumn() - dest.getColumn() == -2) {
+            directionMoving = "right";
+         } else {
+            directionMoving = "left";
+         }
+      } else {
+         if (source.getRow() - dest.getRow() == -2) {
+            directionMoving = "down";
+         } else {
+            directionMoving = "up";
+         }
+      }
+
+      if (source.getColor() != dest.getColor() && dest.getColor() == Slot.EMPTY) {
+         if (directionMoving.equals("right")) {
+            if (boardObject.getSlot(source.getRow(), source.getColumn() + 1).getColor() != Slot.EMPTY) {
+               boardObject.getSlot(source.getRow(), source.getColumn() + 1).setColor(Slot.EMPTY);
+
+               intermediates[0] = new Slot(source.getRow(), source.getColumn() + 1, Slot.EMPTY);
+
+               moveMade = true;
+            }
+         } else if (directionMoving.equals("left")) {
+            if (boardObject.getSlot(source.getRow(), source.getColumn() - 1).getColor() != Slot.EMPTY) {
+               boardObject.getSlot(source.getRow(), source.getColumn() - 1).setColor(Slot.EMPTY);
+
+               intermediates[0] = new Slot(source.getRow(), source.getColumn() - 1, Slot.EMPTY);
+
+               moveMade = true;
+            }
+         } else if (directionMoving.equals("up")) {
+            if (boardObject.getSlot(source.getRow() - 1, source.getColumn()).getColor() != Slot.EMPTY) {
+               boardObject.getSlot(source.getRow() - 1, source.getColumn()).setColor(Slot.EMPTY);
+
+               intermediates[0] = new Slot(source.getRow() - 1, source.getColumn(), Slot.EMPTY);
+
+               moveMade = true;
+            }
+         } else {
+            if (boardObject.getSlot(source.getRow() + 1, source.getColumn()).getColor() != Slot.EMPTY) {
+               boardObject.getSlot(source.getRow() + 1, source.getColumn()).setColor(Slot.EMPTY);
+
+               intermediates[0] = new Slot(source.getRow() + 1, source.getColumn(), Slot.EMPTY);
+
+               moveMade = true;
+            }
+         }
+      }
+
+      return moveMade;
    }
 }

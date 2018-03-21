@@ -10,6 +10,7 @@ package com.neelverma.ai.konane.view;
 import android.content.Intent;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.neelverma.ai.konane.R;
 import com.neelverma.ai.konane.model.Board;
@@ -38,9 +39,18 @@ public class BeginButtonClickListener implements View.OnClickListener {
       SaveGameButtonClickListener.deleteFilePath();
 
       TextView boardSizeEditText = mainActivity.findViewById(R.id.boardSizeEditText);
+      TextView guessEditText = mainActivity.findViewById(R.id.guessEditText);
 
       Intent boardIntent = new Intent(mainActivity, BoardActivity.class);
       boardIntent.putExtra("gameType", BoardActivity.NEW_GAME);
+
+      if (guessEditText.getText().toString().equals("")) {
+         Toast.makeText(mainActivity, "YOU MUST GUESS TO SEE WHO GOES FIRST.", Toast.LENGTH_SHORT).show();
+
+         return;
+      } else {
+         boardIntent.putExtra("guess", guessEditText.getText().toString());
+      }
 
       if (boardSizeEditText.getText().toString().equals("")) {
          Board.MAX_ROW = 6;

@@ -8,6 +8,7 @@
 package com.neelverma.ai.konane.view;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -74,6 +75,10 @@ public class BoardActivity extends AppCompatActivity {
 
       Bundle bundle = getIntent().getExtras();
       int gameType = bundle.getInt("gameType");
+      String guess = bundle.getString("guess");
+
+      int guessRow = Character.getNumericValue(guess.charAt(0));
+      int guessCol = Character.getNumericValue(guess.charAt(3));
 
       loadResources();
 
@@ -89,7 +94,7 @@ public class BoardActivity extends AppCompatActivity {
          startGame();
       } else {
          drawBoardGame();
-         removeButton.setOnClickListener(new RemoveButtonClickListener(BoardActivity.this));
+         removeButton.setOnClickListener(new RemoveButtonClickListener(BoardActivity.this, guessRow, guessCol));
       }
    }
 
@@ -162,8 +167,9 @@ public class BoardActivity extends AppCompatActivity {
     * Returns: Nothing.
     */
 
-   public void removeTwoSlots() {
-      Pair<Slot, Slot> slotPair = gameObject.removeTwoSlots();
+   public void removeTwoSlots(int row, int col) {
+      Pair<Slot, Slot> slotPair = gameObject.removeTwoSlots(row, col);
+
       gameBoard[slotPair.first.getRow()][slotPair.first.getColumn()].setBackground(drawCell[3]);
       gameBoard[slotPair.second.getRow()][slotPair.second.getColumn()].setBackground(drawCell[3]);
    }
@@ -215,6 +221,10 @@ public class BoardActivity extends AppCompatActivity {
       Button saveGameButton = findViewById(R.id.saveGameButton);
       saveGameButton.setVisibility(View.VISIBLE);
       saveGameButton.setOnClickListener(new SaveGameButtonClickListener(BoardActivity.this));
+
+      Button moveButton = findViewById(R.id.moveButton);
+      moveButton.setVisibility(View.VISIBLE);
+      moveButton.setOnClickListener(new MoveButtonClickListener(BoardActivity.this));
 
       enableBoard();
    }

@@ -56,4 +56,14 @@
         android:hint="File Name (For loading)"
         android:inputType="text" />
 
+    <EditText
+        android:id="@+id/guessEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/loadFileEditText"
+        android:layout_alignStart="@+id/loadFileEditText"
+        android:ems="10"
+        android:hint="Guess (For assignment)"
+        android:inputType="text|textPersonName" />
+
 </RelativeLayout>
