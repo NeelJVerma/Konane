@@ -46,7 +46,11 @@ public class GameBoardClickListener implements View.OnClickListener {
    public void onClick(View v) {
       gameObject.setTurnColor(gameObject.getPlayerWhite().isTurn() ? Slot.WHITE : Slot.BLACK);
 
-      /*if (gameObject.getPlayerWhite().isComputer() && gameObject.getTurnColor() == Slot.WHITE) {
+      if (gameObject.getBestMove() != null) {
+         boardActivity.stopMoveAnimation(gameObject.getBestMove());
+      }
+
+      if (gameObject.getPlayerWhite().isComputer() && gameObject.getTurnColor() == Slot.WHITE) {
          Toast.makeText(boardActivity, "COMPUTER'S TURN", Toast.LENGTH_SHORT).show();
 
          return;
@@ -54,7 +58,7 @@ public class GameBoardClickListener implements View.OnClickListener {
          Toast.makeText(boardActivity, "COMPUTER'S TURN", Toast.LENGTH_SHORT).show();
 
          return;
-      }*/
+      }
 
 
       if (gameObject.isFirstClick()) {

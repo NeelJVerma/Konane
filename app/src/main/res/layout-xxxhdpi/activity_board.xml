@@ -96,4 +96,15 @@
         android:text="COMP MOVE"
         android:visibility="gone" />
 
+    <EditText
+        android:id="@+id/plyCutoffEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/removeButton"
+        android:layout_below="@+id/playerWhiteTurn"
+        android:ems="10"
+        android:hint="Ply Cutoff (Default is 1)"
+        android:inputType="number"
+        android:visibility="invisible" />
+
 </RelativeLayout>

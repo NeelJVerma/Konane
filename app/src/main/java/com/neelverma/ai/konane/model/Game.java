@@ -397,9 +397,13 @@ public class Game {
          }
 
          String nextPlayer = playerWhite.isTurn() ? "White" : "Black";
-
          writer.println("Next player: " + nextPlayer);
+
+         String humanPlayer = playerWhite.isComputer() ? "Black" : "White";
+         writer.println("Human: " + humanPlayer);
+
          writer.close();
+
       } catch (Exception e) {
          e.printStackTrace();
       }
@@ -419,13 +423,14 @@ public class Game {
       int blackScore = 0;
       String turn = "black";
       int endBoardLine;
+      String human = "black";
 
       if (boardSize == 6) {
-         endBoardLine = 8;
+         endBoardLine = 9;
       } else if (boardSize == 8) {
-         endBoardLine = 10;
+         endBoardLine = 11;
       } else {
-         endBoardLine = 12;
+         endBoardLine = 13;
       }
 
       try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath))) {
@@ -449,6 +454,8 @@ public class Game {
                }
             } else if (lineCounter == endBoardLine + 1) {
                turn = line.substring(13);
+            } else if (lineCounter == endBoardLine + 2) {
+               human = line.substring(7);
             }
 
             lineCounter++;
@@ -466,6 +473,14 @@ public class Game {
       } else {
          playerBlack.setIsTurn(true);
          playerWhite.setIsTurn(false);
+      }
+
+      if (human.equals("White")) {
+         playerWhite.setComputer(false);
+         playerBlack.setComputer(true);
+      } else {
+         playerWhite.setComputer(true);
+         playerBlack.setComputer(false);
       }
    }
 
@@ -1008,15 +1023,11 @@ public class Game {
       }
    }
 
-   private ArrayList<Slot> makeMoveAlgo(MoveNode move) {
+   public void makeMoveAlgo(MoveNode move) {
       ArrayList<Slot> path = move.getMovePath();
-      ArrayList<Slot> intermediates = new ArrayList<>();
-
-      if (path.size() == 0) {
-         return null;
-      }
 
       Slot source = path.get(0);
+      Slot last = path.get(1);
 
       boardObject.setSlotColor(boardObject.getSlot(source.getRow(), source.getColumn()), Slot.EMPTY);
 
@@ -1025,18 +1036,21 @@ public class Game {
          Slot dest = path.get(i);
 
          if (makeMoveAlgo(source, dest, intermediatesTemp)) {
-            intermediates.add(intermediatesTemp[0]);
-
-            boardObject.setSlotColor(boardObject.getSlot(dest.getRow(), dest.getColumn()), source.getColor());
+            boardObject.setSlotColor(boardObject.getSlot(dest.getRow(), dest.getColumn()), Slot.EMPTY);
+            last = dest;
 
             source = new Slot(dest.getRow(), dest.getColumn(), source.getColor());
          }
       }
 
-      return intermediates;
+      boardObject.setSlotColor(boardObject.getSlot(last.getRow(), last.getColumn()), source.getColor());
    }
 
    public MoveNode getBestMove() {
+      if (rootValues.isEmpty()) {
+         return null;
+      }
+
       MoveNode moveNode = rootValues.get(0);
       int maxScore = moveNode.getScore();
 
@@ -1050,7 +1064,7 @@ public class Game {
       return moveNode;
    }
 
-   private boolean makeMoveAlgo(Slot source, Slot dest, Slot[] intermediates) {
+   public boolean makeMoveAlgo(Slot source, Slot dest, Slot[] intermediates) {
       boolean moveMade = false;
       String directionMoving;
 

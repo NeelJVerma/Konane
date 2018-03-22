@@ -9,6 +9,9 @@ package com.neelverma.ai.konane.view;
 
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
+
+import com.neelverma.ai.konane.R;
 
 /**
  * Class to handle button click action for the button to remove two slots and start the game.
@@ -36,7 +39,7 @@ public class RemoveButtonClickListener implements View.OnClickListener {
    @Override
    public void onClick(View v) {
       Button thisButton = (Button) v;
-      thisButton.setVisibility(View.GONE);
+      thisButton.setVisibility(View.INVISIBLE);
 
       boardActivity.startGame();
       boardActivity.removeTwoSlots(row, col);

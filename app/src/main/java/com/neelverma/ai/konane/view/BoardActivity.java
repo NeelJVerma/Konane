@@ -19,6 +19,9 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -28,7 +31,11 @@ import android.widget.TextView;
 import com.neelverma.ai.konane.R;
 import com.neelverma.ai.konane.model.Board;
 import com.neelverma.ai.konane.model.Game;
+import com.neelverma.ai.konane.model.MoveNode;
 import com.neelverma.ai.konane.model.Slot;
+
+import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 
 /**
  * Class to execute changes to the GUI, while using the model as a reference for game rules.
@@ -75,10 +82,6 @@ public class BoardActivity extends AppCompatActivity {
 
       Bundle bundle = getIntent().getExtras();
       int gameType = bundle.getInt("gameType");
-      String guess = bundle.getString("guess");
-
-      int guessRow = Character.getNumericValue(guess.charAt(0));
-      int guessCol = Character.getNumericValue(guess.charAt(3));
 
       loadResources();
 
@@ -93,6 +96,11 @@ public class BoardActivity extends AppCompatActivity {
          drawBoardGame();
          startGame();
       } else {
+         String guess = bundle.getString("guess");
+
+         int guessRow = Character.getNumericValue(guess.charAt(0));
+         int guessCol = Character.getNumericValue(guess.charAt(3));
+
          drawBoardGame();
          removeButton.setOnClickListener(new RemoveButtonClickListener(BoardActivity.this, guessRow, guessCol));
       }
@@ -226,6 +234,9 @@ public class BoardActivity extends AppCompatActivity {
       moveButton.setVisibility(View.VISIBLE);
       moveButton.setOnClickListener(new MoveButtonClickListener(BoardActivity.this));
 
+      TextView plyCutoffEditText = findViewById(R.id.plyCutoffEditText);
+      plyCutoffEditText.setVisibility(View.VISIBLE);
+
       enableBoard();
    }
 
@@ -297,5 +308,55 @@ public class BoardActivity extends AppCompatActivity {
 
    public TextView getPlayerWhiteTurn() {
       return playerWhiteTurn;
+   }
+
+   public void showMoveFromMinimax(MoveNode moveNode) {
+      for (Slot s : moveNode.getMovePath()) {
+         Animation animation = new AlphaAnimation(1, 0);
+         animation.setDuration(300);
+         animation.setInterpolator(new LinearInterpolator());
+         animation.setRepeatCount(Animation.INFINITE);
+         animation.setRepeatMode(Animation.REVERSE);
+
+         gameBoard[s.getRow()][s.getColumn()].startAnimation(animation);
+      }
+   }
+
+   public void stopMoveAnimation(MoveNode moveNode) {
+      for (Slot s : moveNode.getMovePath()) {
+         gameBoard[s.getRow()][s.getColumn()].clearAnimation();
+      }
+   }
+
+   public void reDrawBoard() {
+      for (int r = 0; r < MAX_ROW; r++) {
+         for (int c = 0; c < MAX_COL; c++) {
+            if (gameObject.getBoardObject().getSlot(r, c).getColor() == Slot.BLACK) {
+               gameBoard[r][c].setBackground(drawCell[1]);
+            } else if (gameObject.getBoardObject().getSlot(r, c).getColor() == Slot.WHITE) {
+               gameBoard[r][c].setBackground(drawCell[2]);
+            } else {
+               gameBoard[r][c].setBackground(drawCell[3]);
+            }
+         }
+      }
+   }
+
+   public void reDrawTurns() {
+      if (gameObject.getPlayerBlack().isTurn()) {
+         getPlayerBlackTurn().setVisibility(View.VISIBLE);
+         getPlayerWhiteTurn().setVisibility(View.INVISIBLE);
+      } else {
+         getPlayerBlackTurn().setVisibility(View.INVISIBLE);
+         getPlayerWhiteTurn().setVisibility(View.VISIBLE);
+      }
+   }
+
+   public void reDrawScores() {
+      String blackText = "BLACK: " + gameObject.getPlayerBlack().getScore();
+      getPlayerBlackScore().setText(blackText.trim());
+
+      String whiteText = "WHITE: " + gameObject.getPlayerWhite().getScore();
+      getPlayerWhiteScore().setText(whiteText.trim());
    }
 }

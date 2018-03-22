@@ -105,4 +105,8 @@ public class Player {
    public boolean isComputer() {
       return isComputer;
    }
+
+   public void addToScore(int add) {
+      score += add;
+   }
 }
