@@ -88,14 +88,6 @@ public class Game {
       minimaxMove = null;
    }
 
-   public MoveNode getMinimaxMove() {
-      return minimaxMove;
-   }
-
-   public void setMinimaxMove(MoveNode minimaxMove) {
-      this.minimaxMove = minimaxMove;
-   }
-
    public void setPlyCutoff(int plyCutoff) {
       this.plyCutoff = plyCutoff;
    }
@@ -664,22 +656,6 @@ public class Game {
       return null;
    }
 
-   /**
-    * Description: Method to determine whether or not a slot can move.
-    * Parameters: Slot slot, which is the slot to check.
-    * Returns: If that slot can move or not.
-    */
-
-   public boolean slotCanMove(Slot slot) {
-      Slot slotRight = boardObject.getSlot(slot.getRow(), slot.getColumn() + 2);
-      Slot slotLeft = boardObject.getSlot(slot.getRow(), slot.getColumn() - 2);
-      Slot slotUp = boardObject.getSlot(slot.getRow() - 2, slot.getColumn());
-      Slot slotDown = boardObject.getSlot(slot.getRow() + 2, slot.getColumn());
-
-      return ((isValidMove(slot, slotRight, turnColor)) || (isValidMove(slot, slotLeft, turnColor)) ||
-         (isValidMove(slot, slotUp, turnColor)) || (isValidMove(slot, slotDown, turnColor)));
-   }
-
    public void depthFirstSearch(Slot start, ArrayList<Pair<Slot, Slot>> moves, HashMap<Slot, Slot> parents) {
       boolean[][] visitedSlots = new boolean[Board.MAX_ROW][Board.MAX_COLUMN];
 
@@ -828,70 +804,6 @@ public class Game {
          MoveNode moveNode = new MoveNode(source, dest);
          moveNode.setMovePath(possiblePath);
          movePaths.add(moveNode);
-      }
-   }
-
-   public int getMin(ArrayList<Integer> list) {
-      int min = Integer.MAX_VALUE;
-      int returnMin = Integer.MIN_VALUE;
-
-      for (int i = 0; i < list.size(); i++) {
-         if (list.get(i) < min) {
-            min = list.get(i);
-            returnMin = i;
-         }
-      }
-
-      return list.get(returnMin);
-   }
-
-   public int getMax(ArrayList<Integer> list) {
-      int max = Integer.MIN_VALUE;
-      int returnMax = Integer.MIN_VALUE;
-
-      for (int i = 0; i < list.size(); i++) {
-         if (list.get(i) > max) {
-            max = list.get(i);
-            returnMax = i;
-         }
-      }
-
-      return list.get(returnMax);
-   }
-
-   private void unMakeMove(Slot slotFrom, Slot slotTo) {
-      String directionMoving;
-
-      boardObject.setSlotColor(slotFrom, turnColor);
-      boardObject.setSlotColor(slotTo, Slot.EMPTY);
-
-      if (slotFrom.getRow() == slotTo.getRow()) {
-         if (slotFrom.getColumn() - slotTo.getColumn() == -2) {
-            directionMoving = "right";
-         } else {
-            directionMoving = "left";
-         }
-      } else {
-         if (slotFrom.getRow() - slotTo.getRow() == -2) {
-            directionMoving = "down";
-         } else {
-            directionMoving = "up";
-         }
-      }
-
-      Slot slotRight = boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() + 1);
-      Slot slotLeft = boardObject.getSlot(slotFrom.getRow(), slotFrom.getColumn() - 1);
-      Slot slotDown = boardObject.getSlot(slotFrom.getRow() + 1, slotFrom.getColumn());
-      Slot slotUp = boardObject.getSlot(slotFrom.getRow() - 1, slotFrom.getColumn());
-
-      if (directionMoving.equals("right")) {
-         boardObject.setSlotColor(slotRight, turnColor * -1);
-      } else if (directionMoving.equals("left")) {
-         boardObject.setSlotColor(slotLeft, turnColor * -1);
-      } else if (directionMoving.equals("down")) {
-         boardObject.setSlotColor(slotDown, turnColor * -1);
-      } else {
-         boardObject.setSlotColor(slotUp, turnColor * -1);
       }
    }
 

@@ -234,6 +234,10 @@ public class BoardActivity extends AppCompatActivity {
       moveButton.setVisibility(View.VISIBLE);
       moveButton.setOnClickListener(new MoveButtonClickListener(BoardActivity.this));
 
+      Button hintButton = findViewById(R.id.hintButton);
+      hintButton.setVisibility(View.VISIBLE);
+      hintButton.setOnClickListener(new HintButtonClickListener(BoardActivity.this));
+
       TextView plyCutoffEditText = findViewById(R.id.plyCutoffEditText);
       plyCutoffEditText.setVisibility(View.VISIBLE);
 
@@ -354,9 +358,32 @@ public class BoardActivity extends AppCompatActivity {
 
    public void reDrawScores() {
       String blackText = "BLACK: " + gameObject.getPlayerBlack().getScore();
-      getPlayerBlackScore().setText(blackText.trim());
+      playerBlackScore.setText(blackText.trim());
 
       String whiteText = "WHITE: " + gameObject.getPlayerWhite().getScore();
-      getPlayerWhiteScore().setText(whiteText.trim());
+      playerWhiteScore.setText(whiteText.trim());
+   }
+
+   public void showScoresFromMinimax(MoveNode moveNode) {
+      Animation animation = new AlphaAnimation(1, 0);
+      animation.setDuration(300);
+      animation.setInterpolator(new LinearInterpolator());
+      animation.setRepeatCount(Animation.INFINITE);
+      animation.setRepeatMode(Animation.REVERSE);
+
+      if (gameObject.getTurnColor() == Slot.BLACK) {
+         String blackText = "BLACK: " + (gameObject.getPlayerBlack().getScore() + moveNode.getScore());
+         getPlayerBlackScore().setText(blackText.trim());
+      } else {
+         String whiteText = "WHITE: " + (gameObject.getPlayerWhite().getScore() + moveNode.getScore());
+         getPlayerWhiteScore().setText(whiteText.trim());
+      }
+   }
+
+   public void stopPlayerAnimation() {
+      reDrawScores();
+
+      playerBlackScore.clearAnimation();
+      playerWhiteScore.clearAnimation();
    }
 }

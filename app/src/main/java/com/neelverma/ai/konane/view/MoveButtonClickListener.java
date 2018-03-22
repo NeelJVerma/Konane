@@ -25,6 +25,12 @@ public class MoveButtonClickListener implements View.OnClickListener {
 
    @Override
    public void onClick(View v) {
+      boardActivity.stopPlayerAnimation();
+
+      if (gameObject.getBestMove() != null) {
+         boardActivity.stopMoveAnimation(gameObject.getBestMove());
+      }
+
       // Don't know why I need this, but turns get switched otherwise.
       gameObject.setTurnColor((gameObject.getPlayerWhite().isTurn() ? Slot.WHITE : Slot.BLACK));
 
@@ -51,7 +57,6 @@ public class MoveButtonClickListener implements View.OnClickListener {
 
       gameObject.makeMoveAlgo(moveNode);
       boardActivity.reDrawBoard();
-      gameObject.getBoardObject().printBoard();
 
       if (gameObject.getTurnColor() == Slot.BLACK) {
          gameObject.getPlayerBlack().addToScore(gameObject.getBestMove().getScore());
@@ -59,7 +64,13 @@ public class MoveButtonClickListener implements View.OnClickListener {
          gameObject.getPlayerWhite().addToScore(gameObject.getBestMove().getScore());
       }
 
-      gameObject.setTurnColor((gameObject.getPlayerWhite().isTurn() ? Slot.BLACK : Slot.WHITE));
+      if (gameObject.getPlayerBlack().isTurn() && !gameObject.playerCanMove(gameObject.getPlayerWhite())) {
+         gameObject.setTurnColor(Slot.BLACK);
+      } else if (gameObject.getPlayerWhite().isTurn() && !gameObject.playerCanMove(gameObject.getPlayerBlack())) {
+         gameObject.setTurnColor(Slot.WHITE);
+      } else {
+         gameObject.setTurnColor((gameObject.getPlayerWhite().isTurn() ? Slot.BLACK : Slot.WHITE));
+      }
 
       if (gameObject.getTurnColor() == Slot.WHITE) {
          gameObject.getPlayerWhite().setIsTurn(true);

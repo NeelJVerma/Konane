@@ -102,8 +102,4 @@ public class Board {
          System.out.println();
       }
    }
-
-   public Slot[][] getGameBoard() {
-      return gameBoard;
-   }
 }

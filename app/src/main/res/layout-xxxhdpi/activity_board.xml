@@ -107,4 +107,13 @@
         android:inputType="number"
         android:visibility="invisible" />
 
+    <Button
+        android:id="@+id/hintButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="HINT"
+        android:visibility="invisible" />
+
 </RelativeLayout>

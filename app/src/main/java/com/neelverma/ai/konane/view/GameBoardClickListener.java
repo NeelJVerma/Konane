@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.neelverma.ai.konane.model.Game;
+import com.neelverma.ai.konane.model.MoveNode;
 import com.neelverma.ai.konane.model.Slot;
 
 /**
@@ -49,6 +50,8 @@ public class GameBoardClickListener implements View.OnClickListener {
       if (gameObject.getBestMove() != null) {
          boardActivity.stopMoveAnimation(gameObject.getBestMove());
       }
+
+      boardActivity.stopPlayerAnimation();
 
       if (gameObject.getPlayerWhite().isComputer() && gameObject.getTurnColor() == Slot.WHITE) {
          Toast.makeText(boardActivity, "COMPUTER'S TURN", Toast.LENGTH_SHORT).show();
