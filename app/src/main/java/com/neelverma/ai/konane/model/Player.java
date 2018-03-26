@@ -1,8 +1,8 @@
 /************************************************************
  * Name: Neel Verma                                         *
- * Project: Project 2 - Two Player Konane                   *
+ * Project: Project 3 - Two Player Konane                   *
  * Class: CMPS331 - Artificial Intelligence                 *
- * Due Date: 2/16/2018                                      *
+ * Due Date: 3/27/2018                                      *
  ************************************************************/
 
 package com.neelverma.ai.konane.model;
@@ -98,13 +98,31 @@ public class Player {
       this.score = score;
    }
 
+   /**
+    * Description: Method to set if the current player is the computer or not.
+    * Parameters: boolean isComputer, which is the boolean value to set.
+    * Returns: Nothing.
+    */
+
    public void setComputer(boolean isComputer) {
       this.isComputer = isComputer;
    }
 
+   /**
+    * Description: A method to determine if the player is a computer.
+    * Parameters: None.
+    * Returns: If the player is a computer.
+    */
+
    public boolean isComputer() {
       return isComputer;
    }
+
+   /**
+    * Description: A method to add a specific value to the player's score.
+    * Parameters: int add, which is the amount to add.
+    * Returns: Nothing.
+    */
 
    public void addToScore(int add) {
       score += add;

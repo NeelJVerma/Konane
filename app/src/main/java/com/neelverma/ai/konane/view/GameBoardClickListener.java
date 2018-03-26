@@ -1,8 +1,8 @@
 /************************************************************
  * Name: Neel Verma                                         *
- * Project: Project 2 - Two Player Konane                   *
+ * Project: Project 3 - Two Player Konane                   *
  * Class: CMPS331 - Artificial Intelligence                 *
- * Due Date: 2/16/2018                                      *
+ * Due Date: 3/27/2018                                      *
  ************************************************************/
 
 package com.neelverma.ai.konane.view;
@@ -13,7 +13,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.neelverma.ai.konane.model.Game;
-import com.neelverma.ai.konane.model.MoveNode;
 import com.neelverma.ai.konane.model.Slot;
 
 /**
@@ -51,7 +50,7 @@ public class GameBoardClickListener implements View.OnClickListener {
          boardActivity.stopMoveAnimation(gameObject.getBestMove());
       }
 
-      boardActivity.stopPlayerAnimation();
+      boardActivity.stopScoreAnimation();
 
       if (gameObject.getPlayerWhite().isComputer() && gameObject.getTurnColor() == Slot.WHITE) {
          Toast.makeText(boardActivity, "COMPUTER'S TURN", Toast.LENGTH_SHORT).show();

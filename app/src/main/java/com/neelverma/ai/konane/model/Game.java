@@ -1,12 +1,12 @@
 /************************************************************
  * Name: Neel Verma                                         *
- * Project: Project 2 - Two Player Konane                   *
+ * Project: Project 3 - Two Player Konane                   *
  * Class: CMPS331 - Artificial Intelligence                 *
- * Due Date: 2/16/2018                                      *
+ * Due Date: 3/27/2018                                      *
  ************************************************************/
 
 package com.neelverma.ai.konane.model;
-import android.content.Context;
+import android.os.Environment;
 import android.util.Pair;
 
 import java.io.BufferedReader;
@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Stack;
-
 
 /**
  * Class to play the game and execute all the game logic. It always holds the state of the game.
@@ -57,6 +56,8 @@ public class Game {
    private ArrayList<MoveNode> rootValues;
    private int plyCutoff;
    private MoveNode minimaxMove;
+   private boolean firstClickCompMove;
+   private boolean alphaBetaEnable;
 
    /**
     * Description: Constructor. Will initialize the current game's variables through their
@@ -86,10 +87,58 @@ public class Game {
       rootValues = new ArrayList<>();
       plyCutoff = 0;
       minimaxMove = null;
+      firstClickCompMove = true;
+      alphaBetaEnable = false;
    }
+
+   /**
+    * Description: Method to check if the comp move button is clicked for the first time.
+    * Parameters: None.
+    * Returns: Whether or not the comp move button was clicked for the first time.
+    */
+
+   public boolean isFirstClickCompMove() {
+      return firstClickCompMove;
+   }
+
+   /**
+    * Description: Method to set the value of first click comp move.
+    * Parameters: boolean firstClickCompMove, which is the boolean value to set.
+    * Returns: Nothing.
+    */
+
+   public void setFirstClickCompMove(boolean firstClickCompMove) {
+      this.firstClickCompMove = firstClickCompMove;
+   }
+
+   /**
+    * Description: Method to set the minimax ply cutoff.
+    * Parameters: int plyCutoff, which is the ply cutoff to set.
+    * Returns: Nothing.
+    */
 
    public void setPlyCutoff(int plyCutoff) {
       this.plyCutoff = plyCutoff;
+   }
+
+   /**
+    * Description: Method to set whether or not alpha beta pruning is enabled.
+    * Parameters: boolean alphaBetaEnable, which is the boolean value to set.
+    * Returns: Nothing.
+    */
+
+   public void setAlphaBetaEnable(boolean alphaBetaEnable) {
+      this.alphaBetaEnable = alphaBetaEnable;
+   }
+
+   /**
+    * Description: Method to return the best move suggested by the minimax algorithm.
+    * Parameters: None.
+    * Returns: The best move.
+    */
+
+   public MoveNode getMinimaxMove() {
+      return minimaxMove;
    }
 
    /**
@@ -360,13 +409,8 @@ public class Game {
     * Returns: The name of the full path to the file.
     */
 
-   public String saveGame(String fileName, Context context) {
-      File file = new File(context.getFilesDir(), "saved_games");
-
-      if (!file.exists()) {
-         file.mkdir();
-      }
-
+   public String saveGame(String fileName) {
+      File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
       File saveFile = new File(file, fileName);
 
       try {
@@ -411,6 +455,8 @@ public class Game {
     */
 
    public void setGameFromState(String filePath, int boardSize) {
+      File readFile = new File(filePath);
+
       int whiteScore = 0;
       int blackScore = 0;
       String turn = "black";
@@ -418,14 +464,14 @@ public class Game {
       String human = "black";
 
       if (boardSize == 6) {
-         endBoardLine = 9;
+         endBoardLine = 8;
       } else if (boardSize == 8) {
-         endBoardLine = 11;
+         endBoardLine = 10;
       } else {
-         endBoardLine = 13;
+         endBoardLine = 12;
       }
 
-      try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath))) {
+      try (BufferedReader bufferedReader = new BufferedReader(new FileReader(readFile))) {
          String line;
          int lineCounter = 0;
 
@@ -616,7 +662,13 @@ public class Game {
       this.turnColor = turnColor;
    }
 
-   public Slot getRight(Slot slot) {
+   /**
+    * Description: Method to get the slot to the right of a specific slot.
+    * Parameters: Slot slot, which is the slot to check the right of.
+    * Returns: The slot, if it is a valid moving position, otherwise null.
+    */
+
+   private Slot getRight(Slot slot) {
       if (slot.getColumn() + 2 < Board.MAX_COLUMN &&
          boardObject.getSlot(slot.getRow(), slot.getColumn() + 2).getColor() == Slot.EMPTY &&
          boardObject.getSlot(slot.getRow(), slot.getColumn() + 1).getColor() != Slot.EMPTY) {
@@ -626,7 +678,13 @@ public class Game {
       return null;
    }
 
-   public Slot getLeft(Slot slot) {
+   /**
+    * Description: Method to get the slot to the left of a specific slot.
+    * Parameters: Slot slot, which is the slot to check the left of.
+    * Returns: The slot, if it is a valid moving position, otherwise null.
+    */
+
+   private Slot getLeft(Slot slot) {
       if (slot.getColumn() - 2 >= Board.MIN_COLUMN &&
          boardObject.getSlot(slot.getRow(), slot.getColumn() - 2).getColor() == Slot.EMPTY &&
          boardObject.getSlot(slot.getRow(), slot.getColumn() - 1).getColor() != Slot.EMPTY) {
@@ -636,7 +694,13 @@ public class Game {
       return null;
    }
 
-   public Slot getUp(Slot slot) {
+   /**
+    * Description: Method to get the slot upwards of a specific slot.
+    * Parameters: Slot slot, which is the slot to check upwards of.
+    * Returns: The slot, if it is a valid moving position, otherwise null.
+    */
+
+   private Slot getUp(Slot slot) {
       if (slot.getRow() - 2 >= Board.MIN_ROW &&
          boardObject.getSlot(slot.getRow() - 2, slot.getColumn()).getColor() == Slot.EMPTY &&
          boardObject.getSlot(slot.getRow() - 1, slot.getColumn()).getColor() != Slot.EMPTY) {
@@ -646,7 +710,13 @@ public class Game {
       return null;
    }
 
-   public Slot getDown(Slot slot) {
+   /**
+    * Description: Method to get the slot downwards of a specific slot.
+    * Parameters: Slot slot, which is the slot to check downwards of.
+    * Returns: The slot, if it is a valid moving position, otherwise null.
+    */
+
+   private Slot getDown(Slot slot) {
       if (slot.getRow() + 2 < Board.MAX_ROW &&
          boardObject.getSlot(slot.getRow() + 2, slot.getColumn()).getColor() == Slot.EMPTY &&
          boardObject.getSlot(slot.getRow() + 1, slot.getColumn()).getColor() != Slot.EMPTY) {
@@ -656,14 +726,52 @@ public class Game {
       return null;
    }
 
-   public void depthFirstSearch(Slot start, ArrayList<Pair<Slot, Slot>> moves, HashMap<Slot, Slot> parents) {
-      boolean[][] visitedSlots = new boolean[Board.MAX_ROW][Board.MAX_COLUMN];
+   /**
+    * Description: Method to set the boolean array of visited slots to all false.
+    * Parameters: boolean[][] visitedSlots, which is the boolean array of visited slots.
+    * Returns: Nothing.
+    */
 
+   private void setSlotsAsNotVisited(boolean[][] visitedSlots) {
       for (int r = 0; r < Board.MAX_ROW; r++) {
          for (int c = 0; c < Board.MAX_COLUMN; c++) {
             visitedSlots[r][c] = false;
          }
       }
+   }
+
+   /**
+    * Description: Method to check if a given slot is the child of another given slot.
+    * Parameters: Slot current, which is the parent.
+    *             Slot toCheck, which is the child to check.
+    *             HashMap<Slot, Slot> parents, which is the map of parents to children.
+    * Returns: Whether or not toCheck is a child of current.
+    */
+
+   private boolean isChild(Slot current, Slot toCheck, HashMap<Slot, Slot> parents) {
+      if (parents.get(current) != null) {
+         if (parents.get(current).equals(toCheck)) {
+            return true;
+         }
+      }
+
+      return false;
+   }
+
+   /**
+    * Description: Method to do a depth first search on a specific slot to get all available moves from
+    * that slot.
+    * Parameters: Slot start, which is the starting slot.
+    *             ArrayList<Pair<Slot, Slot>> moves, which is the list of available moves.
+    *             HashMap<Slot, Slot> parents, which is the map of all parent to child relationships
+    *             of slots.
+    * Returns: Nothing.
+    */
+
+   private void depthFirstSearch(Slot start, ArrayList<Pair<Slot, Slot>> moves, HashMap<Slot, Slot> parents) {
+      boolean[][] visitedSlots = new boolean[Board.MAX_ROW][Board.MAX_COLUMN];
+
+      setSlotsAsNotVisited(visitedSlots);
 
       Stack<Slot> dfsStack = new Stack<>();
       int color = start.getColor();
@@ -678,7 +786,9 @@ public class Game {
          Slot current = dfsStack.pop();
 
          if (!visitedSlots[current.getRow()][current.getColumn()] && !current.equals(previous)) {
-            visitedSlots[current.getRow()][current.getColumn()] = true;
+            if (!current.equals(start)) {
+               visitedSlots[current.getRow()][current.getColumn()] = true;
+            }
 
             next = new Pair<>(start, current);
 
@@ -690,61 +800,29 @@ public class Game {
          Slot left = getLeft(current);
          Slot right = getRight(current);
 
-         if (right != null && !visitedSlots[right.getRow()][right.getColumn()]) {
-            boolean isChild = false;
-
-            if (parents.get(current) != null) {
-               if (parents.get(current).equals(right)) {
-                  isChild = true;
-               }
-            }
-
-            if (!isChild) {
-               dfsStack.push(right);
-               parents.put(right, current);
-            }
-         }
-
-         if (down != null && !visitedSlots[down.getRow()][down.getColumn()]) {
-            boolean isChild = false;
-
-            if (parents.get(current) != null) {
-               if (parents.get(current).equals(down)) {
-                  isChild = true;
-               }
-            }
-
-            if (!isChild) {
-               dfsStack.push(down);
-               parents.put(down, current);
-            }
-         }
-
          if (left != null && !visitedSlots[left.getRow()][left.getColumn()]) {
-            boolean isChild = false;
-
-            if (parents.get(current) != null) {
-               if (parents.get(current).equals(left)) {
-                  isChild = true;
-               }
-            }
-
-            if (!isChild) {
+            if (!isChild(current, left, parents)) {
                dfsStack.push(left);
                parents.put(left, current);
             }
          }
 
-         if (up != null && !visitedSlots[up.getRow()][up.getColumn()]) {
-            boolean isChild = false;
-
-            if (parents.get(current) != null) {
-               if (parents.get(current).equals(up)) {
-                  isChild = true;
-               }
+         if (down != null && !visitedSlots[down.getRow()][down.getColumn()]) {
+            if (!isChild(current, down, parents)) {
+               dfsStack.push(down);
+               parents.put(down, current);
             }
+         }
 
-            if (!isChild) {
+         if (right != null && !visitedSlots[right.getRow()][right.getColumn()]) {
+            if (!isChild(current, right, parents)) {
+               dfsStack.push(right);
+               parents.put(right, current);
+            }
+         }
+
+         if (up != null && !visitedSlots[up.getRow()][up.getColumn()]) {
+            if (!isChild(current, up, parents)) {
                dfsStack.push(up);
                parents.put(up, current);
             }
@@ -756,7 +834,13 @@ public class Game {
       boardObject.setSlotColor(boardObject.getSlot(start.getRow(), start.getColumn()), color);
    }
 
-   public ArrayList<MoveNode> getAllMoves(int slotColor) {
+   /**
+    * Description: Method to get all the valid moves for all stones of a certain color.
+    * Parameters: int slotColor, which is the color of the slot to check all moves for.
+    * Returns: A list of MoveNode objects, which each represent a move.
+    */
+
+   private ArrayList<MoveNode> getAllMoves(int slotColor) {
       ArrayList<MoveNode> movePaths = new ArrayList<>();
       ArrayList<Pair<Slot, Slot>> moves = new ArrayList<>();
       HashMap<Slot, Slot> parents = new HashMap<>();
@@ -777,6 +861,14 @@ public class Game {
 
       return movePaths;
    }
+
+   /**
+    * Description: Method to get the path that a move traveled.
+    * Parameters: HashMap<Slot, Slot> parents, which is a map of parent child relationships among slots.
+    *             ArrayList<Pair<Slot, Slot>> moves, which is the list of all moves.
+    *             ArrayList<MoveNode> movePaths, which is the persistent list of all move paths.
+    * Returns: Nothing.
+    */
 
    private void getPath(HashMap<Slot, Slot> parents, ArrayList<Pair<Slot, Slot>> moves, ArrayList<MoveNode> movePaths) {
       ArrayList<ArrayList<Slot>> path = new ArrayList<>();
@@ -807,71 +899,71 @@ public class Game {
       }
    }
 
-   public void callMinimax() {
+   /**
+    * Description: Method that acts as a wrapper for the recursive minimax method.
+    * Parameters: Player player, which is the current player that is calling the minimax algorithm.
+    * Returns: Nothing.
+    */
+
+   public void callMinimax(Player player) {
       rootValues.clear();
 
-      Player currentPlayer = turnColor == Slot.BLACK ? playerBlack : playerWhite;
-
-      minimax(0, currentPlayer);
-   }
-
-   private Player getWinner() {
-      if (playerBlack.getScore() > playerWhite.getScore()) {
-         return playerBlack;
+      if (player.getColor() == Slot.WHITE) {
+         minimaxPlayerWhite(0, player, Integer.MIN_VALUE, Integer.MAX_VALUE);
+      } else {
+         minimaxPlayerBlack(0, player, Integer.MIN_VALUE , Integer.MAX_VALUE);
       }
 
-      if (playerWhite.getScore() > playerBlack.getScore()) {
-         return playerWhite;
-      }
-
-      return null;
+      minimaxMove = getBestMove();
    }
+
+   /**
+    * Description: Method to get the heuristic value for a certain player at a certain point in time
+    *              during the construction of the game tree (board state is modified in minimax, and
+    *              is the class board, so it does not need to be passed in).
+    * Parameters: Player player, which is the player's heuristic value to get.
+    * Returns: The heuristic value.
+    */
 
    private int getHeuristic(Player player) {
-      ArrayList<MoveNode> blackPlayerMoves = getAllMoves(playerBlack.getColor());
-      int blackPlayerMaxScore = Integer.MIN_VALUE;
+      int whitePieces = 0;
+      int blackPieces = 0;
 
-      for(MoveNode m : blackPlayerMoves) {
-         if(m.getScore() > blackPlayerMaxScore) {
-            blackPlayerMaxScore = m.getScore();
+      for (int r = 0; r < Board.MAX_ROW; r++) {
+         for (int c = 0; c < Board.MAX_COLUMN; c++) {
+            if (boardObject.getSlot(r, c).getColor() == Slot.WHITE) {
+               whitePieces++;
+            } else if (boardObject.getSlot(r, c).getColor() == Slot.BLACK) {
+               blackPieces++;
+            }
          }
       }
 
-      ArrayList<MoveNode> whitePlayerMoves = getAllMoves(playerWhite.getColor());
-      int whitePlayerMaxScore = Integer.MIN_VALUE;
-
-      for(MoveNode m : whitePlayerMoves) {
-         if(m.getScore() > whitePlayerMaxScore) {
-            whitePlayerMaxScore = m.getScore();
-         }
-      }
-
-      if (player.equals(playerWhite)) {
-         return whitePlayerMaxScore - blackPlayerMaxScore;
+      if (player.equals(playerBlack)) {
+         return blackPieces - whitePieces;
       } else {
-         return blackPlayerMaxScore - whitePlayerMaxScore;
+         return whitePieces - blackPieces;
       }
    }
 
-   private int minimax(int depth, Player player) {
-      if (!playerCanMove(playerBlack) && !playerCanMove(playerWhite)) {
-         if (getWinner() != null && getWinner().equals(player)) {
-            return 1;
-         }
+   /**
+    * Description: Method to execute the minimax algorithm for the player playing white pieces.
+    * Parameters: int depth, which is the depth of the tree.
+    *             Player player, which is the current player for a certain level of the tree.
+    *             int alpha, which is the alpha value of a path.
+    *             int beta, which is the beta value of a path.
+    * Returns: The heuristic value for a node.
+    */
 
-         if (getWinner() != null && !getWinner().equals(player)) {
-            return -1;
-         }
-      }
-
-      if (depth > plyCutoff) {
-         return getHeuristic(playerBlack);
+   private int minimaxPlayerWhite(int depth, Player player, int alpha, int beta) {
+      if ((!playerCanMove(playerBlack) && !playerCanMove(playerWhite)) || depth > plyCutoff) {
+         return getHeuristic(playerWhite);
       }
 
       ArrayList<MoveNode> moves = getAllMoves(player.getColor());
 
       if (moves.isEmpty()) {
-         return 0;
+         return getHeuristic(playerWhite);
       }
 
       ArrayList<Integer> scores = new ArrayList<>();
@@ -882,42 +974,139 @@ public class Game {
          copyBoard(savedBoard);
       }
 
-      Player currentPlayer = turnColor == Slot.BLACK ? playerBlack : playerWhite;
-      Player oppositePlayer = turnColor == Slot.BLACK ? playerWhite : playerBlack;
+      for (int i = 0; i < moves.size(); i++) {
+         MoveNode move = moves.get(i);
+
+         if (player.equals(playerWhite)) {
+            makeMoveFromMinimax(move);
+
+            int currentScore = minimaxPlayerWhite(depth + 1, playerBlack, alpha, beta);
+            scores.add(currentScore);
+
+            if (alphaBetaEnable) {
+               if (move.getMinimaxValue() > alpha) {
+                  alpha = move.getMinimaxValue();
+               }
+
+               if (beta <= alpha) {
+                  break;
+               }
+            }
+
+            if (depth == 0) {
+               move.setMinimaxValue(currentScore);
+               rootValues.add(move);
+            }
+         } else if (player.equals(playerBlack)) {
+            makeMoveFromMinimax(move);
+
+            int currentScore = minimaxPlayerWhite(depth + 1, playerWhite, alpha, beta);
+            scores.add(currentScore);
+
+            if (alphaBetaEnable) {
+               if (move.getMinimaxValue() < beta) {
+                  beta = move.getMinimaxValue();
+               }
+
+               if (alpha >= beta) {
+                  break;
+               }
+            }
+         }
+
+         resetBoard(savedBoard);
+      }
+
+      if (player.equals(playerWhite)) {
+         return Collections.max(scores);
+      }
+
+      return Collections.min(scores);
+   }
+
+   /**
+    * Description: Method to execute the minimax algorithm for the player playing black pieces.
+    * Parameters: int depth, which is the depth of the tree.
+    *             Player player, which is the current player for a certain level of the tree.
+    *             int alpha, which is the alpha value of a path.
+    *             int beta, which is the beta value of a path.
+    * Returns: The heuristic value for a node.
+    */
+
+   private int minimaxPlayerBlack(int depth, Player player, int alpha, int beta) {
+      if ((!playerCanMove(playerBlack) && !playerCanMove(playerWhite)) || depth > plyCutoff) {
+         return getHeuristic(playerBlack);
+      }
+
+      ArrayList<MoveNode> moves = getAllMoves(player.getColor());
+
+      if (moves.isEmpty()) {
+         return getHeuristic(playerBlack);
+      }
+
+      ArrayList<Integer> scores = new ArrayList<>();
+
+      Integer[][] savedBoard = new Integer[Board.MAX_ROW][Board.MAX_COLUMN];
+
+      if (plyCutoff >= depth) {
+         copyBoard(savedBoard);
+      }
 
       for (int i = 0; i < moves.size(); i++) {
          MoveNode move = moves.get(i);
 
-         if (player.equals(currentPlayer)) {
-            makeMoveAlgo(move);
+         if (player.equals(playerBlack)) {
+            makeMoveFromMinimax(move);
 
-            int currentScore = minimax(depth + 1, oppositePlayer);
+            int currentScore = minimaxPlayerBlack(depth + 1, playerWhite, alpha, beta);
             scores.add(currentScore);
+
+            if (alphaBetaEnable) {
+               if (move.getMinimaxValue() > alpha) {
+                  alpha = move.getMinimaxValue();
+               }
+
+               if (beta <= alpha) {
+                  break;
+               }
+            }
 
             if (depth == 0) {
                move.setMinimaxValue(currentScore);
                rootValues.add(move);
             }
          } else if (player.equals(playerWhite)) {
-            makeMoveAlgo(move);
+            makeMoveFromMinimax(move);
 
-            int currentScore = minimax(depth + 1, oppositePlayer);
+            int currentScore = minimaxPlayerBlack(depth + 1, playerBlack, alpha, beta);
             scores.add(currentScore);
+
+            if (alphaBetaEnable) {
+               if (move.getMinimaxValue() < beta) {
+                  beta = move.getMinimaxValue();
+               }
+
+               if (alpha >= beta) {
+                  break;
+               }
+            }
          }
 
          resetBoard(savedBoard);
       }
 
-      if (scores.isEmpty()) {
-         return 0;
-      }
-
-      if(player.equals(currentPlayer)) {
+      if (player.equals(playerBlack)) {
          return Collections.max(scores);
       }
 
       return Collections.min(scores);
    }
+
+   /**
+    * Description: Method to copy the current board state into an integer array.
+    * Parameters: Integer[][] savedBoard, which is the integer array to copy the board into.
+    * Returns: Nothing.
+    */
 
    private void copyBoard(Integer[][] savedBoard) {
       for (int r = 0; r < Board.MAX_ROW; r++) {
@@ -927,6 +1116,13 @@ public class Game {
       }
    }
 
+   /**
+    * Description: Method to reset the board from the saved board.
+    * Parameters: Integer[][] savedBoard, which is the saved board to reset the class instance of the
+    *             board with.
+    * Returns: Nothing.
+    */
+
    private void resetBoard(Integer[][] savedBoard) {
       for (int r = 0; r < Board.MAX_ROW; r++) {
          for(int c = 0; c < Board.MAX_COLUMN; c++) {
@@ -935,7 +1131,13 @@ public class Game {
       }
    }
 
-   public void makeMoveAlgo(MoveNode move) {
+   /**
+    * Description: Method to make the move that was generated by the minimax algorithm.
+    * Parameters: MoveNode move, which is the move to make.
+    * Returns: Nothing.
+    */
+
+   public void makeMoveFromMinimax(MoveNode move) {
       ArrayList<Slot> path = move.getMovePath();
 
       Slot source = path.get(0);
@@ -947,7 +1149,7 @@ public class Game {
          Slot[] intermediatesTemp = new Slot[1];
          Slot dest = path.get(i);
 
-         if (makeMoveAlgo(source, dest, intermediatesTemp)) {
+         if (makeMoveFromMinimax(source, dest, intermediatesTemp)) {
             boardObject.setSlotColor(boardObject.getSlot(dest.getRow(), dest.getColumn()), Slot.EMPTY);
             last = dest;
 
@@ -958,25 +1160,40 @@ public class Game {
       boardObject.setSlotColor(boardObject.getSlot(last.getRow(), last.getColumn()), source.getColor());
    }
 
+   /**
+    * Description: Method to get the best move suggested by the minimax algorithm.
+    * Parameters: None.
+    * Returns: The best move.
+    */
+
    public MoveNode getBestMove() {
       if (rootValues.isEmpty()) {
          return null;
       }
 
       MoveNode moveNode = rootValues.get(0);
-      int maxScore = moveNode.getScore();
+      int maxScore = moveNode.getMinimaxValue();
 
       for(MoveNode m : rootValues) {
-         if(m.getScore() > maxScore) {
+         if(m.getMinimaxValue() > maxScore) {
             moveNode = m;
-            maxScore = m.getScore();
+            maxScore = m.getMinimaxValue();
          }
       }
 
       return moveNode;
    }
 
-   public boolean makeMoveAlgo(Slot source, Slot dest, Slot[] intermediates) {
+   /**
+    * Description: Method that serves as an under layer for the other make move method.
+    * Parameters: Slot source, which is the source slot.
+    *             Slot dest, which is the destination slot.
+    *             Slot[] intermediates, which is a persistent array of intermediate slots in the move
+    *             path.
+    * Returns: Whether or not the move was a success.
+    */
+
+   private boolean makeMoveFromMinimax(Slot source, Slot dest, Slot[] intermediates) {
       boolean moveMade = false;
       String directionMoving;
 

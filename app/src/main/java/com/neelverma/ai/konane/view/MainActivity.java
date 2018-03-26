@@ -1,8 +1,8 @@
 /************************************************************
  * Name: Neel Verma                                         *
- * Project: Project 2 - Two Player Konane                   *
+ * Project: Project 3 - Two Player Konane                   *
  * Class: CMPS331 - Artificial Intelligence                 *
- * Due Date: 2/16/2018                                      *
+ * Due Date: 3/27/2018                                      *
  ************************************************************/
 
 package com.neelverma.ai.konane.view;
@@ -29,12 +29,14 @@ public class MainActivity extends AppCompatActivity {
       super.onCreate(savedInstanceState);
       setContentView(R.layout.activity_main);
 
-      /*File dir = new File("/data/user/0/com.neelverma.ai.konane/files/saved_games/");
-      System.out.println(dir.toString());
+      int readPermission = ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+      int writePermission = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
-      for (File f : dir.listFiles()) {
-         f.delete();
-      }*/
+      String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+      if (writePermission != PackageManager.PERMISSION_GRANTED || readPermission != PackageManager.PERMISSION_DENIED) {
+         ActivityCompat.requestPermissions(this, permissions, 1);
+      }
 
       Button beginButton = findViewById(R.id.beginButton);
       beginButton.setOnClickListener(new BeginButtonClickListener(MainActivity.this));

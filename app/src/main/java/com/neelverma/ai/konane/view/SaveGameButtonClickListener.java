@@ -1,14 +1,15 @@
 /************************************************************
  * Name: Neel Verma                                         *
- * Project: Project 2 - Two Player Konane                   *
+ * Project: Project 3 - Two Player Konane                   *
  * Class: CMPS331 - Artificial Intelligence                 *
- * Due Date: 2/16/2018                                      *
+ * Due Date: 3/27/2018                                      *
  ************************************************************/
 
 package com.neelverma.ai.konane.view;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Environment;
 import android.view.View;
 import android.widget.Toast;
 
@@ -41,13 +42,11 @@ public class SaveGameButtonClickListener implements View.OnClickListener {
 
    @Override
    public void onClick(View v) {
-      Context context = v.getContext();
-
       if (gameObject.isSuccessiveMove()) {
          Toast.makeText(boardActivity, "FILE NOT SAVED. CAN'T SAVE MID-TURN.", Toast.LENGTH_SHORT).show();
       } else {
          int i = 0;
-         File dir = new File(context.getFilesDir(), "saved_games");
+         File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
          while (true) {
             File file = new File(dir.toString() + "/saved_game" + i + ".txt");
@@ -59,7 +58,8 @@ public class SaveGameButtonClickListener implements View.OnClickListener {
             i++;
          }
 
-         filePath = gameObject.saveGame("/saved_game" + i + ".txt", context);
+         filePath = gameObject.saveGame("/saved_game" + i + ".txt");
+         Toast.makeText(boardActivity, "SAVED /saved_game" + i + ".txt", Toast.LENGTH_LONG).show();
 
          Intent mainIntent = new Intent(boardActivity, MainActivity.class);
          boardActivity.startActivity(mainIntent);
@@ -75,6 +75,12 @@ public class SaveGameButtonClickListener implements View.OnClickListener {
    public static String getFilePath() {
       return filePath;
    }
+
+   /**
+    * Description: Method to set the file path.
+    * Parameters: String filePath1, which is the file path name.
+    * Returns: Nothing.
+    */
 
    public static void setFilePath(String filePath1) {
       filePath = filePath1;

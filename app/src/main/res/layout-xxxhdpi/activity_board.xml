@@ -100,7 +100,7 @@
         android:id="@+id/plyCutoffEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignStart="@+id/removeButton"
+        android:layout_alignParentStart="true"
         android:layout_below="@+id/playerWhiteTurn"
         android:ems="10"
         android:hint="Ply Cutoff (Default is 1)"
@@ -114,6 +114,15 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:text="HINT"
+        android:visibility="invisible" />
+
+    <CheckBox
+        android:id="@+id/alphaBetaCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/plyCutoffEditText"
+        android:layout_alignParentEnd="true"
+        android:text="Alpha/Beta"
         android:visibility="invisible" />
 
 </RelativeLayout>

@@ -1,14 +1,11 @@
 /************************************************************
  * Name: Neel Verma                                         *
- * Project: Project 2 - Two Player Konane                   *
+ * Project: Project 3 - Two Player Konane                   *
  * Class: CMPS331 - Artificial Intelligence                 *
- * Due Date: 2/16/2018                                      *
+ * Due Date: 3/27/2018                                      *
  ************************************************************/
 
 package com.neelverma.ai.konane.model;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Class to hold the Konane game board.
@@ -85,21 +82,5 @@ public class Board {
 
       Slot ret = new Slot(MAX_ROW, MAX_COLUMN, 2);
       return ret;
-   }
-
-   public void printBoard() {
-      for (int i = 0; i < MAX_ROW; i++) {
-         for (int j = 0; j < MAX_COLUMN; j++) {
-            if (gameBoard[i][j].getColor() == 1) {
-               System.out.print("B ");
-            } else if (gameBoard[i][j].getColor() == -1) {
-               System.out.print("W ");
-            } else {
-               System.out.print("O ");
-            }
-         }
-
-         System.out.println();
-      }
    }
 }

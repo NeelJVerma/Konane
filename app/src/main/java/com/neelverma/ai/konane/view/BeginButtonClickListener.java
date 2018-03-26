@@ -1,8 +1,8 @@
 /************************************************************
  * Name: Neel Verma                                         *
- * Project: Project 2 - Two Player Konane                   *
+ * Project: Project 3 - Two Player Konane                   *
  * Class: CMPS331 - Artificial Intelligence                 *
- * Due Date: 2/16/2018                                      *
+ * Due Date: 3/27/2018                                      *
  ************************************************************/
 
 package com.neelverma.ai.konane.view;
@@ -48,9 +48,9 @@ public class BeginButtonClickListener implements View.OnClickListener {
          Toast.makeText(mainActivity, "YOU MUST GUESS TO SEE WHO GOES FIRST.", Toast.LENGTH_SHORT).show();
 
          return;
-      } else {
-         boardIntent.putExtra("guess", guessEditText.getText().toString());
       }
+
+      boardIntent.putExtra("guess", guessEditText.getText().toString());
 
       if (boardSizeEditText.getText().toString().equals("")) {
          Board.MAX_ROW = 6;

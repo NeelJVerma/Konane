@@ -1,8 +1,8 @@
 /************************************************************
  * Name: Neel Verma                                         *
- * Project: Project 2 - Two Player Konane                   *
+ * Project: Project 3 - Two Player Konane                   *
  * Class: CMPS331 - Artificial Intelligence                 *
- * Due Date: 2/16/2018                                      *
+ * Due Date: 3/27/2018                                      *
  ************************************************************/
 
 package com.neelverma.ai.konane.view;
@@ -23,6 +23,7 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -241,6 +242,9 @@ public class BoardActivity extends AppCompatActivity {
       TextView plyCutoffEditText = findViewById(R.id.plyCutoffEditText);
       plyCutoffEditText.setVisibility(View.VISIBLE);
 
+      CheckBox alphaBetaCheckBox = findViewById(R.id.alphaBetaCheckBox);
+      alphaBetaCheckBox.setVisibility(View.VISIBLE);
+
       enableBoard();
    }
 
@@ -314,6 +318,12 @@ public class BoardActivity extends AppCompatActivity {
       return playerWhiteTurn;
    }
 
+   /**
+    * Description: Method to show the blinking stones of the best move.
+    * Parameters: MoveNode moveNode, which is the best move produced by the minimax algorithm.
+    * Returns: Nothing.
+    */
+
    public void showMoveFromMinimax(MoveNode moveNode) {
       for (Slot s : moveNode.getMovePath()) {
          Animation animation = new AlphaAnimation(1, 0);
@@ -326,11 +336,23 @@ public class BoardActivity extends AppCompatActivity {
       }
    }
 
+   /**
+    * Description: Method to stop the blinking stones of the best move.
+    * Parameters: MoveNode moveNode, which is the best move produced by the minimax algorithm.
+    * Returns: Nothing.
+    */
+
    public void stopMoveAnimation(MoveNode moveNode) {
       for (Slot s : moveNode.getMovePath()) {
          gameBoard[s.getRow()][s.getColumn()].clearAnimation();
       }
    }
+
+   /**
+    * Description: Method to redraw the board after the computer has made their move.
+    * Parameters: None.
+    * Returns: Nothing.
+    */
 
    public void reDrawBoard() {
       for (int r = 0; r < MAX_ROW; r++) {
@@ -346,6 +368,12 @@ public class BoardActivity extends AppCompatActivity {
       }
    }
 
+   /**
+    * Description: Method to redraw the turns after the computer has made their move.
+    * Parameters: None.
+    * Returns: Nothing.
+    */
+
    public void reDrawTurns() {
       if (gameObject.getPlayerBlack().isTurn()) {
          getPlayerBlackTurn().setVisibility(View.VISIBLE);
@@ -356,6 +384,12 @@ public class BoardActivity extends AppCompatActivity {
       }
    }
 
+   /**
+    * Description: Method to redraw the scores after the computer has made their move.
+    * Parameters: None.
+    * Returns: Nothing.
+    */
+
    public void reDrawScores() {
       String blackText = "BLACK: " + gameObject.getPlayerBlack().getScore();
       playerBlackScore.setText(blackText.trim());
@@ -363,6 +397,12 @@ public class BoardActivity extends AppCompatActivity {
       String whiteText = "WHITE: " + gameObject.getPlayerWhite().getScore();
       playerWhiteScore.setText(whiteText.trim());
    }
+
+   /**
+    * Description: Method to show the blinking score of the best move.
+    * Parameters: MoveNode moveNode, which is the best move produced by the minimax algorithm.
+    * Returns: Nothing.
+    */
 
    public void showScoresFromMinimax(MoveNode moveNode) {
       Animation animation = new AlphaAnimation(1, 0);
@@ -373,14 +413,22 @@ public class BoardActivity extends AppCompatActivity {
 
       if (gameObject.getTurnColor() == Slot.BLACK) {
          String blackText = "BLACK: " + (gameObject.getPlayerBlack().getScore() + moveNode.getScore());
-         getPlayerBlackScore().setText(blackText.trim());
+         playerBlackScore.setText(blackText.trim());
+         playerBlackScore.startAnimation(animation);
       } else {
          String whiteText = "WHITE: " + (gameObject.getPlayerWhite().getScore() + moveNode.getScore());
-         getPlayerWhiteScore().setText(whiteText.trim());
+         playerWhiteScore.setText(whiteText.trim());
+         playerWhiteScore.startAnimation(animation);
       }
    }
 
-   public void stopPlayerAnimation() {
+   /**
+    * Description: Method to stop the score animation of the best move.
+    * Parameters: None.
+    * Returns: Nothing.
+    */
+
+   public void stopScoreAnimation() {
       reDrawScores();
 
       playerBlackScore.clearAnimation();

@@ -1,8 +1,8 @@
 /************************************************************
  * Name: Neel Verma                                         *
- * Project: Project 2 - Two Player Konane                   *
+ * Project: Project 3 - Two Player Konane                   *
  * Class: CMPS331 - Artificial Intelligence                 *
- * Due Date: 2/16/2018                                      *
+ * Due Date: 3/27/2018                                      *
  ************************************************************/
 
 package com.neelverma.ai.konane.view;
@@ -45,24 +45,21 @@ public class LoadGameButtonClickListener implements View.OnClickListener {
    @Override
    public void onClick(View v) {
       Intent boardIntent = new Intent(mainActivity, BoardActivity.class);
-      Context context = v.getContext();
-
       TextView loadFileEditText = mainActivity.findViewById(R.id.loadFileEditText);
-
       int gameState;
-      File loadFile = new File(context.getFilesDir() + "/saved_games/" + loadFileEditText.getText().toString());
+      File filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+      File loadFile = new File(filePath, loadFileEditText.getText().toString());
 
       if (!loadFile.exists() || loadFile.isDirectory()) {
          Toast.makeText(mainActivity, "FILE DOESN'T EXIST.", Toast.LENGTH_SHORT).show();
 
          return;
-      } else {
-         gameState = BoardActivity.LOADED_GAME;
-
-         setBoardSize(loadFile.toString());
-
-         SaveGameButtonClickListener.setFilePath(loadFile.toString());
       }
+
+      gameState = BoardActivity.LOADED_GAME;
+
+      setBoardSize(loadFile.toString());
+      SaveGameButtonClickListener.setFilePath(loadFile.toString());
 
       boardIntent.putExtra("gameType", gameState);
       mainActivity.startActivity(boardIntent);
@@ -77,18 +74,22 @@ public class LoadGameButtonClickListener implements View.OnClickListener {
    private void setBoardSize(String loadFile) {
       try (BufferedReader bufferedReader = new BufferedReader(new FileReader(loadFile))) {
          int lineCounter = 0;
+         String line;
 
-         while (bufferedReader.readLine() != null) {
+         while ((line = bufferedReader.readLine()) != null) {
+            System.out.println(line);
             lineCounter++;
          }
 
-         if (lineCounter == 10) {
+         System.out.println(lineCounter);
+
+         if (lineCounter == 11) {
             Board.MAX_ROW = 6;
             Board.MAX_COLUMN = 6;
 
             BoardActivity.MAX_ROW = 6;
             BoardActivity.MAX_COL = 6;
-         } else if (lineCounter == 12) {
+         } else if (lineCounter == 13) {
             Board.MAX_ROW = 8;
             Board.MAX_COLUMN = 8;
 

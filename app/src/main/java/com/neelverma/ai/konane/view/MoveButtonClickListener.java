@@ -1,8 +1,15 @@
+/************************************************************
+ * Name: Neel Verma                                         *
+ * Project: Project 3 - Two Player Konane                   *
+ * Class: CMPS331 - Artificial Intelligence                 *
+ * Due Date: 3/27/2018                                      *
+ ************************************************************/
+
 package com.neelverma.ai.konane.view;
 
 import android.app.AlertDialog;
-import android.util.Pair;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -11,12 +18,21 @@ import com.neelverma.ai.konane.model.Game;
 import com.neelverma.ai.konane.model.MoveNode;
 import com.neelverma.ai.konane.model.Slot;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+/**
+ * Class to handle button click action for the move button.
+ * Created by Neel on 3/15/2018.
+ */
 
 public class MoveButtonClickListener implements View.OnClickListener {
    private BoardActivity boardActivity;
    private Game gameObject;
+
+   /**
+    * Description: Constructor. Will initialize the listener with the activity on which the button
+    * is clicked.
+    * Parameters: BoardActivity boardActivity, which is the activity on which the button was pressed.
+    * Returns: Nothing.
+    */
 
    MoveButtonClickListener(BoardActivity boardActivity) {
       this.boardActivity = boardActivity;
@@ -25,13 +41,12 @@ public class MoveButtonClickListener implements View.OnClickListener {
 
    @Override
    public void onClick(View v) {
-      boardActivity.stopPlayerAnimation();
+      boardActivity.stopScoreAnimation();
 
       if (gameObject.getBestMove() != null) {
          boardActivity.stopMoveAnimation(gameObject.getBestMove());
       }
 
-      // Don't know why I need this, but turns get switched otherwise.
       gameObject.setTurnColor((gameObject.getPlayerWhite().isTurn() ? Slot.WHITE : Slot.BLACK));
 
       if ((gameObject.getPlayerBlack().isTurn() && !gameObject.getPlayerBlack().isComputer()) ||
@@ -51,19 +66,80 @@ public class MoveButtonClickListener implements View.OnClickListener {
       }
 
       gameObject.setPlyCutoff(plyCutoff);
-      gameObject.callMinimax();
 
-      MoveNode moveNode = gameObject.getBestMove();
+      CheckBox alphaBetaCheckBox = boardActivity.findViewById(R.id.alphaBetaCheckBox);
+      alphaBetaCheckBox.setVisibility(View.VISIBLE);
 
-      gameObject.makeMoveAlgo(moveNode);
+      if (alphaBetaCheckBox.isChecked()) {
+         gameObject.setAlphaBetaEnable(true);
+      } else {
+         gameObject.setAlphaBetaEnable(false);
+      }
+
+      if (gameObject.isFirstClickCompMove()) {
+         long startTime = System.currentTimeMillis();
+
+         if (gameObject.getPlayerBlack().isComputer()) {
+            gameObject.callMinimax(gameObject.getPlayerBlack());
+         } else {
+            gameObject.callMinimax(gameObject.getPlayerWhite());
+         }
+
+         long endTime = System.currentTimeMillis();
+
+         Toast.makeText(boardActivity, "MINIMAX TOOK " + (endTime - startTime) + "ms TO RUN", Toast.LENGTH_LONG).show();
+      }
+
+      MoveNode moveNode = gameObject.getMinimaxMove();
+
+      if (gameObject.isFirstClickCompMove()) {
+         boardActivity.showMoveFromMinimax(moveNode);
+         boardActivity.showScoresFromMinimax(moveNode);
+         gameObject.setFirstClickCompMove(false);
+
+         return;
+      }
+
+      gameObject.makeMoveFromMinimax(moveNode);
       boardActivity.reDrawBoard();
 
+      reDrawGuiElements();
+
+      if (!gameObject.playerCanMove(gameObject.getPlayerWhite()) && !gameObject.playerCanMove(gameObject.getPlayerBlack())) {
+         boardActivity.getPlayerWhiteTurn().setVisibility(View.INVISIBLE);
+         boardActivity.getPlayerBlackTurn().setVisibility(View.INVISIBLE);
+         displayEndGameDialog();
+      }
+
+      gameObject.setFirstClickCompMove(true);
+   }
+
+   /**
+    * Description: Method to redraw everything on the GUI.
+    * Parameters: None.
+    * Returns: Nothing.
+    */
+
+   private void reDrawGuiElements() {
       if (gameObject.getTurnColor() == Slot.BLACK) {
          gameObject.getPlayerBlack().addToScore(gameObject.getBestMove().getScore());
       } else {
          gameObject.getPlayerWhite().addToScore(gameObject.getBestMove().getScore());
       }
 
+      handleTurns();
+
+      boardActivity.reDrawScores();
+      boardActivity.reDrawTurns();
+   }
+
+   /**
+    * Description: Method to handle the turn switch or not switch.
+    * Parameters: None.
+    * Returns: Nothing.
+    */
+
+   private void handleTurns() {
       if (gameObject.getPlayerBlack().isTurn() && !gameObject.playerCanMove(gameObject.getPlayerWhite())) {
          gameObject.setTurnColor(Slot.BLACK);
       } else if (gameObject.getPlayerWhite().isTurn() && !gameObject.playerCanMove(gameObject.getPlayerBlack())) {
@@ -76,19 +152,16 @@ public class MoveButtonClickListener implements View.OnClickListener {
          gameObject.getPlayerWhite().setIsTurn(true);
          gameObject.getPlayerBlack().setIsTurn(false);
       } else {
-         gameObject.getPlayerWhite().setIsTurn(true);
-         gameObject.getPlayerBlack().setIsTurn(false);
-      }
-
-      boardActivity.reDrawScores();
-      boardActivity.reDrawTurns();
-
-      if (!gameObject.playerCanMove(gameObject.getPlayerWhite()) && !gameObject.playerCanMove(gameObject.getPlayerBlack())) {
-         boardActivity.getPlayerWhiteTurn().setVisibility(View.INVISIBLE);
-         boardActivity.getPlayerBlackTurn().setVisibility(View.INVISIBLE);
-         displayEndGameDialog();
+         gameObject.getPlayerWhite().setIsTurn(false);
+         gameObject.getPlayerBlack().setIsTurn(true);
       }
    }
+
+   /**
+    * Description: Method to display the end game dialog message to the user.
+    * Parameters: None.
+    * Returns: Nothing.
+    */
 
    private void displayEndGameDialog() {
       AlertDialog.Builder builder = new AlertDialog.Builder(boardActivity);
