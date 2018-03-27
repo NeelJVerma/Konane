@@ -39,11 +39,10 @@ public class HintButtonClickListener implements View.OnClickListener {
 
    @Override
    public void onClick(View v) {
-      if ((gameObject.getPlayerBlack().isTurn() && gameObject.getPlayerBlack().isComputer()) ||
-         (gameObject.getPlayerWhite().isTurn() && gameObject.getPlayerWhite().isComputer())) {
-         Toast.makeText(boardActivity, "HINT NOT AVAILABLE FOR COMPUTER", Toast.LENGTH_SHORT).show();
+      boardActivity.stopScoreAnimation();
 
-         return;
+      if (gameObject.getBestMove() != null) {
+         boardActivity.stopMoveAnimation(gameObject.getBestMove());
       }
 
       TextView plyCutoffEditText = boardActivity.findViewById(R.id.plyCutoffEditText);
@@ -68,10 +67,10 @@ public class HintButtonClickListener implements View.OnClickListener {
 
       long startTime = System.currentTimeMillis();
 
-      if (gameObject.getPlayerBlack().isComputer()) {
-         gameObject.callMinimax(gameObject.getPlayerWhite());
-      } else {
+      if (gameObject.getPlayerBlack().isTurn()) {
          gameObject.callMinimax(gameObject.getPlayerBlack());
+      } else {
+         gameObject.callMinimax(gameObject.getPlayerWhite());
       }
 
       long endTime = System.currentTimeMillis();

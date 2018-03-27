@@ -92,14 +92,6 @@ public class MoveButtonClickListener implements View.OnClickListener {
 
       MoveNode moveNode = gameObject.getMinimaxMove();
 
-      if (gameObject.isFirstClickCompMove()) {
-         boardActivity.showMoveFromMinimax(moveNode);
-         boardActivity.showScoresFromMinimax(moveNode);
-         gameObject.setFirstClickCompMove(false);
-
-         return;
-      }
-
       gameObject.makeMoveFromMinimax(moveNode);
       boardActivity.reDrawBoard();
 
