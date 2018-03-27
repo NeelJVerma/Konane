@@ -65,7 +65,7 @@ public class HintButtonClickListener implements View.OnClickListener {
          gameObject.setAlphaBetaEnable(false);
       }
 
-      long startTime = System.currentTimeMillis();
+      double startTime = System.nanoTime();
 
       if (gameObject.getPlayerBlack().isTurn()) {
          gameObject.callMinimax(gameObject.getPlayerBlack());
@@ -73,7 +73,7 @@ public class HintButtonClickListener implements View.OnClickListener {
          gameObject.callMinimax(gameObject.getPlayerWhite());
       }
 
-      long endTime = System.currentTimeMillis();
+      double endTime = System.nanoTime();
 
       Toast.makeText(boardActivity, "MINIMAX TOOK " + (endTime - startTime) + "ms TO RUN", Toast.LENGTH_LONG).show();
 

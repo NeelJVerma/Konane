@@ -77,7 +77,7 @@ public class MoveButtonClickListener implements View.OnClickListener {
       }
 
       if (gameObject.isFirstClickCompMove()) {
-         long startTime = System.currentTimeMillis();
+         double startTime = System.nanoTime();
 
          if (gameObject.getPlayerBlack().isComputer()) {
             gameObject.callMinimax(gameObject.getPlayerBlack());
@@ -85,7 +85,7 @@ public class MoveButtonClickListener implements View.OnClickListener {
             gameObject.callMinimax(gameObject.getPlayerWhite());
          }
 
-         long endTime = System.currentTimeMillis();
+         double endTime = System.nanoTime();
 
          Toast.makeText(boardActivity, "MINIMAX TOOK " + (endTime - startTime) + "ms TO RUN", Toast.LENGTH_LONG).show();
       }
